@@ -19,4 +19,31 @@
     opacity: 0;
     pointer-events: none;
   }
+
+  &.info-mode {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xl);
+
+    .info-image-container {
+      flex: 0 0 50%;
+    }
+
+    img {
+      position: absolute;
+    }
+  }
+
+  .image-info-panel {
+    flex: 1;
+  }
+}
+
+.image-info-panel {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(----spacing-l);
+  overflow-y: auto;
 }

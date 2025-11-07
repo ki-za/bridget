@@ -5,6 +5,7 @@ import type { ImageJSON } from '../resources'
 import type { Vector } from '../utils'
 
 import CustomCursor from './customCursor'
+import ImageInfoPanel from './imageInfoPanel'
 import Nav from './nav'
 import Stage from './stage'
 import StageNav from './stageNav'
@@ -29,7 +30,6 @@ export interface HistoryItem {
   x: number
   y: number
 }
-
 /**
  * components
  */
@@ -52,6 +52,21 @@ export default function Desktop(props: {
   const active = createMemo(() => isOpen() && !isAnimating())
   const cursorText = createMemo(() => (isLoading() ? props.loadingText : hoverText()))
 
+  const currentImage = createMemo(() => {
+    if (!isOpen()) return null
+    const history = cordHist()
+    if (!history.length) return null
+    const currentIndex = history[history.length - 1].i
+    return props.ijs[currentIndex]
+  })
+
+  const currentImageInfo = createMemo(() => {
+    const img = currentImage()
+    return img?.imageInfo
+  })
+
+  const hasImageInfo = createMemo(() => currentImage()?.imageInfo !== undefined)
+
   return (
     <>
       <Nav />
@@ -67,23 +82,28 @@ export default function Desktop(props: {
           setCordHist={setCordHist}
           navVector={navVector}
           setNavVector={setNavVector}
+          currentImageInfo={currentImageInfo}
         />
-        <Show when={isOpen()}>
-          <CustomCursor cursorText={cursorText} active={active} isOpen={isOpen} />
-          <StageNav
-            prevText={props.prevText}
-            closeText={props.closeText}
-            nextText={props.nextText}
-            loadingText={props.loadingText}
-            active={active}
-            isAnimating={isAnimating}
-            setCordHist={setCordHist}
-            isOpen={isOpen}
-            setIsOpen={setIsOpen}
-            setHoverText={setHoverText}
-            navVector={navVector}
-            setNavVector={setNavVector}
-          />
+        <CustomCursor cursorText={cursorText} active={active} isOpen={isOpen} />
+        <StageNav
+          prevText={props.prevText}
+          closeText={props.closeText}
+          nextText={props.nextText}
+          loadingText={props.loadingText}
+          active={active}
+          isAnimating={isAnimating}
+          setCordHist={setCordHist}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          setHoverText={setHoverText}
+          navVector={navVector}
+          setNavVector={setNavVector}
+        />
+      </Show>
+      <Show when={isOpen()}>
+        <Show when={hasImageInfo()}>
+          {/* {render imageInfo component} */}
+          <ImageInfoPanel info={currentImageInfo()!} />
         </Show>
       </Show>
     </>

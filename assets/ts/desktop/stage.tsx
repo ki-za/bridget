@@ -2,6 +2,7 @@ import { type gsap } from 'gsap'
 import {
   For,
   createEffect,
+  createMemo,
   on,
   onMount,
   type Accessor,
@@ -9,7 +10,7 @@ import {
   type Setter
 } from 'solid-js'
 
-import type { ImageJSON } from '../resources'
+import type { ImageInfo, ImageJSON } from '../resources'
 import { useState, type State } from '../state'
 import { decrement, increment, loadGsap, type Vector } from '../utils'
 
@@ -86,6 +87,8 @@ function onMutation<T extends HTMLElement>(
   }).observe(element, observeOptions)
 }
 
+export type ViewportMode = 'trail' | 'expanded' | 'expanded-with-info'
+
 /**
  * Stage component
  */
@@ -101,6 +104,8 @@ export default function Stage(props: {
   setCordHist: Setter<HistoryItem[]>
   navVector: Accessor<Vector>
   setNavVector: Setter<Vector>
+
+  currentImageInfo: Accessor<ImageInfo | undefined>
 }): JSX.Element {
   // variables
   let _gsap: typeof gsap
@@ -134,6 +139,14 @@ export default function Stage(props: {
     }
   }
 
+  const viewportMode = createMemo<ViewportMode>(() => {
+    if (!props.isOpen()) return 'trail'
+    if (props.currentImageInfo()) return 'expanded-with-info'
+    return 'expanded'
+  })
+
+  const hasImageInfo = createMemo(() => props.currentImageInfo() !== null)
+
   const onClick: () => void = () => {
     !props.isAnimating() && props.setIsOpen(true)
   }
@@ -150,17 +163,21 @@ export default function Stage(props: {
     const _isOpen = props.isOpen()
     const _state = state()
 
-    _gsap.set(elsTrail, {
-      x: (i: number) => _cordHist[i].x - window.innerWidth / 2,
-      y: (i: number) => _cordHist[i].y - window.innerHeight / 2,
-      opacity: (i: number) =>
-        Math.max(
-          (i + 1 + _state.trailLength <= _cordHist.length ? 0 : 1) - (_isOpen ? 1 : 0),
-          0
-        ),
-      zIndex: (i: number) => i,
-      scale: 0.6
-    })
+    const mode = viewportMode()
+
+    if (mode === 'expanded-with-info')
+      _gsap.set(elsTrail, {
+        x: (i: number) => _cordHist[i].x - window.innerWidth / 2,
+        y: (i: number) => _cordHist[i].y - window.innerHeight / 2,
+        opacity: (i: number) =>
+          Math.max(
+            (i + 1 + _state.trailLength <= _cordHist.length ? 0 : 1) -
+              (_isOpen ? 1 : 0),
+            0
+          ),
+        zIndex: (i: number) => i,
+        scale: 0.6
+      })
 
     if (_isOpen) {
       const elc = getImagesFromIndexes(imgs, [getCurrentElIndex(_cordHist)])[0]
@@ -453,7 +470,12 @@ export default function Stage(props: {
 
   return (
     <>
-      <div class="stage" onClick={onClick} onKeyDown={onClick}>
+      <div
+        class="stage"
+        classList={{ 'info-mode': !hasImageInfo() }}
+        onClick={onClick}
+        onKeyDown={onClick}
+      >
         <For each={props.ijs}>
           {(ij, i) => (
             <img
