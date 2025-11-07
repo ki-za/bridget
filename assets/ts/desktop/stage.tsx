@@ -2,7 +2,6 @@ import { type gsap } from 'gsap'
 import {
   For,
   createEffect,
-  createMemo,
   on,
   onMount,
   type Accessor,
@@ -138,14 +137,6 @@ export default function Stage(props: {
       props.setCordHist((prev) => [...prev, newHist].slice(-stateLength))
     }
   }
-
-  const viewportMode = createMemo<ViewportMode>(() => {
-    if (!props.isOpen()) return 'trail'
-    if (props.currentImageInfo()) return 'expanded-with-info'
-    return 'expanded'
-  })
-
-  const hasImageInfo = createMemo(() => props.currentImageInfo() !== null)
 
   const onClick: () => void = () => {
     !props.isAnimating() && props.setIsOpen(true)
@@ -470,7 +461,7 @@ export default function Stage(props: {
     <>
       <div
         class="stage"
-        classList={{ 'info-mode': !hasImageInfo() }}
+        classList={{ [props.mode]: true }}
         onClick={onClick}
         onKeyDown={onClick}
       >
