@@ -9,4 +9,50 @@
   --z-nav-gallery: 500;
   --z-cursor: 600;
   --z-nav: 800;
+
+  font-size: 16px;
+  // Golden Ratio Typography Scale (1.618)
+  --scaleFactor: 1.61;
+
+  // Base size
+  --md: 0.98;
+
+  // Smaller sizes
+  --sm: calc(1rem / var(--scaleFactor));
+  --xs: calc(var(--sm) / var(--scaleFactor));
+  --2xs: calc(var(--xs) / var(--scaleFactor));
+  --3xs: calc(var(--2xs) / var(--scaleFactor));
+
+  // Larger sizes
+  --lg: calc(1rem * var(--scaleFactor));
+  --xl: calc(var(--lg) * var(--scaleFactor));
+  --2xl: calc(var(--xl) * var(--scaleFactor));
+
+  // Tag color palette (muted colors for visual distinction)
+  --tag-color-1: #8b9dc3; // Muted blue
+  --tag-color-2: #a8b5a0; // Muted sage green
+  --tag-color-3: #c9a896; // Muted terracotta
+  --tag-color-4: #b8a8c9; // Muted lavender
+
+  // Panel dimensions
+  --panel-max-width: 25vw;
+  --panel-min-width: 200px;
+  --panel-gap-min: var(--md);
+  --panel-gap-max: 5vw;
+
+  // Transitions
+  --transition-fast: 0.2s ease;
+  --transition-medium: 0.3s ease;
+  --transition-slow: 0.5s ease;
+
+  // Skew angles
+  --tag-skew-angle: -35deg;
+  --tag-skew-counter: 35deg;
+
+  // Font weights
+  --font-weight-regular: 400;
+  --font-weight-medium-bold: 750;
+
+  // Breakpoints (for reference in media queries)
+  --breakpoint-mobile: 600px;
 }
