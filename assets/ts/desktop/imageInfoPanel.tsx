@@ -5,7 +5,6 @@ export default function ImageInfoPanel(props: {
   info: ImageInfo | null | undefined
 }): JSX.Element {
   // If missing -> null UI. No ghost component in the DOM.
-  if (!props.info) return null
 
   return (
     <Show when={props.info}>
