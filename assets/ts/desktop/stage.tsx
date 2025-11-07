@@ -104,8 +104,8 @@ export default function Stage(props: {
   setCordHist: Setter<HistoryItem[]>
   navVector: Accessor<Vector>
   setNavVector: Setter<Vector>
-
   currentImageInfo: Accessor<ImageInfo | undefined>
+  mode: ViewportMode
 }): JSX.Element {
   // variables
   let _gsap: typeof gsap
@@ -163,9 +163,7 @@ export default function Stage(props: {
     const _isOpen = props.isOpen()
     const _state = state()
 
-    const mode = viewportMode()
-
-    if (mode === 'expanded-with-info')
+    if (props.mode === 'trail')
       _gsap.set(elsTrail, {
         x: (i: number) => _cordHist[i].x - window.innerWidth / 2,
         y: (i: number) => _cordHist[i].y - window.innerHeight / 2,

@@ -3,6 +3,7 @@ import { Show, createMemo, createSignal, type JSX } from 'solid-js'
 
 import type { ImageJSON } from '../resources'
 import type { Vector } from '../utils'
+import type { ViewportMode } from './stage'
 
 import CustomCursor from './customCursor'
 import ImageInfoPanel from './imageInfoPanel'
@@ -67,6 +68,12 @@ export default function Desktop(props: {
 
   const hasImageInfo = createMemo(() => currentImage()?.imageInfo !== undefined)
 
+  const viewPortMode = createMemo<ViewportMode>(() => {
+    if (!isOpen()) return 'trail'
+    if (currentImageInfo()) return 'expanded-with-info'
+    return 'expanded'
+  })
+
   return (
     <>
       <Nav />
@@ -82,6 +89,7 @@ export default function Desktop(props: {
           setCordHist={setCordHist}
           navVector={navVector}
           setNavVector={setNavVector}
+          mode={viewPortMode()}
           currentImageInfo={currentImageInfo}
         />
         <CustomCursor cursorText={cursorText} active={active} isOpen={isOpen} />
