@@ -6,7 +6,6 @@ import type { Vector } from '../utils'
 import type { ViewportMode } from './stage'
 
 import CustomCursor from './customCursor'
-import ImageInfoPanel from './imageInfoPanel'
 import Nav from './nav'
 import Stage from './stage'
 import StageNav from './stageNav'
@@ -70,7 +69,8 @@ export default function Desktop(props: {
 
   const viewPortMode = createMemo<ViewportMode>(() => {
     if (!isOpen()) return 'trail'
-    if (currentImageInfo()) return 'expanded-with-info'
+    if (currentImageInfo() && isAnimating()) return 'animating-with-info'
+    if (currentImageInfo() && !isAnimating()) return 'expanded-with-info'
     return 'expanded'
   })
 
@@ -92,6 +92,7 @@ export default function Desktop(props: {
           mode={viewPortMode()}
           currentImageInfo={currentImageInfo}
         />
+
         <CustomCursor cursorText={cursorText} active={active} isOpen={isOpen} />
         <StageNav
           prevText={props.prevText}
@@ -107,12 +108,6 @@ export default function Desktop(props: {
           navVector={navVector}
           setNavVector={setNavVector}
         />
-      </Show>
-      <Show when={isOpen()}>
-        <Show when={hasImageInfo()}>
-          {/* {render imageInfo component} */}
-          <ImageInfoPanel info={currentImageInfo()!} />
-        </Show>
       </Show>
     </>
   )

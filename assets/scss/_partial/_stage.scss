@@ -3,86 +3,97 @@
   overflow: hidden;
   width: 100vw;
   height: calc(var(--window-height) - var(--nav-height));
-
   cursor: pointer;
 
+  // Default image styles (trail + expanded modes)
   img {
     position: absolute;
     top: 0;
     left: 0;
-
     width: 100vw;
     height: var(--window-height);
     object-fit: contain;
-
     transform: scale(0.6);
     opacity: 0;
     pointer-events: none;
   }
 
+  // Expanded mode (no changes needed)
   &.expanded {
     img {
-      position: absolute;
-      top: 0;
-      left: 0;
+      // Inherits default styles
+    }
+  }
 
-      width: 100vw;
-      height: var(--window-height);
-      object-fit: contain;
-
-      transform: scale(0.6);
-      opacity: 0;
+  // Expanded with info mode
+  &.expanded-with-info {
+    // Layout container for image + panel
+    .image-info-container {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: clamp(var(--md), 5vw, 5vw);
+      width: 100%;
+      height: 100%;
+      position: relative;
       pointer-events: none;
     }
-  }
 
-  &.expanded-with-info {
+    // Area for images to position within
+    .image-area {
+      flex: 1;
+      position: relative;
+      height: 100%;
+      max-width: calc(100% - var(--panel-max-width) - var(--panel-gap-max));
+      pointer-events: none;
+    }
+
+    // Images position differently in info mode
     img {
-      width: 60vw !important;
-      height: 100vh;
-      object-fit: contain;
-      position: fixed;
+      // Position relative to .stage, not .image-area
+      // But CSS centers them accounting for panel width
+      position: absolute;
       left: 0;
-      top: var(--nav-height);
-      z-index: 100;
+      top: 0;
+      transform: translateY(-50%);
+      width: auto;
+      max-width: calc(100vw - var(--panel-max-width) - var(--panel-gap-max) * 2);
+      max-height: 100%;
+      // height: auto;
+      object-fit: contain;
     }
   }
 }
 
+// Image info panel
 .image-info-panel {
-  position: fixed;
-  right: 0;
-  top: var(--nav-height);
-  width: 40vw;
-  height: calc(100vh - var(--nav-height));
-  background: white;
-  z-index: 200;
+  position: relative;
+  width: var(--panel-max-width);
+  min-width: var(--panel-min-width);
+  max-width: var(--panel-max-width);
+  height: 100%;
   overflow-y: auto;
-  padding: var(--spacing-xl);
-  border-left: 2px solid #ff0000;
+  padding: var(--lg);
+  background: white;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  pointer-events: auto;
 }
 
-// Debug overlay styles
-.debug-overlay {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  z-index: 1000;
-
-  .mode-indicator {
-    padding: var(--spacing-s);
-    font-family: monospace;
-    font-size: 12px;
-    border-radius: 4px;
-
-    &.has-info {
-      background: rgba(0, 255, 0, 0.8);
-      color: black;
+// Responsive: hide panel below 600px
+@media (max-width: 600px) {
+  .stage.expanded-with-info {
+    .image-info-container {
+      justify-content: center;
     }
 
-    &.no-info {
-      background: rgba(255, 165, 0, 0.8);
-      color: black;
+    .image-info-panel {
+      display: none;
+    }
+
+    img {
+      max-width: 100%;
+      left: 50%;
+      transform: translate(-50%, -50%);
     }
   }
 }

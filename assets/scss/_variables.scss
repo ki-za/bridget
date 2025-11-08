@@ -20,13 +20,13 @@
   // Smaller sizes
   --sm: calc(1rem / var(--scaleFactor));
   --xs: calc(var(--sm) / var(--scaleFactor));
-  --2xs: calc(var(--xs) / var(--scaleFactor));
-  --3xs: calc(var(--2xs) / var(--scaleFactor));
+  --xs-2: calc(var(--xs) / var(--scaleFactor));
+  --xs-3: calc(var(--xs-2) / var(--scaleFactor));
 
   // Larger sizes
   --lg: calc(1rem * var(--scaleFactor));
   --xl: calc(var(--lg) * var(--scaleFactor));
-  --2xl: calc(var(--xl) * var(--scaleFactor));
+  --xl-2: calc(var(--xl) * var(--scaleFactor));
 
   // Tag color palette (muted colors for visual distinction)
   --tag-color-1: #8b9dc3; // Muted blue

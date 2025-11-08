@@ -1,6 +1,7 @@
 import { type gsap } from 'gsap'
 import {
   For,
+  Show,
   createEffect,
   on,
   onMount,
@@ -14,6 +15,8 @@ import { useState, type State } from '../state'
 import { decrement, increment, loadGsap, type Vector } from '../utils'
 
 import type { DesktopImage, HistoryItem } from './layout'
+
+import ImageInfoPanel from './imageInfoPanel'
 
 /**
  * helper functions
@@ -86,7 +89,11 @@ function onMutation<T extends HTMLElement>(
   }).observe(element, observeOptions)
 }
 
-export type ViewportMode = 'trail' | 'expanded' | 'expanded-with-info'
+export type ViewportMode =
+  | 'trail'
+  | 'expanded'
+  | 'animating-with-info'
+  | 'expanded-with-info'
 
 /**
  * Stage component
@@ -154,6 +161,7 @@ export default function Stage(props: {
     const _isOpen = props.isOpen()
     const _state = state()
 
+    // Trail mode positioning
     if (props.mode === 'trail')
       _gsap.set(elsTrail, {
         x: (i: number) => _cordHist[i].x - window.innerWidth / 2,
@@ -168,6 +176,7 @@ export default function Stage(props: {
         scale: 0.6
       })
 
+    // Expanded modes (with or without info)
     if (_isOpen) {
       const currentIndex = getCurrentElIndex(_cordHist)
       const elc = imgs[currentIndex]
@@ -179,6 +188,7 @@ export default function Stage(props: {
         }
       })
 
+      // Preload adjacent images
       const indexArrayToHires: number[] = []
       const indexArrayToCleanup: number[] = []
       switch (props.navVector()) {
@@ -195,7 +205,21 @@ export default function Stage(props: {
       }
       hires(getImagesFromIndexes(imgs, indexArrayToHires)) // preload
       _gsap.set(getImagesFromIndexes(imgs, indexArrayToCleanup), { opacity: 0 })
-      _gsap.set(elc, { x: 0, y: 0, scale: 1 }) // set current to center
+
+      // Position current image based on mode
+      if (props.mode === 'expanded-with-info') {
+        // In info mode: CSS handles positioning, GSAP only sets scale
+        // Clear x/y transforms to let CSS take over
+        _gsap.set(elc, {
+          x: 0,
+          y: 0,
+          scale: 1
+        })
+      } else {
+        // Regular expanded mode: GSAP centers the image
+        _gsap.set(elc, { x: 0, y: 0, scale: 1 })
+      }
+
       setLoaderForHiresImage(elc) // set loader, if loaded set current opacity to 1
     } else {
       lores(elsTrail)
@@ -474,6 +498,15 @@ export default function Stage(props: {
         onClick={onClick}
         onKeyDown={onClick}
       >
+        {/* Wrapper only appears in info mode */}
+        <Show when={props.mode === 'expanded-with-info'}>
+          <div class="image-info-container">
+            <div class="image-area" />
+            <ImageInfoPanel info={props.currentImageInfo()!} />
+          </div>
+        </Show>
+
+        {/* Images always render here (refs stay stable) */}
         <For each={props.ijs}>
           {(ij, i) => (
             <img
