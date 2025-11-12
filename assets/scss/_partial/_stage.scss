@@ -30,21 +30,23 @@
     // Layout container for image + panel
     .image-info-container {
       display: flex;
+      flex: 1;
       align-items: center;
       justify-content: flex-start;
-      gap: clamp(var(--md), 5vw, 5vw);
+      // gap: 3.5vw;
       width: 100%;
       height: 100%;
       position: relative;
       pointer-events: none;
     }
 
-    // Area for images to position within
+    // copies the area of the `img` css class
     .image-area {
-      flex: 1;
       position: relative;
       height: 100%;
-      max-width: calc(100% - var(--panel-max-width) - var(--panel-gap-max));
+      max-height: calc(100vw - var(--panel-max-width) - var(--panel-gap-max));
+
+      aspect-ratio: 1;
       pointer-events: none;
     }
 
@@ -55,9 +57,9 @@
       position: absolute;
       left: 0;
       top: 0;
-      transform: translateY(-50%);
+      // transform: translateY(-50%);
       width: auto;
-      max-width: calc(100vw - var(--panel-max-width) - var(--panel-gap-max) * 2);
+      max-width: calc(100vw - var(--panel-max-width) - var(--panel-gap-max));
       max-height: 100%;
       // height: auto;
       object-fit: contain;
@@ -66,34 +68,34 @@
 }
 
 // Image info panel
-.image-info-panel {
-  position: relative;
-  width: var(--panel-max-width);
-  min-width: var(--panel-min-width);
-  max-width: var(--panel-max-width);
-  height: 100%;
-  overflow-y: auto;
-  padding: var(--lg);
-  background: white;
-  border-left: 1px solid rgba(0, 0, 0, 0.1);
-  pointer-events: auto;
-}
+// .image-info-panel {
+//   position: relative;
+//   width: var(--panel-max-width);
+//   min-width: var(--panel-min-width);
+//   max-width: var(--panel-max-width);
+//   height: 100%;
+//   overflow-y: auto;
+//   padding: var(--lg);
+//   background: white;
+//   border-left: 1px solid rgba(0, 0, 0, 0.1);
+//   pointer-events: auto;
+// }
 
 // Responsive: hide panel below 600px
-@media (max-width: 600px) {
-  .stage.expanded-with-info {
-    .image-info-container {
-      justify-content: center;
-    }
-
-    .image-info-panel {
-      display: none;
-    }
-
-    img {
-      max-width: 100%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-  }
-}
+// @media (max-width: 600px) {
+//   .stage.expanded-with-info {
+//     .image-info-container {
+//       justify-content: center;
+//     }
+//
+//     .image-info-panel {
+//       display: none;
+//     }
+//
+//     img {
+//       max-width: 100%;
+//       left: 50%;
+//       transform: translate(-50%, -50%);
+//     }
+//   }
+// }
