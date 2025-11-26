@@ -95,59 +95,6 @@ export type ViewportMode =
   | 'animating-with-info'
   | 'expanded-with-info'
 
-// enlargedImageScale = viewportHeight / (viewportWidth - panelWidth)
-function getDimensionsForAnimation() {
-  const panelWidth = document.getElementsByClassName('panel-container')[0].clientWidth
-  const viewPortWidth =
-    document.getElementsByClassName('image-info-container')[0].clientWidth
-  const viewPortHeight =
-    document.getElementsByClassName('image-info-container')[0].clientHeight
-  const availableWidth = viewPortWidth - panelWidth
-  return {
-    availableWidth: viewPortWidth - panelWidth,
-    viewPortHeight: viewPortHeight,
-    viewPortWidth: viewPortWidth
-  }
-}
-
-// for 1:1 aspect ratio images
-function getImageEnlargedPosAndScale() {
-  if (document == null) {
-    return { imageXPos: 0, imageScale: 1 }
-  }
-  const { availableWidth, viewPortHeight, viewPortWidth } = getDimensionsForAnimation()
-  if (availableWidth >= viewPortHeight) {
-    return {
-      imageXPos: 0,
-      imageScale: 1
-    }
-  }
-  return {
-    imageXPos: availableWidth / -2,
-    imageScale: availableWidth / viewPortHeight
-  }
-}
-
-// let ghostImageAreaRef: HTMLDivElement | undefined
-// function getImageTargetTransform() {
-//   if (!ghostImageAreaRef) {
-//     console.log('no ghjostimagereffound')
-//     return { x: 0, scale: 1 }
-//   }
-//   const ghostRectangle = ghostImageAreaRef.getBoundingClientRect()
-//   // because gsap translations are relative to the elements current position
-//   // images start centered in viewport coords
-//   // we need to move the image to align with the ghost area center
-//   const viewportCenterX = window.innerWidth / 2
-//   const ghostCenterX = ghostRectangle.left + ghostRectangle.width / 2
-//   const x = ghostCenterX - viewportCenterX
-//   const scale = ghostRectangle.height / window.innerHeight
-//   console.log('fefwefwefw')
-//   console.log(ghostRectangle)
-//   console.log(window)
-//   return { x: x, scale: scale }
-// }
-
 function remToPx(remValue: number) {
   const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize)
   return remValue * rootFontSize
