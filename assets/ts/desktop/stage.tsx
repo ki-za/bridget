@@ -95,6 +95,115 @@ export type ViewportMode =
   | 'animating-with-info'
   | 'expanded-with-info'
 
+// enlargedImageScale = viewportHeight / (viewportWidth - panelWidth)
+function getDimensionsForAnimation() {
+  const panelWidth = document.getElementsByClassName('panel-container')[0].clientWidth
+  const viewPortWidth =
+    document.getElementsByClassName('image-info-container')[0].clientWidth
+  const viewPortHeight =
+    document.getElementsByClassName('image-info-container')[0].clientHeight
+  const availableWidth = viewPortWidth - panelWidth
+  return {
+    availableWidth: viewPortWidth - panelWidth,
+    viewPortHeight: viewPortHeight,
+    viewPortWidth: viewPortWidth
+  }
+}
+
+// for 1:1 aspect ratio images
+function getImageEnlargedPosAndScale() {
+  if (document == null) {
+    return { imageXPos: 0, imageScale: 1 }
+  }
+  const { availableWidth, viewPortHeight, viewPortWidth } = getDimensionsForAnimation()
+  if (availableWidth >= viewPortHeight) {
+    return {
+      imageXPos: 0,
+      imageScale: 1
+    }
+  }
+  return {
+    imageXPos: availableWidth / -2,
+    imageScale: availableWidth / viewPortHeight
+  }
+}
+
+// let ghostImageAreaRef: HTMLDivElement | undefined
+// function getImageTargetTransform() {
+//   if (!ghostImageAreaRef) {
+//     console.log('no ghjostimagereffound')
+//     return { x: 0, scale: 1 }
+//   }
+//   const ghostRectangle = ghostImageAreaRef.getBoundingClientRect()
+//   // because gsap translations are relative to the elements current position
+//   // images start centered in viewport coords
+//   // we need to move the image to align with the ghost area center
+//   const viewportCenterX = window.innerWidth / 2
+//   const ghostCenterX = ghostRectangle.left + ghostRectangle.width / 2
+//   const x = ghostCenterX - viewportCenterX
+//   const scale = ghostRectangle.height / window.innerHeight
+//   console.log('fefwefwefw')
+//   console.log(ghostRectangle)
+//   console.log(window)
+//   return { x: x, scale: scale }
+// }
+
+function remToPx(remValue: number) {
+  const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize)
+  return remValue * rootFontSize
+}
+
+function getImageTargetTransform(): { x: number; scale: number } {
+  const viewportWidth = window.innerWidth
+  const navHeight = remToPx(
+    parseInt(
+      getComputedStyle(document.documentElement).getPropertyValue('--nav-height')
+    )
+  )
+  const viewportHeight = window.innerHeight - navHeight
+
+  // Get panel width from CSS variable or measure existing panel
+  const panelMaxWidth =
+    remToPx(
+      parseInt(
+        getComputedStyle(document.documentElement).getPropertyValue('--panel-max-width')
+      )
+    ) || 401 // fallback
+
+  const panelGapMax = remToPx(
+    parseInt(
+      getComputedStyle(document.documentElement).getPropertyValue('--panel-gap-max')
+    ) || 1
+  )
+
+  // Calculate image area dimensions (same as CSS)
+  const imageAreaMaxHeight = viewportWidth - panelMaxWidth - panelGapMax
+  const imageAreaHeight = Math.min(imageAreaMaxHeight, viewportHeight)
+  const imageAreaWidth = imageAreaHeight // 1:1 aspect ratio
+
+  // Image area is left-aligned and vertically centered
+  const imageAreaLeft = 0
+  const imageAreaCenterX = imageAreaLeft + imageAreaWidth / 2
+
+  // Calculate offset from viewport center
+  const viewportCenterX = viewportWidth / 2
+  const x = imageAreaCenterX - viewportCenterX
+
+  console.log('targetimagetransform-values', { panelMaxWidth, panelGapMax })
+  // Scale from full viewport height to image area height
+  const scale = imageAreaHeight / viewportHeight
+
+  console.log('Calculated transform:', {
+    x,
+    scale,
+    imageAreaHeight,
+    imageAreaWidth,
+    imageAreaMaxHeight
+  })
+
+  return { x, scale }
+}
+
 /**
  * Stage component
  */
@@ -208,12 +317,14 @@ export default function Stage(props: {
 
       // Position current image based on mode
       if (props.mode === 'expanded-with-info') {
+        console.log('exapndedewithinfoCEHCK')
         // In info mode: CSS handles positioning, GSAP only sets scale
         // Clear x/y transforms to let CSS take over
+        const { x, scale } = getImageTargetTransform()
         _gsap.set(elc, {
-          x: 0,
+          x: x,
           y: 0,
-          scale: 1
+          scale: scale
         })
       } else {
         // Regular expanded mode: GSAP centers the image
@@ -250,6 +361,9 @@ export default function Stage(props: {
     )
     setLoaderForHiresImage(elc)
 
+    // to find out how big the image will be when its enlarged for
+    // responsiveness
+
     const tl = _gsap.timeline()
     const trailInactiveEls = getImagesFromIndexes(
       imgs,
@@ -266,8 +380,8 @@ export default function Stage(props: {
     })
     // current move to center
     tl.to(elc, {
-      x: 0,
       y: 0,
+      x: 0,
       ease: 'power3.inOut',
       duration: 0.7,
       delay: 0.3
@@ -278,8 +392,17 @@ export default function Stage(props: {
       scale: 1,
       ease: 'power3.inOut'
     })
-    // finished
-    // eslint-disable-next-line solid/reactivity
+    if (props.currentImageInfo()) {
+      console.log('current has image info')
+      const { x, scale } = getImageTargetTransform()
+
+      tl.to(elc, {
+        delay: 0,
+        scale: scale,
+        x: x,
+        transformOrigin: 'left-center'
+      })
+    }
     return await tl.then(() => {
       props.setIsAnimating(false)
     })
