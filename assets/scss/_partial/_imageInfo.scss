@@ -1,6 +1,14 @@
+.panel-container {
+  display: flex;
+  position: relative;
+  width: 100%;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
 .image-info-panel {
   position: relative;
-  overflow-y: wrap;
+  top: 16.5vh;
   max-width: var(--panel-max-width);
   min-width: var(--panel-min-width);
   padding: var(--xs);
@@ -8,9 +16,9 @@
   color: var(--panel-text);
   // border-left: 1px solid rgba(0, 0, 0, 0.05);
   display: inline-grid;
-  // grid-template-columns: auto;
-  justify-content: start;
   margin: var(--xl);
+  margin-left: calc(var(--xl) * 0.85);
+  flex: 1;
 }
 
 .image-info-panel::-webkit-scrollbar {
@@ -102,7 +110,7 @@
   flex: 1 1 auto;
   text-wrap: balance;
   font-weight: var(--font-weight-medium);
-  line-height: 1.3;
+  line-height: 1.1;
   letter-spacing: -0.013em;
   margin: 0;
 }
@@ -113,6 +121,7 @@
   gap: calc(var(--xs) * 0.5);
   flex-shrink: 0;
   z-index: var(--z-link);
+  pointer-events: auto;
 }
 
 .link-icon {
@@ -162,6 +171,8 @@
   opacity: 0.6;
   margin-right: var(--sm);
   text-align: left;
+
+  cursor: none;
 }
 
 .artist-section {
@@ -203,7 +214,9 @@
 }
 
 .content-constrained {
+  pointer-events: none;
   width: 100%;
+  z-index: var(--z-link);
 }
 
 .track-items {
@@ -211,36 +224,33 @@
   flex-direction: column;
   margin-bottom: var(--md);
   margin-top: var(--xs);
-  z-index: var(--z-link);
+  gap: var(--sm);
 }
 
 .track-item {
-  display: inline-block;
-  justify-content: space-between;
+  display: flex;
   align-items: center;
-  // padding: calc(var(--xs) * 0.75) 0;
   padding-left: var(--sm);
   transition: background var(--transition-fast);
-  font-style: normal;
   line-height: 1;
+  flex-wrap: nowrap;
+
+  z-index: var(--z-link);
+  pointer-events: auto;
+  align-items: center;
 }
 
 .track-item:hover {
   background: rgba(0, 0, 0, 0.02);
+  cursor: default;
+
+  cursor: general;
 
   transition:
     font-style var(--transition-medium) 1s,
     transform var(--transition-medium),
     opacity var(--transition-medium);
 }
-
-/* .track-item:hover .track-tags .tag { */
-/*   transform: scaleX(1) skewX(calc(var(--tag-skew-angle))); */
-/*   opacity: 1; */
-/**/
-/*   padding-left: var(--sm); */
-/*   padding-right: calc(0.8 * var(--md)); */
-/* } */
 
 .track-name {
   font-size: calc(0.9 * var(--panel-body-size));
@@ -252,20 +262,23 @@
 
 .track-tags {
   display: inline-flex;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  margin-left: var(--sm);
+  align-content: center;
+  font-size: calc(1.2 * var(--panel-label-size));
   gap: calc(var(--xs) * 0.75);
-  align-items: center;
   z-index: var(--z-link);
+  pointer-events: auto;
 }
 
 .track-tags .tag {
-  display: inline-flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
   /* collapse geometry */
   width: 0;
-  padding-left: 0;
-  padding-right: 0;
+  padding: 0;
   overflow: hidden;
 
   /* hide text reliably */
@@ -275,11 +288,6 @@
   /* ribbon shape */
   transform-origin: left center;
   transform: skewX(var(--tag-skew-angle)) scaleX(0);
-  transition:
-    width var(--transition-fast) ease,
-    transform var(--transition-fast) ease,
-    padding var(--transition-fast) ease;
-
   /* background + border (keeps sliver silhouette) */
   cursor: default;
 
@@ -290,8 +298,10 @@
 /* TRACK HOVER: show uniform slivers (text still hidden) */
 .track-item:hover .track-tags .tag {
   width: var(--tag-sliver-width);
-  padding-left: 0;
   padding-right: 0;
+
+  padding-top: var(--tag-expanded-padding-vertical);
+  padding-bottom: var(--tag-expanded-padding-vertical);
   transform: skewX(var(--tag-skew-angle)) scaleX(1);
   color: var(--tag-text-hidden);
   pointer-events: auto; /* let user move pointer onto tag */
@@ -303,19 +313,17 @@
 .track-tags .tag:hover ~ .tag,     /* partial fallback (only affects following siblings) */
 .track-tags .tag:hover {
   /* allow the hovered tag itself to expand in fallback */
-  padding-left: var(--tag-expanded-padding-l);
   width: auto;
-  padding-right: var(--tag-expanded-padding-r);
-  transform: skewX(var(--tag-skew-angle)) scaleX(1); /* keep skew, full scale */
+  padding-right: var(--tag-expanded-padding-l);
+  padding-left: var(--tag-expanded-padding-l);
+  padding-top: var(--tag-expanded-padding-vertical);
+  padding-bottom: var(--tag-expanded-padding-vertical);
   color: var(--tag-text-visible);
-  pointer-events: auto;
-  transition-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
-}
 
-/* micro affordance: hovered tag slightly pops */
-.track-tags .tag:hover {
-  transform: skewX(var(--tag-skew-angle)) scale(1.03);
-  z-index: 2;
+  // transform: skewX(var(--tag-skew-angle)) scaleX(1); /* keep skew, full scale */
+  // transition-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
+
+  pointer-events: auto;
 }
 
 .metadata-section {
@@ -333,6 +341,10 @@
 }
 
 .released-by {
+  position: relative;
+  z-index: var(--z-link);
+  pointer-events: auto;
+  cursor: general;
 }
 .collaborator-list {
   font-size: var(--panel-label-size);
@@ -356,18 +368,16 @@
 
 .released-by:last-child,
 .collaborator-list:last-child {
+  z-index: var(--z-link);
+  pointer-events: auto;
   margin-bottom: 0;
 }
 
 .metadata-section a {
-  color: var(--panel-text-secondary);
-  color: inherit;
+  position: relative;
+
   opacity: 0.8;
 
-  font-size: var(--panel-label-size);
-  font-weight: var(--font-weight-regular);
-  text-transform: uppercase;
-  text-align: left;
   text-decoration: none;
   border-bottom: 1px solid rgba(0, 0, 0, 0.2);
   transition: border-color var(--transition-fast);
@@ -376,18 +386,27 @@
 .metadata-section a:hover,
 .metadata-section a:focus {
   border-color: currentColor;
+
+  z-index: var(--z-link);
 }
 
 .metadata-section span {
   color: inherit;
+  position: relative;
   opacity: 0.8;
   font-weight: var(--font-weight-regular);
+
+  z-index: var(--z-link);
 }
 
 .collaborator-list span {
   display: inline;
+  position: relative;
 
   font-size: var(--panel-label-size);
   font-weight: var(--font-weight-regular);
   opacity: 0.8;
+
+  pointer-events: auto;
+  z-index: var(--z-link);
 }
