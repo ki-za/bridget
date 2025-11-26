@@ -17,11 +17,29 @@ export default function CustomCursor(props: {
 
   // states
   const [xy, setXy] = createSignal<XY>({ x: 0, y: 0 })
+  const [suppressed, setSuppressed] = createSignal(false) // whether to hide the custom-cursor
 
   // helper functions
   const onMouse: (e: MouseEvent) => void = (e) => {
-    const { clientX, clientY } = e
+    const { clientX, clientY, target } = e
     setXy({ x: clientX, y: clientY })
+
+    if (target instanceof HTMLElement) {
+      const tag = target.tagName // category of mouse hover location
+      const pointerStyle = getComputedStyle(target).cursor
+      console.log(pointerStyle)
+
+      const shouldHide =
+        tag === 'A' ||
+        tag === 'BUTTON' ||
+        tag === 'INPUT' ||
+        tag === 'TEXTAREA' ||
+        tag === 'SELECT' ||
+        pointerStyle === 'text' ||
+        pointerStyle === 'pointer'
+
+      setSuppressed(shouldHide)
+    }
   }
 
   // effects
@@ -42,7 +60,7 @@ export default function CustomCursor(props: {
     <>
       <div
         class="cursor"
-        classList={{ active: props.active() }}
+        classList={{ active: props.active(), suppressed: suppressed() }}
         style={{ transform: `translate3d(${xy().x}px, ${xy().y}px, 0)` }}
       >
         <div class="cursorInner">{props.cursorText()}</div>

@@ -19,3 +19,13 @@
 .active {
   display: block;
 }
+
+.cursor.suppressed {
+  opacity: 0;
+  transform: scale(0.69);
+}
+
+.active.suppressed {
+  opacity: 0;
+  transform: scale(0.69);
+}
