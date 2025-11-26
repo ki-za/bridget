@@ -65,7 +65,8 @@
   --tag-sliver-width: 1rem; /* visible sliver width */
   --tag-expanded-width: 8rem; /* fixed expanded width (consistent layout) */
   --tag-expanded-padding-l: var(--sm);
-  --tag-expanded-padding-r: calc(0.8 * var(--md));
+  --tag-expanded-padding-r: var(--md);
+  ---tag-expanded-padding-vertical: var(--sm);
   --tag-text-hidden: transparent;
   --tag-text-visible: #ffffff;
 
