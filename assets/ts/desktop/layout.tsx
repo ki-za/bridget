@@ -69,8 +69,10 @@ export default function Desktop(props: {
 
   const viewPortMode = createMemo<ViewportMode>(() => {
     if (!isOpen()) return 'trail'
-    if (currentImageInfo() && isAnimating()) return 'animating-with-info'
-    if (currentImageInfo() && !isAnimating()) return 'expanded-with-info'
+    if (currentImageInfo() && isOpen() && isAnimating()) {
+      return 'animating-with-info'
+    }
+    if (currentImageInfo() && isOpen() && !isAnimating()) return 'expanded-with-info'
     return 'expanded'
   })
 
