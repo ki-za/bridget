@@ -1,6 +1,7 @@
 import { type gsap } from 'gsap'
 import {
   For,
+  Show,
   createEffect,
   on,
   onMount,
@@ -9,11 +10,13 @@ import {
   type Setter
 } from 'solid-js'
 
-import type { ImageJSON } from '../resources'
+import type { ImageInfo, ImageJSON } from '../resources'
 import { useState, type State } from '../state'
 import { decrement, increment, loadGsap, type Vector } from '../utils'
 
 import type { DesktopImage, HistoryItem } from './layout'
+
+import ImageInfoPanel from './imageInfoPanel'
 
 /**
  * helper functions
@@ -86,6 +89,68 @@ function onMutation<T extends HTMLElement>(
   }).observe(element, observeOptions)
 }
 
+export type ViewportMode =
+  | 'trail'
+  | 'expanded'
+  | 'animating-with-info'
+  | 'expanded-with-info'
+
+function remToPx(remValue: number) {
+  const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize)
+  return remValue * rootFontSize
+}
+
+function getImageTargetTransform(): { x: number; scale: number } {
+  const viewportWidth = window.innerWidth
+  const navHeight = remToPx(
+    parseInt(
+      getComputedStyle(document.documentElement).getPropertyValue('--nav-height')
+    )
+  )
+  const viewportHeight = window.innerHeight - navHeight
+
+  // Get panel width from CSS variable or measure existing panel
+  const panelMaxWidth =
+    remToPx(
+      parseInt(
+        getComputedStyle(document.documentElement).getPropertyValue('--panel-max-width')
+      )
+    ) || 401 // fallback
+
+  const panelGapMax = remToPx(
+    parseInt(
+      getComputedStyle(document.documentElement).getPropertyValue('--panel-gap-max')
+    ) || 1
+  )
+
+  // Calculate image area dimensions (same as CSS)
+  const imageAreaMaxHeight = viewportWidth - panelMaxWidth - panelGapMax
+  const imageAreaHeight = Math.min(imageAreaMaxHeight, viewportHeight)
+  const imageAreaWidth = imageAreaHeight // 1:1 aspect ratio
+
+  // Image area is left-aligned and vertically centered
+  const imageAreaLeft = 0
+  const imageAreaCenterX = imageAreaLeft + imageAreaWidth / 2
+
+  // Calculate offset from viewport center
+  const viewportCenterX = viewportWidth / 2
+  const x = imageAreaCenterX - viewportCenterX
+
+  console.log('targetimagetransform-values', { panelMaxWidth, panelGapMax })
+  // Scale from full viewport height to image area height
+  const scale = imageAreaHeight / viewportHeight
+
+  console.log('Calculated transform:', {
+    x,
+    scale,
+    imageAreaHeight,
+    imageAreaWidth,
+    imageAreaMaxHeight
+  })
+
+  return { x, scale }
+}
+
 /**
  * Stage component
  */
@@ -101,6 +166,8 @@ export default function Stage(props: {
   setCordHist: Setter<HistoryItem[]>
   navVector: Accessor<Vector>
   setNavVector: Setter<Vector>
+  currentImageInfo: Accessor<ImageInfo | undefined>
+  mode: ViewportMode
 }): JSX.Element {
   // variables
   let _gsap: typeof gsap
@@ -150,20 +217,34 @@ export default function Stage(props: {
     const _isOpen = props.isOpen()
     const _state = state()
 
-    _gsap.set(elsTrail, {
-      x: (i: number) => _cordHist[i].x - window.innerWidth / 2,
-      y: (i: number) => _cordHist[i].y - window.innerHeight / 2,
-      opacity: (i: number) =>
-        Math.max(
-          (i + 1 + _state.trailLength <= _cordHist.length ? 0 : 1) - (_isOpen ? 1 : 0),
-          0
-        ),
-      zIndex: (i: number) => i,
-      scale: 0.6
-    })
+    // Trail mode positioning
+    if (props.mode === 'trail')
+      _gsap.set(elsTrail, {
+        x: (i: number) => _cordHist[i].x - window.innerWidth / 2,
+        y: (i: number) => _cordHist[i].y - window.innerHeight / 2,
+        opacity: (i: number) =>
+          Math.max(
+            (i + 1 + _state.trailLength <= _cordHist.length ? 0 : 1) -
+              (_isOpen ? 1 : 0),
+            0
+          ),
+        zIndex: (i: number) => i,
+        scale: 0.6
+      })
 
+    // Expanded modes (with or without info)
     if (_isOpen) {
-      const elc = getImagesFromIndexes(imgs, [getCurrentElIndex(_cordHist)])[0]
+      const currentIndex = getCurrentElIndex(_cordHist)
+      const elc = imgs[currentIndex]
+
+      // Reset all non-current images to hidden state
+      imgs.forEach((img, index) => {
+        if (index !== currentIndex) {
+          _gsap.set(img, { opacity: 0, scale: 0.6 })
+        }
+      })
+
+      // Preload adjacent images
       const indexArrayToHires: number[] = []
       const indexArrayToCleanup: number[] = []
       switch (props.navVector()) {
@@ -180,7 +261,23 @@ export default function Stage(props: {
       }
       hires(getImagesFromIndexes(imgs, indexArrayToHires)) // preload
       _gsap.set(getImagesFromIndexes(imgs, indexArrayToCleanup), { opacity: 0 })
-      _gsap.set(elc, { x: 0, y: 0, scale: 1 }) // set current to center
+
+      // Position current image based on mode
+      if (props.mode === 'expanded-with-info') {
+        console.log('exapndedewithinfoCEHCK')
+        // In info mode: CSS handles positioning, GSAP only sets scale
+        // Clear x/y transforms to let CSS take over
+        const { x, scale } = getImageTargetTransform()
+        _gsap.set(elc, {
+          x: x,
+          y: 0,
+          scale: scale
+        })
+      } else {
+        // Regular expanded mode: GSAP centers the image
+        _gsap.set(elc, { x: 0, y: 0, scale: 1 })
+      }
+
       setLoaderForHiresImage(elc) // set loader, if loaded set current opacity to 1
     } else {
       lores(elsTrail)
@@ -211,6 +308,9 @@ export default function Stage(props: {
     )
     setLoaderForHiresImage(elc)
 
+    // to find out how big the image will be when its enlarged for
+    // responsiveness
+
     const tl = _gsap.timeline()
     const trailInactiveEls = getImagesFromIndexes(
       imgs,
@@ -227,8 +327,8 @@ export default function Stage(props: {
     })
     // current move to center
     tl.to(elc, {
-      x: 0,
       y: 0,
+      x: 0,
       ease: 'power3.inOut',
       duration: 0.7,
       delay: 0.3
@@ -239,8 +339,17 @@ export default function Stage(props: {
       scale: 1,
       ease: 'power3.inOut'
     })
-    // finished
-    // eslint-disable-next-line solid/reactivity
+    if (props.currentImageInfo()) {
+      console.log('current has image info')
+      const { x, scale } = getImageTargetTransform()
+
+      tl.to(elc, {
+        delay: 0,
+        scale: scale,
+        x: x,
+        transformOrigin: 'left-center'
+      })
+    }
     return await tl.then(() => {
       props.setIsAnimating(false)
     })
@@ -452,7 +561,21 @@ export default function Stage(props: {
 
   return (
     <>
-      <div class="stage" onClick={onClick} onKeyDown={onClick}>
+      <div
+        class="stage"
+        classList={{ [props.mode]: true }}
+        onClick={onClick}
+        onKeyDown={onClick}
+      >
+        {/* Wrapper only appears in info mode */}
+        <Show when={props.mode === 'expanded-with-info'}>
+          <div class="image-info-container">
+            <div class="image-area" />
+            <ImageInfoPanel info={props.currentImageInfo()!} />
+          </div>
+        </Show>
+
+        {/* Images always render here (refs stay stable) */}
         <For each={props.ijs}>
           {(ij, i) => (
             <img

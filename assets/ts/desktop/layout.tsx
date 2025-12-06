@@ -2,6 +2,7 @@ import { Show, createMemo, createSignal, type JSX } from 'solid-js'
 
 import type { ImageJSON } from '../resources'
 import type { Vector } from '../utils'
+import type { ViewportMode } from './stage'
 
 import CustomCursor from './customCursor'
 import Nav from './nav'
@@ -28,7 +29,6 @@ export interface HistoryItem {
   x: number
   y: number
 }
-
 /**
  * components
  */
@@ -51,6 +51,30 @@ export default function Desktop(props: {
   const active = createMemo(() => isOpen() && !isAnimating())
   const cursorText = createMemo(() => (isLoading() ? props.loadingText : hoverText()))
 
+  const currentImage = createMemo(() => {
+    if (!isOpen()) return null
+    const history = cordHist()
+    if (!history.length) return null
+    const currentIndex = history[history.length - 1].i
+    return props.ijs[currentIndex]
+  })
+
+  const currentImageInfo = createMemo(() => {
+    const img = currentImage()
+    return img?.imageInfo
+  })
+
+  const hasImageInfo = createMemo(() => currentImage()?.imageInfo !== undefined)
+
+  const viewPortMode = createMemo<ViewportMode>(() => {
+    if (!isOpen()) return 'trail'
+    if (currentImageInfo() && isOpen() && isAnimating()) {
+      return 'animating-with-info'
+    }
+    if (currentImageInfo() && isOpen() && !isAnimating()) return 'expanded-with-info'
+    return 'expanded'
+  })
+
   return (
     <>
       <Nav />
@@ -66,24 +90,25 @@ export default function Desktop(props: {
           setCordHist={setCordHist}
           navVector={navVector}
           setNavVector={setNavVector}
+          mode={viewPortMode()}
+          currentImageInfo={currentImageInfo}
         />
-        <Show when={isOpen()}>
-          <CustomCursor cursorText={cursorText} active={active} isOpen={isOpen} />
-          <StageNav
-            prevText={props.prevText}
-            closeText={props.closeText}
-            nextText={props.nextText}
-            loadingText={props.loadingText}
-            active={active}
-            isAnimating={isAnimating}
-            setCordHist={setCordHist}
-            isOpen={isOpen}
-            setIsOpen={setIsOpen}
-            setHoverText={setHoverText}
-            navVector={navVector}
-            setNavVector={setNavVector}
-          />
-        </Show>
+
+        <CustomCursor cursorText={cursorText} active={active} isOpen={isOpen} />
+        <StageNav
+          prevText={props.prevText}
+          closeText={props.closeText}
+          nextText={props.nextText}
+          loadingText={props.loadingText}
+          active={active}
+          isAnimating={isAnimating}
+          setCordHist={setCordHist}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          setHoverText={setHoverText}
+          navVector={navVector}
+          setNavVector={setNavVector}
+        />
       </Show>
     </>
   )

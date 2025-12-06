@@ -1,0 +1,182 @@
+
+["1.jpg"]
+artistName = "Alex Webb"
+artistLink = "https://alexwebb.com"
+projectName = "Istanbul: City of a Hundred Names"
+releaseYear = 2007
+projectContributionTags = ["photographer", "author"]
+releasedBy = ["Aperture Foundation"]
+releasedByLink = "https://aperture.org"
+collaborators = ["Orhan Pamuk"]
+trackList = [
+  { name = "The Golden Horn", contributionTags = [
+    "photographed",
+    "composed",
+  ] },
+  { name = "Galata Bridge Chronicles", contributionTags = [
+    "photographed",
+    "edited",
+  ] },
+  { name = "Byzantine Echoes", contributionTags = [
+    "photographed",
+  ] },
+]
+
+["2.jpg"]
+artistName = "Alex Webb"
+artistLink = "https://alexwebb.com"
+projectName = "The Suffering of Light"
+spotifyLink = "https://open.spotify.com/show/photography-talks"
+appleMusicLink = "https://podcasts.apple.com/podcast/photography-talks"
+releaseYear = 2011
+projectContributionTags = ["photographer", "curator"]
+releasedBy = ["Thames & Hudson"]
+releasedByLink = "https://thamesandhudson.com"
+collaborators = ["Rebecca Norris Webb", "Geoff Dyer"]
+trackList = [
+  { name = "Haiti: Aftershocks", contributionTags = [
+    "photographed",
+    "documented",
+  ] },
+  { name = "Mexico: Border Crossings", contributionTags = [
+    "photographed",
+    "researched",
+  ] },
+  { name = "Turkey: Between Worlds", contributionTags = [
+    "photographed",
+    "curated",
+  ] },
+]
+
+["3.jpg"]
+artistName = "Alex Webb"
+projectName = "Memory City"
+releaseYear = 2014
+projectContributionTags = ["photographer", "storyteller"]
+collaborators = ["Rebecca Norris Webb"]
+releasedBy = ["Radius Books"]
+trackList = [
+  { name = "Rochester: Industrial Decline", contributionTags = [
+    "photographed",
+    "documented",
+  ] },
+  { name = "Kodak's Legacy", contributionTags = [
+    "photographed",
+    "archived",
+  ] },
+]
+
+["4.jpg"]
+artistName = "Alex Webb"
+artistLink = "https://magnumphotos.com/photographer/alex-webb"
+projectName = "La Calle: Streetwork in Guatemala"
+spotifyLink = "https://open.spotify.com/show/documentary-photography"
+releaseYear = 1999
+projectContributionTags = ["photographer", "documentarian", "author"]
+releasedBy = ["University of New Mexico Press"]
+releasedByLink = "https://unmpress.com"
+collaborators = ["Rebecca Norris Webb"]
+trackList = [
+  { name = "Market Day in Chichicastenango", contributionTags = [
+    "photographed",
+    "documented",
+  ] },
+  { name = "Guatemala City Streets", contributionTags = [
+    "photographed",
+    "researched",
+  ] },
+  { name = "Highland Villages", contributionTags = [
+    "photographed",
+    "explored",
+  ] },
+]
+
+["5.jpg"]
+artistName = "Alex Webb"
+artistLink = "https://magnumphotos.com/photographer/alex-webb"
+projectName = "Violet Isle"
+releaseYear = 2009
+projectContributionTags = ["photographer", "author"]
+releasedBy = ["Radius Books"]
+releasedByLink = "https://radiusbooks.org"
+collaborators = ["Rebecca Norris Webb"]
+trackList = [
+  { name = "Havana Nights", contributionTags = [
+    "photographed",
+  ] },
+  { name = "Caribbean Shadows", contributionTags = [
+    "photographed",
+    "curated",
+  ] },
+  { name = "The Isle's Secrets", contributionTags = [
+    "photographed",
+    "documented",
+  ] },
+]
+
+["6.jpg"]
+artistName = "Alex Webb"
+projectName = "Slant Rhymes"
+spotifyLink = "https://open.spotify.com/show/photo-dialogues"
+releaseYear = 2017
+projectContributionTags = ["photographer", "poet"]
+releasedBy = ["La Fábrica"]
+releasedByLink = "https://lafabrica.com"
+collaborators = ["Rebecca Norris Webb"]
+trackList = [
+  { name = "Parallel Journeys", contributionTags = [
+    "photographed",
+  ] },
+  { name = "Mirrored Streets", contributionTags = [
+    "photographed",
+    "composed",
+  ] },
+]
+
+["7.jpg"]
+artistName = "Alex Webb"
+artistLink = "https://alexwebb.com"
+projectName = "Brooklyn: The City Within"
+releaseYear = 2019
+projectContributionTags = ["photographer"]
+releasedBy = ["Aperture Foundation"]
+releasedByLink = "https://aperture.org"
+collaborators = ["Rebecca Norris Webb"]
+trackList = [
+  { name = "Coney Island Tides", contributionTags = [
+    "photographed",
+  ] },
+  { name = "Borough Reflections", contributionTags = [
+    "photographed",
+    "curated",
+  ] },
+  { name = "Under the El", contributionTags = [
+    "photographed",
+    "interpreted",
+  ] },
+]
+
+["8.jpg"]
+artistName = "Alex Webb"
+artistLink = "https://magnumphotos.com/photographer/alex-webb"
+projectName = "The City of Gardens"
+spotifyLink = "https://open.spotify.com/show/urban-narratives"
+appleMusicLink = "https://podcasts.apple.com/urban-narratives"
+releaseYear = 2023
+projectContributionTags = ["photographer", "urban researcher"]
+releasedBy = ["Thames & Hudson"]
+releasedByLink = "https://thamesandhudson.com"
+collaborators = ["Urban Botanical Institute"]
+trackList = [
+  { name = "Flora of the Streets", contributionTags = [
+    "photographed",
+    "archived",
+  ] },
+  { name = "Concrete Botanics", contributionTags = [
+    "photographed",
+    "researched",
+  ] },
+  { name = "Garden Walls", contributionTags = [
+    "photographed",
+  ] },
+]

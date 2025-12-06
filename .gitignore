@@ -6,6 +6,8 @@ node_modules/
 build/
 gen_/
 
+static/
+repo-overview.md
 ## OS Files
 # Windows
 Thumbs.db

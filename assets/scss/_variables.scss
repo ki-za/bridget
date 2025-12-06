@@ -7,4 +7,70 @@
   --z-nav-gallery: 500;
   --z-cursor: 600;
   --z-nav: 800;
+  --z-link: 850;
+
+  font-size: 16px;
+  // text and gap scaling
+  --scaleFactor: 1.61;
+  // Base size
+  --md: 0.98;
+  --sm: calc(1rem / var(--scaleFactor));
+  --xs: calc(var(--sm) / var(--scaleFactor));
+  --lg: calc(1rem * var(--scaleFactor));
+  --xl: calc(var(--lg) * var(--scaleFactor));
+
+  // Tag color palette (muted colors for visual distinction)
+  --tag-color-1: #8b9dc3; // Muted blue
+  --tag-color-2: #a8b5a0; // Muted sage green
+  --tag-color-3: #c9a896; // Muted terracotta
+  --tag-color-4: #b8a8c9; // Muted lavender
+
+  // Panel dimensions
+  --panel-max-width: 30rem;
+  --panel-min-width: 400px;
+  --panel-gap-min: 1vw;
+  --panel-gap-max: var(--xl);
+
+  // Transitions
+  --transition-fast: 0.2s ease;
+  --transition-medium: 0.3s ease;
+  --transition-slow: 0.5s ease;
+
+  --font-weight-regular-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 600;
+  --font-weight-medium-bold: 750;
+
+  --panel-base-multiplier: 1.2;
+
+  --panel-label-size: calc(var(--sm) * var(--panel-base-multiplier));
+  --panel-meta-size: calc(var(--sm) * 1.4 * var(--panel-base-multiplier));
+  --panel-body-size: calc(var(--md) * var(--panel-base-multiplier));
+  --panel-tag-size: calc(var(--sm) * 0.9 * var(--panel-base-multiplier));
+  --panel-title-size: calc(var(--xl) * var(--panel-base-multiplier));
+
+  --panel-bg: #fafafa;
+  --panel-text: #1a1a1a;
+  --panel-text-secondary: #2a2a2a;
+  --panel-border: #e0e0e0;
+
+  --panel-accent: #333333;
+  --tag-color-1-bauhaus: #5b7aa8;
+  --tag-color-2-bauhaus: #7a9070;
+  --tag-color-3-bauhaus: #a8775b;
+  --tag-color-4-bauhaus: #8a70a8;
+
+  --tag-sliver-width: 1rem; /* visible sliver width */
+  --tag-expanded-width: 8rem; /* fixed expanded width (consistent layout) */
+  --tag-expanded-padding-l: var(--sm);
+  --tag-expanded-padding-r: var(--md);
+  ---tag-expanded-padding-vertical: var(--sm);
+  --tag-text-hidden: transparent;
+  --tag-text-visible: #ffffff;
+
+  --tag-skew-angle: -19deg;
+  --tag-skew-counter: 19deg;
+
+  // Breakpoints (for reference in media queries)
+  --breakpoint-mobile: 600px;
 }
