@@ -21,6 +21,8 @@ import { loadGsap, type Vector } from '../utils'
 import GalleryImage from './galleryImage'
 import GalleryNav, { capitalizeFirstLetter } from './galleryNav'
 
+import MobileImageInfoPanel from './imageInfoPanel'
+
 function removeDuplicates<T>(arr: T[]): T[] {
   if (arr.length < 2) return arr // optimization
   return [...new Set(arr)]
@@ -160,6 +162,7 @@ export default function Gallery(props: {
           .then((S) => {
             invariant(galleryInner, 'galleryInner is not defined')
             _swiper = new S(galleryInner, { spaceBetween: 20 })
+
             _swiper.on('slideChange', ({ realIndex }) => {
               setIndex(realIndex)
             })
@@ -218,12 +221,18 @@ export default function Gallery(props: {
             <Show when={libLoaded()}>
               <For each={props.ijs}>
                 {(ij, i) => (
-                  <div class="swiper-slide">
-                    <GalleryImage
-                      load={loads[i()]}
-                      ij={ij}
-                      loadingText={_loadingText}
-                    />
+                  <div class={`swiper-slide ${ij.imageInfo ? 'has-info' : ''}`}>
+                    <div class="slide-content">
+                      <GalleryImage
+                        load={loads[i()]}
+                        ij={ij}
+                        loadingText={_loadingText}
+                      />
+                      {/* NEW: Add info panel below image */}
+                      <Show when={ij.imageInfo}>
+                        <MobileImageInfoPanel info={ij.imageInfo} />
+                      </Show>
+                    </div>
                   </div>
                 )}
               </For>
