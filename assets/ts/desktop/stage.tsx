@@ -237,13 +237,6 @@ export default function Stage(props: {
       const currentIndex = getCurrentElIndex(_cordHist)
       const elc = imgs[currentIndex]
 
-      // Reset all non-current images to hidden state
-      imgs.forEach((img, index) => {
-        if (index !== currentIndex) {
-          _gsap.set(img, { opacity: 0, scale: 0.6 })
-        }
-      })
-
       // Preload adjacent images
       const indexArrayToHires: number[] = []
       const indexArrayToCleanup: number[] = []
