@@ -261,6 +261,7 @@ export default function Stage(props: {
         // In info mode: CSS handles positioning, GSAP only sets scale
         // Clear x/y transforms to let CSS take over
         const { x, scale } = getImageTargetTransform()
+        console.time('expand-animation')
         _gsap.set(elc, {
           x: x,
           y: 0,
@@ -290,6 +291,14 @@ export default function Stage(props: {
 
     const elcIndex = getCurrentElIndex(_cordHist)
     const elc = imgs[elcIndex]
+
+    const hasInfo = !!props.currentImageInfo()
+    const infoTransform = hasInfo ? getImageTargetTransform() : { x: 0, scale: 1 }
+
+    if (props.currentImageInfo()) {
+      console.log('current has image info')
+      const { x, scale } = getImageTargetTransform()
+    }
 
     // don't hide here because we want a better transition
     hires(
@@ -332,15 +341,12 @@ export default function Stage(props: {
       scale: 1,
       ease: 'power3.inOut'
     })
-    if (props.currentImageInfo()) {
-      console.log('current has image info')
-      const { x, scale } = getImageTargetTransform()
-
+    if (hasInfo) {
       tl.to(elc, {
         delay: 0,
-        scale: scale,
-        x: x,
-        transformOrigin: 'left-center'
+        transformOrigin: 'left-center',
+        scale: infoTransform.scale,
+        x: infoTransform.x
       })
     }
     return await tl.then(() => {
