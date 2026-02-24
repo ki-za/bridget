@@ -20,28 +20,49 @@ export default function CustomCursor(props: {
   const [suppressed, setSuppressed] = createSignal(false) // whether to hide the custom-cursor
 
   // helper functions
+
   const onMouse: (e: MouseEvent) => void = (e) => {
     const { clientX, clientY, target } = e
     setXy({ x: clientX, y: clientY })
 
-    if (target instanceof HTMLElement) {
-      const tag = target.tagName // category of mouse hover location
-      const pointerStyle = getComputedStyle(target).cursor
-      console.log(pointerStyle)
+    const elementUnderCursor = document.elementFromPoint(clientX, clientY)
 
-      const shouldHide =
+    if (elementUnderCursor instanceof HTMLElement) {
+      const cursorStyle = getComputedStyle(elementUnderCursor).cursor
+      const tag = elementUnderCursor.tagName
+
+      const isInteractiveElement =
         tag === 'A' ||
         tag === 'BUTTON' ||
         tag === 'INPUT' ||
         tag === 'TEXTAREA' ||
-        tag === 'SELECT' ||
-        pointerStyle === 'text' ||
-        pointerStyle === 'pointer'
+        tag === 'SELECT'
 
-      setSuppressed(shouldHide)
+      const hasDefaultCursor = cursorStyle === 'default' || cursorStyle === 'text'
+
+      const shouldSuppress = hasDefaultCursor || isInteractiveElement
+
+      setSuppressed(shouldSuppress)
     }
-  }
 
+    // if (target instanceof HTMLElement) {
+    //   const tag = target.tagName // category of mouse hover location
+    //   const pointerStyle = getComputedStyle(target).cursor
+    //   console.log(pointerStyle)
+    //
+    //   const shouldHide =
+    //     tag === 'A' ||
+    //     tag === 'BUTTON' ||
+    //     tag === 'INPUT' ||
+    //     tag === 'TEXTAREA' ||
+    //     tag === 'SELECT' ||
+    //     pointerStyle === 'text' ||
+    //     pointerStyle === 'pointer' ||
+    //     pointerStyle === 'default'
+    //
+    //   setSuppressed(shouldHide)
+    // }
+  }
   // effects
   onMount(() => {
     controller = new AbortController()

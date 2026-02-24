@@ -3,7 +3,7 @@
   overflow: hidden;
   width: 100vw;
   height: calc(var(--window-height) - var(--nav-height));
-  cursor: pointer;
+  cursor: default;
 
   // Default image styles (trail + expanded modes)
   img {
@@ -55,66 +55,27 @@
       position: relative;
       pointer-events: none;
 
-      &.ghost {
+      // copies the area of the `img` css class
+      .image-area {
+        position: relative;
+        align-self: center;
+        height: 100%;
+        max-height: calc(100vw - var(--panel-max-width) - var(--panel-gap-max));
+
+        aspect-ratio: 1;
+        pointer-events: none;
+
+        .ghost-img {
+          width: 100%;
+          height: 100%;
+          aspect-ratio: 1;
+          object-fit: cover; /* or contain, depending on your main img style */
+          background: red;
+        }
+
+        img {
+        }
       }
-    }
-
-    // copies the area of the `img` css class
-    .image-area {
-      position: relative;
-      align-self: center;
-      height: 100%;
-      max-height: calc(100vw - var(--panel-max-width) - var(--panel-gap-max));
-
-      aspect-ratio: 1;
-      pointer-events: none;
-
-      &.ghost {
-      }
-    }
-
-    .ghost-img {
-      width: 100%;
-      height: 100%;
-      aspect-ratio: 1;
-      object-fit: cover; /* or contain, depending on your main img style */
-      background: red;
-    }
-
-    img {
     }
   }
 }
-
-// Image info panel
-// .image-info-panel {
-//   position: relative;
-//   width: var(--panel-max-width);
-//   min-width: var(--panel-min-width);
-//   max-width: var(--panel-max-width);
-//   height: 100%;
-//   overflow-y: auto;
-//   padding: var(--lg);
-//   background: white;
-//   border-left: 1px solid rgba(0, 0, 0, 0.1);
-//   pointer-events: auto;
-// }
-
-// Responsive: hide panel below 600px
-// @media (max-width: 600px) {
-//   .stage.expanded-with-info {
-//     .image-info-container {
-//       justify-content: center;
-//     }
-//
-//     .image-info-panel {
-//       display: none;
-//     }
-//
-//     img {
-//       max-width: 100%;
-//       left: 50%;
-//       transform: translate(-50%, -50%);
-//     }
-//   }
-// }

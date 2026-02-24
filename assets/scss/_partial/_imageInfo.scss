@@ -4,6 +4,7 @@
   width: 100%;
   justify-content: center;
   box-sizing: border-box;
+  pointer-events: auto;
 }
 
 .image-info-panel {
@@ -14,11 +15,43 @@
   padding: var(--xs);
   bottom: 5.8vh;
   color: var(--panel-text);
-  // border-left: 1px solid rgba(0, 0, 0, 0.05);
   display: inline-grid;
   margin: var(--xl);
   margin-left: calc(var(--xl) * 0.85);
   flex: 1;
+  z-index: 1001;
+}
+
+.image-info-panel a,
+.image-info-panel .link-button,
+.image-info-panel .artist-section a,
+.image-info-panel .metadata-section a,
+.image-info-panel .collaborator a,
+.image-info-panel .tag,
+.image-info-panel button {
+  // z-index: var(--z-link) !important;
+  // cursor: pointer !important;
+  pointer-events: auto;
+}
+
+/* Force text cursor on text elements */
+// .image-info-panel .project-name,
+// .image-info-panel .track-name,
+// .image-info-panel .section-label,
+// .image-info-panel .release-year,
+// .image-info-panel span:not(a span) {
+//   // cursor: pointer !important;
+//   // z-index: var(--z-link) !important;
+//   pointer-events: auto;
+// }
+
+.image-info-panel .image-info-panel * {
+  // cursor: default !important;
+}
+
+.image-info-panel a {
+  z-index: var(--z-link);
+  // cursor: pointer;
 }
 
 .image-info-panel::-webkit-scrollbar {
@@ -70,7 +103,7 @@
   /* font-size: var(--panel-tag-size); */
   font-weight: var(--font-weight-regular);
   font-style: italic;
-  font-size: 1.2em;
+  font-size: 1em;
   color: white;
   background: var(--tag-color-1-bauhaus);
   transform: skewX(calc(var(--tag-skew-angle)));
@@ -114,6 +147,7 @@
   line-height: 1.1;
   letter-spacing: -0.013em;
   margin: 0;
+  z-index: var(--z-link);
 }
 
 .project-links {
@@ -172,8 +206,6 @@
   opacity: 0.6;
   margin-right: var(--sm);
   text-align: left;
-
-  cursor: none;
 }
 
 .artist-section {
@@ -182,7 +214,8 @@
   justify-content: flex-start;
   align-items: baseline;
   margin-bottom: calc(-1 * var(--xs));
-  gap: var(--lg);
+  pointer-events: auto;
+  // gap: var(--lg);
   /* padding-left: calc(0.5 * var(--xs)); */
 }
 
@@ -191,12 +224,11 @@
   font-style: italic;
   text-transform: uppercase;
   margin-right: var(calc(0.7 * --lg));
+  pointer-events: auto;
 }
 
 .artist-name a {
-  color: var(--panel-text-secondary);
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
   transition: border-color var(--transition-fast);
 }
 
@@ -215,7 +247,7 @@
 }
 
 .content-constrained {
-  pointer-events: none;
+  // pointer-events: none;
   width: 100%;
   z-index: var(--z-link);
 }
@@ -223,7 +255,8 @@
 .track-items {
   display: flex;
   flex-direction: column;
-  gap: var(--sm);
+  margin-bottom: var(--md);
+  margin-top: var(--xs);
 }
 
 .track-item {
@@ -231,19 +264,16 @@
   align-items: center;
   padding-left: var(--sm);
   transition: background var(--transition-fast);
-  line-height: 1;
+  // line-height: 1;
   flex-wrap: nowrap;
 
   z-index: var(--z-link);
-  pointer-events: auto;
-  align-items: center;
+  // pointer-events: auto;
+  // align-items: center;
 }
 
 .track-item:hover {
   background: rgba(0, 0, 0, 0.02);
-  cursor: default;
-
-  cursor: general;
 
   transition:
     font-style var(--transition-medium) 1s,
@@ -268,7 +298,7 @@
   font-size: calc(1.2 * var(--panel-label-size));
   gap: calc(var(--xs) * 0.75);
   z-index: var(--z-link);
-  pointer-events: auto;
+  // pointer-events: auto;
 }
 
 .track-tags .tag {
@@ -288,10 +318,9 @@
   transform-origin: left center;
   transform: skewX(var(--tag-skew-angle)) scaleX(0);
   /* background + border (keeps sliver silhouette) */
-  cursor: default;
 
   /* allow pointer when shown as sliver (enabled by track hover) */
-  pointer-events: none;
+  // pointer-events: none;
 }
 
 /* TRACK HOVER: show uniform slivers (text still hidden) */
@@ -303,7 +332,7 @@
   padding-bottom: var(--tag-expanded-padding-vertical);
   transform: skewX(var(--tag-skew-angle)) scaleX(1);
   color: var(--tag-text-hidden);
-  pointer-events: auto; /* let user move pointer onto tag */
+  // pointer-events: auto; /* let user move pointer onto tag */
   opacity: 1;
 }
 
@@ -322,7 +351,7 @@
   // transform: skewX(var(--tag-skew-angle)) scaleX(1); /* keep skew, full scale */
   // transition-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
 
-  pointer-events: auto;
+  // pointer-events: auto;
 }
 
 .metadata-section {
@@ -342,8 +371,7 @@
 .released-by {
   position: relative;
   z-index: var(--z-link);
-  pointer-events: auto;
-  cursor: general;
+  // pointer-events: auto;
 }
 .collaborator-list {
   font-size: var(--panel-label-size);
@@ -365,10 +393,14 @@
   font-weight: var(--font-weight-regular);
 }
 
+.collaborator a {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
 .released-by:last-child,
 .collaborator-list:last-child {
   z-index: var(--z-link);
-  pointer-events: auto;
+  // pointer-events: auto;
   margin-bottom: 0;
 }
 
@@ -406,6 +438,6 @@
   font-weight: var(--font-weight-regular);
   opacity: 0.8;
 
-  pointer-events: auto;
+  // pointer-events: auto;
   z-index: var(--z-link);
 }
