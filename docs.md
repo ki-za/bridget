@@ -8,6 +8,11 @@
   - [`index.md`](#indexmd)
     - [Front Matter](#front-matter)
     - [Markdown Content](#markdown-content)
+  - [Image Info Panel](#image-info-panel)
+    - [File Location & Format](#file-location--format)
+    - [Schema](#schema)
+    - [Available Fields](#available-fields)
+    - [Track List](#track-list)
   - [Favicon](#favicon)
 - [Configuration](#configuration)
   - [`hugo.toml`](#hugotoml)
@@ -167,6 +172,69 @@ _[Contents](#contents)_
 - If this is an **information** page:
   - You can write anything in index.md, and it will be rendered as HTML.
   - However, please note that the CSS for the information page **only provides simple styling for text**. If you have any requirements beyond text and the browser rendering does not meet your expectations, please modify [`_article.scss`](https://github.com/Sped0n/bridget/blob/main/assets/scss/_partial/_article.scss).
+
+### Image Info Panel
+
+You can add detailed information to images that appears when users tap/click the info button on mobile or in the side panel on desktop.
+
+#### File Location & Format
+
+Create an `imageInfo.toml` file in the same directory as your images:
+
+```
+content/
+└── Discography/
+    ├── 1.jpg
+    ├── 2.jpg
+    ├── 3.jpg
+    └── imageInfo.toml    ← Place here
+```
+
+#### Schema
+
+```toml
+["1.jpg"]                           # Must match image filename exactly
+artistName = "Alex Webb"            # Required
+artistLink = "https://alexwebb.com" # Optional
+projectName = "Istanbul: City of a Hundred Names"  # Required
+releaseYear = 2007                 # Required
+projectContributionTags = ["photographer", "author"]  # Optional
+releasedBy = ["Aperture Foundation"]  # Optional
+releasedByLink = "https://aperture.org"  # Optional
+collaborators = ["Orhan Pamuk"]    # Optional
+spotifyLink = "https://..."         # Optional - shows music icon
+appleMusicLink = "https://..."      # Optional - shows Apple Music icon
+
+# Track list - optional, shows "View All" button when present
+trackList = [
+  { name = "The Golden Horn", contributionTags = ["photographed", "composed"] },
+  { name = "Galata Bridge Chronicles", contributionTags = ["photographed", "edited"] },
+]
+```
+
+#### Available Fields
+
+| Field                     | Type   | Required | Description                                 |
+| ------------------------- | ------ | -------- | ------------------------------------------- |
+| `artistName`              | string | Yes      | Artist/photographer name                    |
+| `artistLink`              | string | No       | URL to artist's website                     |
+| `projectName`             | string | Yes      | Name of the project/collection              |
+| `releaseYear`             | number | Yes      | Year of release/publication                 |
+| `projectContributionTags` | array  | No       | Tags describing your role                   |
+| `releasedBy`              | array  | No       | Publisher/organization                      |
+| `releasedByLink`          | string | No       | URL to publisher                            |
+| `collaborators`           | array  | No       | List of collaborators                       |
+| `spotifyLink`             | string | No       | Spotify podcast/show link                   |
+| `appleMusicLink`          | string | No       | Apple Music podcast link                    |
+| `trackList`               | array  | No       | List of tracks/items with contribution tags |
+
+#### Track List
+
+When `trackList` is present:
+
+- Shows a "View All" button in the info panel
+- Tapping opens a modal with all track items
+- Each track can have `name` and `contributionTags`
 
 ### Favicon
 
