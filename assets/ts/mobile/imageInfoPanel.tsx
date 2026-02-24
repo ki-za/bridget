@@ -1,4 +1,5 @@
 import { createSignal, For, Show, type JSX } from 'solid-js'
+
 import type { ImageInfo } from '../resources'
 
 export default function MobileImageInfoPanel(props: { info?: ImageInfo }): JSX.Element {
@@ -161,7 +162,7 @@ export default function MobileImageInfoPanel(props: { info?: ImageInfo }): JSX.E
             <div class="track-modal-overlay" onClick={closeTrackModal}>
               <div class="track-modal" onClick={(e) => e.stopPropagation()}>
                 <div class="track-modal-header">
-                  <div class="track-modal-handle"></div>
+                  <div class="track-modal-handle" />
                   <h3 class="track-modal-title">
                     All Tracks ({info().trackList?.length})
                   </h3>

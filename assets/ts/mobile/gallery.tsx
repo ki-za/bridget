@@ -20,7 +20,6 @@ import { loadGsap, type Vector } from '../utils'
 
 import GalleryImage from './galleryImage'
 import GalleryNav, { capitalizeFirstLetter } from './galleryNav'
-
 import MobileImageInfoPanel from './imageInfoPanel'
 
 function removeDuplicates<T>(arr: T[]): T[] {
