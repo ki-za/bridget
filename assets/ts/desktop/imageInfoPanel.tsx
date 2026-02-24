@@ -1,4 +1,5 @@
 import { For, Show, type JSX } from 'solid-js'
+
 import type { ImageInfo } from '../resources'
 
 export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element {
@@ -68,7 +69,7 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
               </h2>
             </div>
 
-            <div class="section-divider"></div>
+            <div class="section-divider" />
 
             {/* Content Constrained Wrapper */}
             <div class="content-constrained">
@@ -105,7 +106,7 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
               </Show>
 
               <Show when={info().trackList?.length}>
-                <div class="section-divider"></div>
+                <div class="section-divider" />
               </Show>
 
               {/* Metadata Section (Collaborators & Released By) */}

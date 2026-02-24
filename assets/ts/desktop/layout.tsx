@@ -2,10 +2,10 @@ import { Show, createMemo, createSignal, type JSX } from 'solid-js'
 
 import type { ImageJSON } from '../resources'
 import type { Vector } from '../utils'
-import type { ViewportMode } from './stage'
 
 import CustomCursor from './customCursor'
 import Nav from './nav'
+import type { ViewportMode } from './stage'
 import Stage from './stage'
 import StageNav from './stageNav'
 

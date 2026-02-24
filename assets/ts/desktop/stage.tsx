@@ -14,9 +14,8 @@ import type { ImageInfo, ImageJSON } from '../resources'
 import { useState, type State } from '../state'
 import { decrement, increment, loadGsap, type Vector } from '../utils'
 
-import type { DesktopImage, HistoryItem } from './layout'
-
 import ImageInfoPanel from './imageInfoPanel'
+import type { DesktopImage, HistoryItem } from './layout'
 
 /**
  * helper functions
