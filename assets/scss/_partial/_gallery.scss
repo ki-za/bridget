@@ -1,85 +1,77 @@
 .gallery {
   pointer-events: all;
-
   position: fixed;
   top: var(--nav-height);
   z-index: var(--z-nav-gallery);
   overflow: hidden;
-
   display: flex;
   flex-direction: column;
-
   width: 100vw;
   height: calc(var(--window-height) - var(--nav-height));
-  background: deeppink;
+  background: white;
   transform: translate3d(0, 100%, 0);
 
   .galleryInner {
     flex: 1;
     height: 0;
-  }
 
-  .swiper-slide {
-    // Default: centered image (no info)
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-
-    // With info: structured flexbox layout
-    &.has-info {
-      // Reset to stretch for full control
-      align-items: stretch;
-      justify-content: stretch;
-
-      .slide-content {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        height: 100%;
-
-        // Image container takes remaining space
-        > div:first-child {
-          flex: 1;
-          min-height: 0; // Critical for flex overflow
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          overflow: hidden;
-        }
-
-        // Info panel takes natural height
-        .mobile-image-info {
-          flex: 0 0 auto;
-        }
-      }
+    &.swiper {
+      overflow: visible !important;
     }
   }
 
+  /* All slides: centered by default */
+  .swiper-slide {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    height: 100%;
+  }
+
+  /* Slides with info: image full width, info below, scrollable */
+  .swiper-slide.has-info {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+
+    .slide-content {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: auto;
+      min-height: 0;
+
+      > div:first-child {
+        width: 100%;
+        flex-shrink: 0;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      .mobile-image-info {
+        flex: 0 0 auto;
+        width: 100%;
+      }
+    }
+
+    img {
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+      max-height: none;
+      object-fit: contain;
+    }
+  }
+  /* Image rules for slides without info: centered, height constrained */
   img {
+    max-height: calc(var(--window-height) - 2 * var(--nav-height));
     max-width: 100%;
     width: auto;
     object-fit: contain;
-  }
-
-  // Default slides (no info): constrain image height
-  .swiper-slide:not(.has-info) img {
-    max-height: calc(var(--window-height) - 2 * var(--nav-height));
-  }
-
-  // Slides with info: image constrained by flex container
-  .swiper-slide.has-info {
-    .slideContainer {
-      max-height: 100%;
-      max-width: 100%;
-
-      img {
-        min-width: 100vw;
-        width: 100vw;
-        max-height: 100%;
-        max-width: 100%;
-      }
-    }
   }
 
   .loadingText {
@@ -97,7 +89,6 @@
   .nav {
     height: var(--nav-height);
     padding: var(--space-standard);
-
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -105,31 +96,26 @@
     .navClose {
       cursor: pointer;
       z-index: calc(var(--z-nav-gallery) + 1);
-
       min-width: 25%;
       height: calc(var(--nav-height) * 2.5);
-
       display: flex;
       align-items: center;
       justify-content: flex-end;
-
       margin-right: calc(var(--space-standard) * -1);
       padding-right: var(--space-standard);
     }
   }
 }
 
+/* Hides background images when gallery is open (fade out) */
 .curtain {
   position: fixed;
   top: 0;
   left: 0;
   z-index: var(--z-curtain);
-
   width: 100vw;
   height: var(--window-height);
-
   background: rgba(0, 0, 0, 0.5);
   opacity: 0;
-
   pointer-events: none;
 }
