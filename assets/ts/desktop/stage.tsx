@@ -135,18 +135,18 @@ function getImageTargetTransform(): { x: number; scale: number } {
   const viewportCenterX = viewportWidth / 2
   const x = imageAreaCenterX - viewportCenterX
 
-  console.log('targetimagetransform-values', { panelMaxWidth, panelGapMax })
+  // console.log('targetimagetransform-values', { panelMaxWidth, panelGapMax })
   // Scale from full viewport height to image area height
   const scale = imageAreaHeight / viewportHeight
 
-  console.log('Calculated transform:', {
-    x,
-    scale,
-    imageAreaHeight,
-    imageAreaWidth,
-    imageAreaMaxHeight
-  })
-
+  // console.log('Calculated transform:', {
+  //   x,
+  //   scale,
+  //   imageAreaHeight,
+  //   imageAreaWidth,
+  //   imageAreaMaxHeight
+  // })
+  //
   return { x, scale }
 }
 
@@ -256,7 +256,7 @@ export default function Stage(props: {
 
       // Position current image based on mode
       if (props.mode === 'expanded-with-info') {
-        console.log('exapndedewithinfoCEHCK')
+        // console.log('exapndedewithinfoCEHCK')
         // In info mode: CSS handles positioning, GSAP only sets scale
         // Clear x/y transforms to let CSS take over
         const { x, scale } = getImageTargetTransform()
@@ -295,7 +295,7 @@ export default function Stage(props: {
     const infoTransform = hasInfo ? getImageTargetTransform() : { x: 0, scale: 1 }
 
     if (props.currentImageInfo()) {
-      console.log('current has image info')
+      // console.log('current has image info')
       const { x, scale } = getImageTargetTransform()
     }
 
