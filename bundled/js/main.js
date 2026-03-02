@@ -1627,7 +1627,7 @@ function useState() {
 }
 var _tmpl$ = /* @__PURE__ */ template(`<div>Error`);
 const container = document.getElementsByClassName("container")[0];
-const Desktop = lazy(async () => await __vitePreload(() => import("./zuI2ld.js"), true ? [] : void 0));
+const Desktop = lazy(async () => await __vitePreload(() => import("./CjgBwE.js"), true ? [] : void 0));
 const Mobile = lazy(async () => await __vitePreload(() => import("./CErZb-.js"), true ? [] : void 0));
 function Main() {
   const [ijs] = createResource(getImageJSON);

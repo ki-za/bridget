@@ -364,18 +364,7 @@ function getImageTargetTransform() {
   const imageAreaCenterX = imageAreaLeft + imageAreaWidth / 2;
   const viewportCenterX = viewportWidth / 2;
   const x = imageAreaCenterX - viewportCenterX;
-  console.log("targetimagetransform-values", {
-    panelMaxWidth,
-    panelGapMax
-  });
   const scale = imageAreaHeight / viewportHeight;
-  console.log("Calculated transform:", {
-    x,
-    scale,
-    imageAreaHeight,
-    imageAreaWidth,
-    imageAreaMaxHeight
-  });
   return {
     x,
     scale
@@ -452,12 +441,10 @@ function Stage(props) {
         opacity: 0
       });
       if (props.mode === "expanded-with-info") {
-        console.log("exapndedewithinfoCEHCK");
         const {
           x,
           scale
         } = getImageTargetTransform();
-        console.time("expand-animation");
         _gsap.set(elc, {
           x,
           y: 0,
@@ -488,7 +475,6 @@ function Stage(props) {
       scale: 1
     };
     if (props.currentImageInfo()) {
-      console.log("current has image info");
       getImageTargetTransform();
     }
     hires(getImagesFromIndexes(imgs, [elcIndex, getPrevElIndex(_cordHist, _state), getNextElIndex(_cordHist, _state)]));

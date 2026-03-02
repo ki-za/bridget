@@ -260,7 +260,6 @@ export default function Stage(props: {
         // In info mode: CSS handles positioning, GSAP only sets scale
         // Clear x/y transforms to let CSS take over
         const { x, scale } = getImageTargetTransform()
-        console.time('expand-animation')
         _gsap.set(elc, {
           x: x,
           y: 0,
