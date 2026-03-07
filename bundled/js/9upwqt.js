@@ -414,7 +414,7 @@ function Stage(props) {
     const elsTrail = getImagesFromIndexes(imgs, trailElsIndex);
     const _isOpen = props.isOpen();
     const _state = state();
-    if (props.mode === "trail") _gsap.set(elsTrail, {
+    _gsap.set(elsTrail, {
       x: (i) => _cordHist[i].x - window.innerWidth / 2,
       y: (i) => _cordHist[i].y - window.innerHeight / 2,
       opacity: (i) => Math.max((i + 1 + _state.trailLength <= _cordHist.length ? 0 : 1) - (_isOpen ? 1 : 0), 0),
@@ -424,6 +424,13 @@ function Stage(props) {
     if (_isOpen) {
       const currentIndex = getCurrentElIndex(_cordHist);
       const elc = imgs[currentIndex];
+      imgs.forEach((img, idx) => {
+        if (idx !== currentIndex) {
+          _gsap.set(img, {
+            opacity: 0
+          });
+        }
+      });
       const indexArrayToHires = [];
       const indexArrayToCleanup = [];
       switch (props.navVector()) {
