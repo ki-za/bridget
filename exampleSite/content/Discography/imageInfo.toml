@@ -1,182 +1,306 @@
-
 ["1.jpg"]
-artistName = "Alex Webb"
-artistLink = "https://alexwebb.com"
-projectName = "Istanbul: City of a Hundred Names"
-releaseYear = 2007
-projectContributionTags = ["photographer", "author"]
-releasedBy = ["Aperture Foundation"]
-releasedByLink = "https://aperture.org"
-collaborators = ["Orhan Pamuk"]
-trackList = [
-  { name = "The Golden Horn", contributionTags = [
-    "photographed",
-    "composed",
-  ] },
-  { name = "Galata Bridge Chronicles", contributionTags = [
-    "photographed",
-    "edited",
-  ] },
-  { name = "Byzantine Echoes", contributionTags = [
-    "photographed",
-  ] },
-]
+artistName = "Finlay"
+artistLink = "https://open.spotify.com/artist/4nCrmx2lubowcRdrXefd1W"
+projectName = "Self & Others"
+spotifyLink = "https://open.spotify.com/album/6GrKuZfwFVjNp6MwhxVeFH"
+appleMusicLink = "https://music.apple.com/us/album/self-others-ep/1527294208"
+releaseYear = 2020
+projectContributionTags = ["producer"]
+releasedBy = ["Globe Town Records"]
+releasedByLink = "https://globetownrecords.com/"
+collaborators = ["Jonathan Quarmby"]
+trackList = [{ name = "Self & Others", contributionTags = ["producer"] }]
 
 ["2.jpg"]
-artistName = "Alex Webb"
-artistLink = "https://alexwebb.com"
-projectName = "The Suffering of Light"
-spotifyLink = "https://open.spotify.com/show/photography-talks"
-appleMusicLink = "https://podcasts.apple.com/podcast/photography-talks"
-releaseYear = 2011
-projectContributionTags = ["photographer", "curator"]
-releasedBy = ["Thames & Hudson"]
-releasedByLink = "https://thamesandhudson.com"
-collaborators = ["Rebecca Norris Webb", "Geoff Dyer"]
+artistName = "Tycho Jones"
+artistLink = "https://open.spotify.com/artist/040Wu7p6ehPK6ozMgKd5dm"
+projectName = "Tychonaut"
+spotifyLink = "https://open.spotify.com/album/5lNZWn92AKrC1U8TEI8GZ7"
+appleMusicLink = "https://music.apple.com/gb/album/tychonaut/1819819076"
+releaseYear = 2021
+projectContributionTags = ["producer"]
+releasedBy = ["Globe Town Records"]
+releasedByLink = "https://globetownrecords.com/"
+collaborators = ["Jonathan Quarmby", "tgwog"]
 trackList = [
-  { name = "Haiti: Aftershocks", contributionTags = [
-    "photographed",
-    "documented",
+  { name = "Level Head", contributionTags = [
+    "producer",
   ] },
-  { name = "Mexico: Border Crossings", contributionTags = [
-    "photographed",
-    "researched",
-  ] },
-  { name = "Turkey: Between Worlds", contributionTags = [
-    "photographed",
-    "curated",
+  { name = "Pseudo", contributionTags = [
+    "producer",
   ] },
 ]
 
 ["3.jpg"]
-artistName = "Alex Webb"
-projectName = "Memory City"
-releaseYear = 2014
-projectContributionTags = ["photographer", "storyteller"]
-collaborators = ["Rebecca Norris Webb"]
-releasedBy = ["Radius Books"]
-trackList = [
-  { name = "Rochester: Industrial Decline", contributionTags = [
-    "photographed",
-    "documented",
-  ] },
-  { name = "Kodak's Legacy", contributionTags = [
-    "photographed",
-    "archived",
-  ] },
-]
+artistName = "Truman"
+artistLink = "https://open.spotify.com/artist/6xl472PR9L4g5ITVPUm3V6"
+projectName = "Alligator"
+spotifyLink = "https://open.spotify.com/album/5jNpvejgRDEEs9TKLdwi2f"
+appleMusicLink = "https://music.apple.com/us/album/alligator-single/1537393809"
+releaseYear = 2020
+projectContributionTags = ["producer"]
+collaborators = ["Greg Freeman"]
+releasedBy = ["Polydor Records"]
+releasedByLink = "https://polydor.co.uk/"
+trackList = [{ name = "Alligator", contributionTags = ["producer"] }]
 
 ["4.jpg"]
-artistName = "Alex Webb"
-artistLink = "https://magnumphotos.com/photographer/alex-webb"
-projectName = "La Calle: Streetwork in Guatemala"
-spotifyLink = "https://open.spotify.com/show/documentary-photography"
-releaseYear = 1999
-projectContributionTags = ["photographer", "documentarian", "author"]
-releasedBy = ["University of New Mexico Press"]
-releasedByLink = "https://unmpress.com"
-collaborators = ["Rebecca Norris Webb"]
-trackList = [
-  { name = "Market Day in Chichicastenango", contributionTags = [
-    "photographed",
-    "documented",
-  ] },
-  { name = "Guatemala City Streets", contributionTags = [
-    "photographed",
-    "researched",
-  ] },
-  { name = "Highland Villages", contributionTags = [
-    "photographed",
-    "explored",
-  ] },
-]
+artistName = "Truman"
+artistLink = "https://open.spotify.com/artist/6xl472PR9L4g5ITVPUm3V6"
+projectName = "Memory"
+spotifyLink = "https://open.spotify.com/album/32qFt7ppmZcKXN7mFUQJb9"
+appleMusicLink = "https://music.apple.com/us/album/memory-single/1569900273"
+releaseYear = 2021
+projectContributionTags = ["producer"]
+releasedBy = ["Globe Town Records"]
+releasedByLink = "https://globetownrecords.com/"
+trackList = [{ name = "Memory", contributionTags = ["producer"] }]
 
 ["5.jpg"]
-artistName = "Alex Webb"
-artistLink = "https://magnumphotos.com/photographer/alex-webb"
-projectName = "Violet Isle"
-releaseYear = 2009
-projectContributionTags = ["photographer", "author"]
-releasedBy = ["Radius Books"]
-releasedByLink = "https://radiusbooks.org"
-collaborators = ["Rebecca Norris Webb"]
+artistName = "Tom Rasmussen"
+artistLink = "https://open.spotify.com/artist/1FWk2wt5rW1viTKVsPd4Gf"
+projectName = "Body Building"
+spotifyLink = "https://open.spotify.com/album/4Nk6hRlOPSVUiER6Ou43pZ"
+appleMusicLink = "https://music.apple.com/gb/album/body-building/1780382169"
+releaseYear = 2023
+projectContributionTags = ["writer", "producer"]
+releasedBy = ["Globe Town Records"]
+releasedByLink = "https://globetownrecords.com/"
+collaborators = ["Finlay Henderson", "Jonathan Quarmby"]
 trackList = [
-  { name = "Havana Nights", contributionTags = [
-    "photographed",
+  { name = "Fantasy Island Obsession", contributionTags = [
+    "producer",
   ] },
-  { name = "Caribbean Shadows", contributionTags = [
-    "photographed",
-    "curated",
+  { name = "Not Over It", contributionTags = [
+    "writer",
+    "producer",
   ] },
-  { name = "The Isle's Secrets", contributionTags = [
-    "photographed",
-    "documented",
+  { name = "Seth", contributionTags = [
+    "writer",
+    "producer",
+  ] },
+  { name = "This Is How We Walk on The Moon", contributionTags = [
+    "producer",
+  ] },
+  { name = "Joy", contributionTags = [
+    "writer",
+    "producer",
+  ] },
+  { name = "Dysphoria", contributionTags = [
+    "writer",
+    "producer",
+  ] },
+  { name = "Look At Me", contributionTags = [
+    "writer",
+    "producer",
   ] },
 ]
 
 ["6.jpg"]
-artistName = "Alex Webb"
-projectName = "Slant Rhymes"
-spotifyLink = "https://open.spotify.com/show/photo-dialogues"
-releaseYear = 2017
-projectContributionTags = ["photographer", "poet"]
-releasedBy = ["La Fábrica"]
-releasedByLink = "https://lafabrica.com"
-collaborators = ["Rebecca Norris Webb"]
+artistName = "Kinami"
+artistLink = "https://open.spotify.com/artist/5Zm3vMvLFPUji0Y2txuRdt"
+projectName = "Celebrity Posters"
+spotifyLink = "https://open.spotify.com/album/6c4o2twxsgWlovXfF6uBUW"
+appleMusicLink = "https://music.apple.com/us/album/celebrity-posters-single/1652615167"
+releaseYear = 2022
+projectContributionTags = ["writer", "producer"]
+releasedBy = ["Kinami"]
+releasedByLink = "https://open.spotify.com/artist/5Zm3vMvLFPUji0Y2txuRdt"
+collaborators = ["John Christopher Fee"]
 trackList = [
-  { name = "Parallel Journeys", contributionTags = [
-    "photographed",
-  ] },
-  { name = "Mirrored Streets", contributionTags = [
-    "photographed",
-    "composed",
+  { name = "Celebrity Posters", contributionTags = [
+    "writer",
+    "producer",
   ] },
 ]
 
 ["7.jpg"]
-artistName = "Alex Webb"
-artistLink = "https://alexwebb.com"
-projectName = "Brooklyn: The City Within"
-releaseYear = 2019
-projectContributionTags = ["photographer"]
-releasedBy = ["Aperture Foundation"]
-releasedByLink = "https://aperture.org"
-collaborators = ["Rebecca Norris Webb"]
+artistName = "SUNNY ONLY 1"
+artistLink = "https://open.spotify.com/artist/1PcuXbYDyLM8zEsZT1EQtc"
+projectName = "so what?"
+spotifyLink = "https://open.spotify.com/album/37XuDYvrQvP0uncB0mxmOb"
+appleMusicLink = "https://music.apple.com/gb/album/so-what-single/1683173792"
+releaseYear = 2023
+projectContributionTags = ["writer", "producer"]
+releasedBy = ["ASOBI SYSTEM"]
+releasedByLink = "https://asobisystem.com/en/"
+collaborators = ["John Christopher Fee"]
+trackList = [{ name = "so what?", contributionTags = ["writer", "producer"] }]
+
+["8.jpg"]
+artistName = "SUNNY ONLY 1"
+artistLink = "https://open.spotify.com/artist/1PcuXbYDyLM8zEsZT1EQtc"
+projectName = "WASH IT"
+spotifyLink = "https://open.spotify.com/album/2lhR8KI4TzL3EURFcsaTBj"
+appleMusicLink = "https://music.apple.com/gb/album/wash-it-single/1699743511"
+releaseYear = 2023
+projectContributionTags = ["writer", "producer"]
+releasedBy = ["ASOBI SYSTEM"]
+releasedByLink = "https://asobisystem.com/en/"
+trackList = [{ name = "WASH IT", contributionTags = ["writer", "producer"] }]
+
+["9.jpg"]
+artistName = "Kinami"
+artistLink = "https://open.spotify.com/artist/5Zm3vMvLFPUji0Y2txuRdt"
+projectName = "Version of You"
+spotifyLink = "https://open.spotify.com/album/6ppDsGwiugL0WJHX2Fv4Tf"
+appleMusicLink = "https://music.apple.com/gb/album/version-of-you-single/1707136558"
+releaseYear = 2023
+projectContributionTags = ["writer", "producer"]
+releasedBy = ["Kinami"]
+releasedByLink = "https://open.spotify.com/artist/5Zm3vMvLFPUji0Y2txuRdt"
 trackList = [
-  { name = "Coney Island Tides", contributionTags = [
-    "photographed",
-  ] },
-  { name = "Borough Reflections", contributionTags = [
-    "photographed",
-    "curated",
-  ] },
-  { name = "Under the El", contributionTags = [
-    "photographed",
-    "interpreted",
+  { name = "Version of You", contributionTags = [
+    "writer",
+    "producer",
   ] },
 ]
 
-["8.jpg"]
-artistName = "Alex Webb"
-artistLink = "https://magnumphotos.com/photographer/alex-webb"
-projectName = "The City of Gardens"
-spotifyLink = "https://open.spotify.com/show/urban-narratives"
-appleMusicLink = "https://podcasts.apple.com/urban-narratives"
+["10.jpg"]
+artistName = "Tycho Jones"
+artistLink = "https://open.spotify.com/artist/040Wu7p6ehPK6ozMgKd5dm"
+projectName = "Negative Space"
+spotifyLink = "https://open.spotify.com/album/3VbGauJnEye8O4j2EbpDAe"
+appleMusicLink = "https://music.apple.com/us/album/negative-space-single/1792023083"
 releaseYear = 2023
-projectContributionTags = ["photographer", "urban researcher"]
-releasedBy = ["Thames & Hudson"]
-releasedByLink = "https://thamesandhudson.com"
-collaborators = ["Urban Botanical Institute"]
+projectContributionTags = ["producer"]
+releasedBy = ["Globe Town Records"]
+releasedByLink = "https://globetownrecords.com/"
+collaborators = ["Finlay Henderson", "Jonathan Quarmby"]
+trackList = [{ name = "Pink + Blue", contributionTags = ["producer"] }]
+
+["11.jpg"]
+artistName = "SUNNY ONLY 1"
+artistLink = "https://open.spotify.com/artist/1PcuXbYDyLM8zEsZT1EQtc"
+projectName = "Electric Drive"
+spotifyLink = "https://open.spotify.com/album/6mMAhTM5gJDjobDYdLOM3v"
+appleMusicLink = "https://music.apple.com/gb/album/electric-drive/1761157535"
+releaseYear = 2024
+projectContributionTags = ["writer", "producer", "mixer"]
+releasedBy = ["ASOBI SYSTEM"]
+releasedByLink = "https://asobisystem.com/en/"
+collaborators = [
+  "YINYO",
+  "DALU",
+  "Kohki",
+  "Nao Kawamura",
+  "Hirota Sugawara",
+  "Tycho Jones",
+]
 trackList = [
-  { name = "Flora of the Streets", contributionTags = [
-    "photographed",
-    "archived",
+  { name = "Utopia", contributionTags = [
+    "writer",
+    "producer",
+    "mixer",
   ] },
-  { name = "Concrete Botanics", contributionTags = [
-    "photographed",
-    "researched",
+  { name = "100%", contributionTags = [
+    "writer",
+    "producer",
+    "mixer",
   ] },
-  { name = "Garden Walls", contributionTags = [
-    "photographed",
+  { name = "BOUNCE", contributionTags = [
+    "writer",
+    "producer",
+    "mixer",
+  ] },
+  { name = "Natural Born Killer%", contributionTags = [
+    "writer",
+    "producer",
+    "mixer",
+  ] },
+  { name = "Roller Coaster Girl", contributionTags = [
+    "writer",
+    "producer",
+    "mixer",
+  ] },
+  { name = "諸行無常", contributionTags = [
+    "writer",
+    "producer",
+    "mixer",
+  ] },
+  { name = "Energy", contributionTags = [
+    "writer",
+    "producer",
+    "mixer",
+  ] },
+  { name = "Take Me With You", contributionTags = [
+    "writer",
+    "producer",
+    "mixer",
   ] },
 ]
+
+["12.jpg"]
+artistName = ["Kinami & KUNIKO"]
+artistLink = "https://open.spotify.com/artist/5Zm3vMvLFPUji0Y2txuRdt"
+projectName = "ARAHA YUNTA"
+spotifyLink = "https://open.spotify.com/album/2IxW9eKTyjmllCWVCSQ9ts"
+appleMusicLink = "https://music.apple.com/gb/album/araha-yunta-single/1773010168"
+releaseYear = 2024
+projectContributionTags = ["producer"]
+releasedBy = ["Bigknot Records"]
+releasedByLink = "https://www.instagram.com/bigknot_records/?hl=en"
+collaborators = ["HARIKUYAMAKU"]
+trackList = [{ name = "ARAHA YUNTA", contributionTags = ["producer"] }]
+
+["13.jpg"]
+artistName = "Tom Rasmussen"
+artistLink = "https://open.spotify.com/artist/1FWk2wt5rW1viTKVsPd4Gf"
+projectName = "Live Wire"
+spotifyLink = "https://open.spotify.com/album/2e2BL8KVYFFPve2vtCmO4l"
+appleMusicLink = "https://music.apple.com/gb/album/live-wire/1766527095"
+releaseYear = 2024
+projectContributionTags = ["writer", "violinist"]
+releasedBy = ["Globe Town Records"]
+releasedByLink = "https://globetownrecords.com/"
+collaborators = ["Finlay Henderson", "Jonathan Quarmby"]
+trackList = [
+  { name = "Nobody's Love", contributionTags = [
+    "writer",
+  ] },
+  { name = "Nature Of The Clock", contributionTags = [
+    "violinist",
+  ] },
+]
+
+["14.jpg"]
+artistName = "Kinami"
+artistLink = "https://open.spotify.com/artist/5Zm3vMvLFPUji0Y2txuRdt"
+projectName = "HARANBANJO"
+spotifyLink = "https://open.spotify.com/album/0wA2m6EHOEXhz5B1OH0IHw"
+appleMusicLink = "https://music.apple.com/us/album/haranbanjo-ep/1838957478"
+releaseYear = 2025
+projectContributionTags = ["writer", "producer", "mixer"]
+releasedBy = ["Kinami"]
+releasedByLink = "https://open.spotify.com/artist/5Zm3vMvLFPUji0Y2txuRdt"
+collaborators = ["Charlie Kurata", "TOSH", "Alejandro Espinosa"]
+trackList = [
+  { name = "HOMEWRECKER", contributionTags = [
+    "writer",
+    "producer",
+    "mixer",
+  ] },
+  { name = "mmm", contributionTags = [
+    "mixer",
+  ] },
+  { name = "Dream A Little Dream For Me", contributionTags = [
+    "producer",
+    "mixer",
+  ] },
+  { name = "Glimmer", contributionTags = [
+    "writer",
+    "producer",
+  ] },
+]
+
+["15.jpg"]
+artistName = "Grace Aimi"
+artistLink = "https://open.spotify.com/artist/2m3H3Dr0tGC1Fdmq4AV3iX"
+projectName = "Genjitsu Tohi"
+spotifyLink = "https://open.spotify.com/album/0KQDVchjxr5eUBtApF2QkQ"
+appleMusicLink = "https://music.apple.com/gb/album/genjitsu-tohi-single/1854699152"
+releaseYear = 2025
+projectContributionTags = ["producer"]
+releasedBy = ["Grace Aimi"]
+releasedByLink = "https://open.spotify.com/artist/2m3H3Dr0tGC1Fdmq4AV3iX"
+trackList = [{ name = "Genjitsu Tohi", contributionTags = ["producer"] }]
