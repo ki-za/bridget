@@ -113,16 +113,39 @@
     opacity var(--transition-fast);
 }
 
-.tag:nth-child(4n + 1) {
+/* Tag colors based on text content, not position */
+.tag[data-tag='producer'] {
   background: var(--tag-color-1-bauhaus);
 }
-.tag:nth-child(4n + 2) {
+.tag[data-tag='writer'] {
   background: var(--tag-color-2-bauhaus);
 }
-.tag:nth-child(4n + 3) {
+.tag[data-tag='mixer'] {
   background: var(--tag-color-3-bauhaus);
 }
-.tag:nth-child(4n + 4) {
+.tag[data-tag='violinist'] {
+  background: var(--tag-color-4-bauhaus);
+}
+
+/* Fallback nth-child for any unknown tags */
+.tag:not([data-tag='producer']):not([data-tag='writer']):not([data-tag='mixer']):not(
+    [data-tag='violinist']
+  ):nth-child(4n + 1) {
+  background: var(--tag-color-1-bauhaus);
+}
+.tag:not([data-tag='producer']):not([data-tag='writer']):not([data-tag='mixer']):not(
+    [data-tag='violinist']
+  ):nth-child(4n + 2) {
+  background: var(--tag-color-2-bauhaus);
+}
+.tag:not([data-tag='producer']):not([data-tag='writer']):not([data-tag='mixer']):not(
+    [data-tag='violinist']
+  ):nth-child(4n + 3) {
+  background: var(--tag-color-3-bauhaus);
+}
+.tag:not([data-tag='producer']):not([data-tag='writer']):not([data-tag='mixer']):not(
+    [data-tag='violinist']
+  ):nth-child(4n + 4) {
   background: var(--tag-color-4-bauhaus);
 }
 
