@@ -207,6 +207,7 @@ export default function Stage(props: {
   const setPosition: () => void = () => {
     if (!mounted) return
     if (imgs.length === 0) return
+    // if (props.isAnimating()) return
     const _cordHist = props.cordHist()
     const trailElsIndex = getTrailElsIndex(_cordHist)
     if (trailElsIndex.length === 0) return
@@ -217,24 +218,46 @@ export default function Stage(props: {
     const _state = state()
 
     // Trail mode positioning
-    if (props.mode === 'trail')
-      _gsap.set(elsTrail, {
-        x: (i: number) => _cordHist[i].x - window.innerWidth / 2,
-        y: (i: number) => _cordHist[i].y - window.innerHeight / 2,
-        opacity: (i: number) =>
-          Math.max(
-            (i + 1 + _state.trailLength <= _cordHist.length ? 0 : 1) -
-              (_isOpen ? 1 : 0),
-            0
-          ),
-        zIndex: (i: number) => i,
-        scale: 0.6
-      })
 
+    _gsap.set(elsTrail, {
+      x: (i: number) => _cordHist[i].x - window.innerWidth / 2,
+      y: (i: number) => _cordHist[i].y - window.innerHeight / 2,
+      opacity: (i: number) =>
+        Math.max(
+          (i + 1 + _state.trailLength <= _cordHist.length ? 0 : 1) - (_isOpen ? 1 : 0),
+          0
+        ),
+      zIndex: (i: number) => i,
+      scale: 0.6
+    })
+    // if (props.mode === 'trail') {
+    //   // First hide ALL images to clean up any stale state
+    //   _gsap.set(imgs, { opacity: 0 })
+    //   // Then position and show trail images
+    //   _gsap.set(elsTrail, {
+    //     x: (i: number) => _cordHist[i].x - window.innerWidth / 2,
+    //     y: (i: number) => _cordHist[i].y - window.innerHeight / 2,
+    //     opacity: (i: number) =>
+    //       Math.max(
+    //         (i + 1 + _state.trailLength <= _cordHist.length ? 0 : 1) -
+    //           (_isOpen ? 1 : 0),
+    //         0
+    //       ),
+    //     zIndex: (i: number) => i,
+    //     scale: 0.6
+    //   })
+    // }
     // Expanded modes (with or without info)
     if (_isOpen) {
       const currentIndex = getCurrentElIndex(_cordHist)
       const elc = imgs[currentIndex]
+
+      // Hide all non-current images to prevent background flash
+      imgs.forEach((img, idx) => {
+        if (idx !== currentIndex) {
+          _gsap.set(img, { opacity: 0 })
+        }
+      })
 
       // Preload adjacent images
       const indexArrayToHires: number[] = []
@@ -251,24 +274,31 @@ export default function Stage(props: {
         default:
           break
       }
+
       hires(getImagesFromIndexes(imgs, indexArrayToHires)) // preload
       _gsap.set(getImagesFromIndexes(imgs, indexArrayToCleanup), { opacity: 0 })
 
-      // Position current image based on mode
+      // Position current image
       if (props.mode === 'expanded-with-info') {
-        // console.log('exapndedewithinfoCEHCK')
-        // In info mode: CSS handles positioning, GSAP only sets scale
-        // Clear x/y transforms to let CSS take over
         const { x, scale } = getImageTargetTransform()
-        _gsap.set(elc, {
-          x: x,
-          y: 0,
-          scale: scale
-        })
+        _gsap.set(elc, { x, y: 0, scale })
       } else {
-        // Regular expanded mode: GSAP centers the image
         _gsap.set(elc, { x: 0, y: 0, scale: 1 })
       }
+      // // Position current image based on mode
+      // if (props.mode === 'expanded-with-info') {
+      //   // In info mode: CSS handles positioning, GSAP only sets scale
+      //   // Clear x/y transforms to let CSS take over
+      //   const { x, scale } = getImageTargetTransform()
+      //   _gsap.set(elc, {
+      //     x: x,
+      //     y: 0,
+      //     scale: scale
+      //   })
+      // } else {
+      //   // Regular expanded mode: GSAP centers the image
+      //   _gsap.set(elc, { x: 0, y: 0, scale: 1 })
+      // }
 
       setLoaderForHiresImage(elc) // set loader, if loaded set current opacity to 1
     } else {
