@@ -94,7 +94,7 @@ export default function MobileImageInfoPanel(props: { info?: ImageInfo }): JSX.E
               <section class="track-list">
                 <h4 class="section-label">Tracks</h4>
                 <div class="track-items">
-                  <For each={info().trackList!.slice(0, 3)}>
+                  <For each={info().trackList}>
                     {(track) => (
                       <div class="track-item">
                         <span class="track-name">{track.name}</span>
@@ -102,13 +102,6 @@ export default function MobileImageInfoPanel(props: { info?: ImageInfo }): JSX.E
                     )}
                   </For>
                 </div>
-
-                {/* Show All Button */}
-                <Show when={(info().trackList?.length || 0) > 3}>
-                  <button class="track-show-more" onClick={openTrackModal}>
-                    Show All Tracks ({info().trackList!.length})
-                  </button>
-                </Show>
               </section>
             </Show>
 
