@@ -222,7 +222,7 @@
 }
 
 .section-label {
-  display: inline-block;
+  display: inline;
   font-size: var(--panel-label-size);
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
@@ -281,6 +281,30 @@
   flex-direction: column;
   margin-bottom: var(--md);
   margin-top: var(--xs);
+  max-height: 20.3vh;
+  overflow-y: auto;
+
+  /* Subtle scrollbar matching panel theme */
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.12);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.22);
+  }
+
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
 }
 
 .track-item {

@@ -19,17 +19,23 @@ export interface TrackInfo {
 
 // data structure for project/album/series metadata
 export interface ImageInfo {
-  artistName: string // "Alex Webb"
-  artistLink: string // "https://alexwebb.com"
+  artistName: string | string[] // "Alex Webb" or ["Artist A", "Artist B"]
+  artistLink?: string | string[] // "https://..." or ["https://a.com", "https://b.com"]
   projectName: string // "Istanbul: City of a Hundred Names"
   spotifyLink?: string // "https://open.spotify.com/..."
   appleMusicLink?: string // "https://podcasts.apple.com/..."
   releaseYear: number // 2007
   projectContributionTags?: string[] // ["photographer", "author"]
-  releasedBy?: string[] // ["Aperture Foundation"]
-  releasedByLink: string // "https://aperture.org"
+  releasedBy?: string[] // ["Aperture Foundation", "Label B"]
+  releasedByLink?: string | string[] // ["https://aperture.org", "https://b.com"]
   collaborators?: string[] // ["Orhan Pamuk"]
   trackList?: TrackInfo[] // Array of tracks/sections
+}
+
+// Normalize a value that may be a string or string[] into a string[]
+export function toArray(value: string | string[] | undefined): string[] {
+  if (value === undefined) return []
+  return Array.isArray(value) ? value : [value]
 }
 
 export async function getImageJSON(): Promise<ImageJSON[]> {

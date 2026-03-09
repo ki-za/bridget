@@ -194,13 +194,13 @@ content/
 
 ```toml
 ["1.jpg"]                           # Must match image filename exactly
-artistName = "Alex Webb"            # Required
-artistLink = "https://alexwebb.com" # Optional
+artistName = "Alex Webb"            # Required (string or array of strings ["alexweb1", "another-name"])
+artistLink = "https://alexwebb.com" # Optional (string or array, parallel with artistName)
 projectName = "Istanbul: City of a Hundred Names"  # Required
 releaseYear = 2007                 # Required
 projectContributionTags = ["photographer", "author"]  # Optional
 releasedBy = ["Aperture Foundation"]  # Optional
-releasedByLink = "https://aperture.org"  # Optional
+releasedByLink = ["https://aperture.org"]  # Optional (array, parallel with releasedBy)
 collaborators = ["Orhan Pamuk"]    # Optional
 spotifyLink = "https://..."         # Optional - shows music icon
 appleMusicLink = "https://..."      # Optional - shows Apple Music icon
@@ -212,29 +212,40 @@ trackList = [
 ]
 ```
 
+##### Multiple Artists / Publishers
+
+To link multiple artists or publishers, use parallel arrays where each index corresponds:
+
+```toml
+["collab.jpg"]
+artistName = ["Artist A", "Artist B"]
+artistLink = ["https://a.com", "https://b.com"]
+releasedBy = ["Label A", "Label B"]
+releasedByLink = ["https://labela.com", "https://labelb.com"]
+```
+
+Single strings are also supported.
+
+```toml
+artistName = "Solo Artist"          # works the same as ["Solo Artist"]
+artistLink = "https://solo.com"     # works the same as ["https://solo.com"]
+```
+
 #### Available Fields
 
-| Field                     | Type   | Required | Description                                 |
-| ------------------------- | ------ | -------- | ------------------------------------------- |
-| `artistName`              | string | Yes      | Artist/photographer name                    |
-| `artistLink`              | string | No       | URL to artist's website                     |
-| `projectName`             | string | Yes      | Name of the project/collection              |
-| `releaseYear`             | number | Yes      | Year of release/publication                 |
-| `projectContributionTags` | array  | No       | Tags describing your role                   |
-| `releasedBy`              | array  | No       | Publisher/organization                      |
-| `releasedByLink`          | string | No       | URL to publisher                            |
-| `collaborators`           | array  | No       | List of collaborators                       |
-| `spotifyLink`             | string | No       | Spotify podcast/show link                   |
-| `appleMusicLink`          | string | No       | Apple Music podcast link                    |
-| `trackList`               | array  | No       | List of tracks/items with contribution tags |
-
-#### Track List
-
-When `trackList` is present:
-
-- Shows a "View All" button in the info panel
-- Tapping opens a modal with all track items
-- Each track can have `name` and `contributionTags`
+| Field                     | Type            | Required | Description                                           |
+| ------------------------- | --------------- | -------- | ----------------------------------------------------- |
+| `artistName`              | string \| array | Yes      | Artist name(s)                                        |
+| `artistLink`              | string \| array | No       | URL(s) to artist website(s), parallel with artistName |
+| `projectName`             | string          | Yes      | Name of the project/collection                        |
+| `releaseYear`             | number          | Yes      | Year of release/publication                           |
+| `projectContributionTags` | array           | No       | Tags describing your role                             |
+| `releasedBy`              | array           | No       | Publisher(s)/organization(s)                          |
+| `releasedByLink`          | string \| array | No       | URL(s) to publisher(s), parallel with releasedBy      |
+| `collaborators`           | array           | No       | List of collaborators                                 |
+| `spotifyLink`             | string          | No       | Spotify podcast/show link                             |
+| `appleMusicLink`          | string          | No       | Apple Music podcast link                              |
+| `trackList`               | array           | No       | List of tracks/items with contribution tags           |
 
 ### Favicon
 

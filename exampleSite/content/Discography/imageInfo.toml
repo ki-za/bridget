@@ -7,7 +7,7 @@ appleMusicLink = "https://music.apple.com/us/album/self-others-ep/1527294208"
 releaseYear = 2020
 projectContributionTags = ["producer"]
 releasedBy = ["Globe Town Records"]
-releasedByLink = "https://globetownrecords.com/"
+releasedByLink = ["https://globetownrecords.com/"]
 collaborators = ["Jonathan Quarmby"]
 trackList = [{ name = "Self & Others", contributionTags = ["producer"] }]
 
@@ -20,7 +20,7 @@ appleMusicLink = "https://music.apple.com/gb/album/tychonaut/1819819076"
 releaseYear = 2021
 projectContributionTags = ["producer"]
 releasedBy = ["Globe Town Records"]
-releasedByLink = "https://globetownrecords.com/"
+releasedByLink = ["https://globetownrecords.com/"]
 collaborators = ["Jonathan Quarmby", "tgwog"]
 trackList = [
   { name = "Level Head", contributionTags = [
@@ -41,7 +41,7 @@ releaseYear = 2020
 projectContributionTags = ["producer"]
 collaborators = ["Greg Freeman"]
 releasedBy = ["Polydor Records"]
-releasedByLink = "https://polydor.co.uk/"
+releasedByLink = ["https://polydor.co.uk/"]
 trackList = [{ name = "Alligator", contributionTags = ["producer"] }]
 
 ["4.jpg"]
@@ -53,7 +53,7 @@ appleMusicLink = "https://music.apple.com/us/album/memory-single/1569900273"
 releaseYear = 2021
 projectContributionTags = ["producer"]
 releasedBy = ["Globe Town Records"]
-releasedByLink = "https://globetownrecords.com/"
+releasedByLink = ["https://globetownrecords.com/"]
 trackList = [{ name = "Memory", contributionTags = ["producer"] }]
 
 ["5.jpg"]
@@ -65,7 +65,7 @@ appleMusicLink = "https://music.apple.com/gb/album/body-building/1780382169"
 releaseYear = 2023
 projectContributionTags = ["writer", "producer"]
 releasedBy = ["Globe Town Records"]
-releasedByLink = "https://globetownrecords.com/"
+releasedByLink = ["https://globetownrecords.com/"]
 collaborators = ["Finlay Henderson", "Jonathan Quarmby"]
 trackList = [
   { name = "Fantasy Island Obsession", contributionTags = [
@@ -105,7 +105,7 @@ appleMusicLink = "https://music.apple.com/us/album/celebrity-posters-single/1652
 releaseYear = 2022
 projectContributionTags = ["writer", "producer"]
 releasedBy = ["Kinami"]
-releasedByLink = "https://open.spotify.com/artist/5Zm3vMvLFPUji0Y2txuRdt"
+releasedByLink = ["https://open.spotify.com/artist/5Zm3vMvLFPUji0Y2txuRdt"]
 collaborators = ["John Christopher Fee"]
 trackList = [
   { name = "Celebrity Posters", contributionTags = [
@@ -123,7 +123,7 @@ appleMusicLink = "https://music.apple.com/gb/album/so-what-single/1683173792"
 releaseYear = 2023
 projectContributionTags = ["writer", "producer"]
 releasedBy = ["ASOBI SYSTEM"]
-releasedByLink = "https://asobisystem.com/en/"
+releasedByLink = ["https://asobisystem.com/en/"]
 collaborators = ["John Christopher Fee"]
 trackList = [{ name = "so what?", contributionTags = ["writer", "producer"] }]
 
@@ -136,7 +136,7 @@ appleMusicLink = "https://music.apple.com/gb/album/wash-it-single/1699743511"
 releaseYear = 2023
 projectContributionTags = ["writer", "producer"]
 releasedBy = ["ASOBI SYSTEM"]
-releasedByLink = "https://asobisystem.com/en/"
+releasedByLink = ["https://asobisystem.com/en/"]
 trackList = [{ name = "WASH IT", contributionTags = ["writer", "producer"] }]
 
 ["9.jpg"]
@@ -148,7 +148,7 @@ appleMusicLink = "https://music.apple.com/gb/album/version-of-you-single/1707136
 releaseYear = 2023
 projectContributionTags = ["writer", "producer"]
 releasedBy = ["Kinami"]
-releasedByLink = "https://open.spotify.com/artist/5Zm3vMvLFPUji0Y2txuRdt"
+releasedByLink = ["https://open.spotify.com/artist/5Zm3vMvLFPUji0Y2txuRdt"]
 trackList = [
   { name = "Version of You", contributionTags = [
     "writer",
@@ -165,7 +165,7 @@ appleMusicLink = "https://music.apple.com/us/album/negative-space-single/1792023
 releaseYear = 2023
 projectContributionTags = ["producer"]
 releasedBy = ["Globe Town Records"]
-releasedByLink = "https://globetownrecords.com/"
+releasedByLink = ["https://globetownrecords.com/"]
 collaborators = ["Finlay Henderson", "Jonathan Quarmby"]
 trackList = [{ name = "Pink + Blue", contributionTags = ["producer"] }]
 
@@ -178,7 +178,7 @@ appleMusicLink = "https://music.apple.com/gb/album/electric-drive/1761157535"
 releaseYear = 2024
 projectContributionTags = ["writer", "producer", "mixer"]
 releasedBy = ["ASOBI SYSTEM"]
-releasedByLink = "https://asobisystem.com/en/"
+releasedByLink = ["https://asobisystem.com/en/"]
 collaborators = [
   "YINYO",
   "DALU",
@@ -231,15 +231,18 @@ trackList = [
 ]
 
 ["12.jpg"]
-artistName = ["Kinami & KUNIKO"]
-artistLink = "https://open.spotify.com/artist/5Zm3vMvLFPUji0Y2txuRdt"
+artistName = ["Kinami", "KUNIKO"]
+artistLink = [
+  "https://open.spotify.com/artist/5Zm3vMvLFPUji0Y2txuRdt",
+  "https://open.spotify.com/artist/4iNNntfP8V0DC4hffbkpUO",
+]
 projectName = "ARAHA YUNTA"
 spotifyLink = "https://open.spotify.com/album/2IxW9eKTyjmllCWVCSQ9ts"
 appleMusicLink = "https://music.apple.com/gb/album/araha-yunta-single/1773010168"
 releaseYear = 2024
 projectContributionTags = ["producer"]
 releasedBy = ["Bigknot Records"]
-releasedByLink = "https://www.instagram.com/bigknot_records/?hl=en"
+releasedByLink = ["https://www.instagram.com/bigknot_records/?hl=en"]
 collaborators = ["HARIKUYAMAKU"]
 trackList = [{ name = "ARAHA YUNTA", contributionTags = ["producer"] }]
 
@@ -252,7 +255,7 @@ appleMusicLink = "https://music.apple.com/gb/album/live-wire/1766527095"
 releaseYear = 2024
 projectContributionTags = ["writer", "violinist"]
 releasedBy = ["Globe Town Records"]
-releasedByLink = "https://globetownrecords.com/"
+releasedByLink = ["https://globetownrecords.com/"]
 collaborators = ["Finlay Henderson", "Jonathan Quarmby"]
 trackList = [
   { name = "Nobody's Love", contributionTags = [
@@ -272,7 +275,7 @@ appleMusicLink = "https://music.apple.com/us/album/haranbanjo-ep/1838957478"
 releaseYear = 2025
 projectContributionTags = ["writer", "producer", "mixer"]
 releasedBy = ["Kinami"]
-releasedByLink = "https://open.spotify.com/artist/5Zm3vMvLFPUji0Y2txuRdt"
+releasedByLink = ["https://open.spotify.com/artist/5Zm3vMvLFPUji0Y2txuRdt"]
 collaborators = ["Charlie Kurata", "TOSH", "Alejandro Espinosa"]
 trackList = [
   { name = "HOMEWRECKER", contributionTags = [
@@ -302,5 +305,5 @@ appleMusicLink = "https://music.apple.com/gb/album/genjitsu-tohi-single/18546991
 releaseYear = 2025
 projectContributionTags = ["producer"]
 releasedBy = ["Grace Aimi"]
-releasedByLink = "https://open.spotify.com/artist/2m3H3Dr0tGC1Fdmq4AV3iX"
+releasedByLink = ["https://open.spotify.com/artist/2m3H3Dr0tGC1Fdmq4AV3iX"]
 trackList = [{ name = "Genjitsu Tohi", contributionTags = ["producer"] }]
