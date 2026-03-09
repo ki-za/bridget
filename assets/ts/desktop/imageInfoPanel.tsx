@@ -10,6 +10,7 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
         const artistNames = createMemo(() => toArray(info().artistName))
         const artistLinks = createMemo(() => toArray(info().artistLink))
         const releasedByLinks = createMemo(() => toArray(info().releasedByLink))
+        const collaboratorLinks = createMemo(() => toArray(info().collaboratorLinks))
 
         return (
           <div class="panel-container">
@@ -136,7 +137,21 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
                         <For each={info().collaborators}>
                           {(collaborator, index) => (
                             <>
-                              <span class="collaborator">{collaborator}</span>
+                              <Show
+                                when={collaboratorLinks()[index()]}
+                                fallback={
+                                  <span class="collaborator">{collaborator}</span>
+                                }
+                              >
+                                <a
+                                  href={collaboratorLinks()[index()]}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  class="collaborator"
+                                >
+                                  {collaborator}
+                                </a>
+                              </Show>
                               <Show when={index() < info().collaborators!.length - 1}>
                                 {', '}
                               </Show>

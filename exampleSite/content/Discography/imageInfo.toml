@@ -9,6 +9,7 @@ projectContributionTags = ["producer"]
 releasedBy = ["Globe Town Records"]
 releasedByLink = ["https://globetownrecords.com/"]
 collaborators = ["Jonathan Quarmby"]
+collaboratorLinks = ["https://google.com"]
 trackList = [{ name = "Self & Others", contributionTags = ["producer"] }]
 
 ["2.jpg"]
@@ -167,6 +168,10 @@ projectContributionTags = ["producer"]
 releasedBy = ["Globe Town Records"]
 releasedByLink = ["https://globetownrecords.com/"]
 collaborators = ["Finlay Henderson", "Jonathan Quarmby"]
+collaboratorLinks = [
+  "https://finlayhenderson.com",
+  "https://jonathanquarmby.com",
+]
 trackList = [{ name = "Pink + Blue", contributionTags = ["producer"] }]
 
 ["11.jpg"]

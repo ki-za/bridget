@@ -202,6 +202,7 @@ projectContributionTags = ["photographer", "author"]  # Optional
 releasedBy = ["Aperture Foundation"]  # Optional
 releasedByLink = ["https://aperture.org"]  # Optional (array, parallel with releasedBy)
 collaborators = ["Orhan Pamuk"]    # Optional
+collaboratorLinks = ["https://orhanpamuk.com"]  # Optional (array, parallel with collaborators)
 spotifyLink = "https://..."         # Optional - shows music icon
 appleMusicLink = "https://..."      # Optional - shows Apple Music icon
 
@@ -212,9 +213,9 @@ trackList = [
 ]
 ```
 
-##### Multiple Artists / Publishers
+##### Multiple Artists / Publishers / Collaborators
 
-To link multiple artists or publishers, use parallel arrays where each index corresponds:
+To link multiple artists, publishers, or collaborators, use parallel arrays where each index corresponds:
 
 ```toml
 ["collab.jpg"]
@@ -222,30 +223,33 @@ artistName = ["Artist A", "Artist B"]
 artistLink = ["https://a.com", "https://b.com"]
 releasedBy = ["Label A", "Label B"]
 releasedByLink = ["https://labela.com", "https://labelb.com"]
+collaborators = ["Collab A", "Collab B"]
+collaboratorLinks = ["https://collab-a.com", "https://collab-b.com"]
 ```
 
-Single strings are also supported.
+Single strings are also supported for backward compatibility.
 
 ```toml
 artistName = "Solo Artist"          # works the same as ["Solo Artist"]
-artistLink = "https://solo.com"     # works the same as ["https://solo.com"]
+artistLink = "https://solo.com"    # works the same as ["https://solo.com"]
 ```
 
 #### Available Fields
 
-| Field                     | Type            | Required | Description                                           |
-| ------------------------- | --------------- | -------- | ----------------------------------------------------- |
-| `artistName`              | string \| array | Yes      | Artist name(s)                                        |
-| `artistLink`              | string \| array | No       | URL(s) to artist website(s), parallel with artistName |
-| `projectName`             | string          | Yes      | Name of the project/collection                        |
-| `releaseYear`             | number          | Yes      | Year of release/publication                           |
-| `projectContributionTags` | array           | No       | Tags describing your role                             |
-| `releasedBy`              | array           | No       | Publisher(s)/organization(s)                          |
-| `releasedByLink`          | string \| array | No       | URL(s) to publisher(s), parallel with releasedBy      |
-| `collaborators`           | array           | No       | List of collaborators                                 |
-| `spotifyLink`             | string          | No       | Spotify podcast/show link                             |
-| `appleMusicLink`          | string          | No       | Apple Music podcast link                              |
-| `trackList`               | array           | No       | List of tracks/items with contribution tags           |
+| Field                     | Type            | Required | Description                                            |
+| ------------------------- | --------------- | -------- | ------------------------------------------------------ |
+| `artistName`              | string \| array | Yes      | Artist name(s)                                         |
+| `artistLink`              | string \| array | No       | URL(s) to artist website(s), parallel with artistName  |
+| `projectName`             | string          | Yes      | Name of the project/collection                         |
+| `releaseYear`             | number          | Yes      | Year of release/publication                            |
+| `projectContributionTags` | array           | No       | Tags describing your role                              |
+| `releasedBy`              | array           | No       | Publisher(s)/organization(s)                           |
+| `releasedByLink`          | string \| array | No       | URL(s) to publisher(s), parallel with releasedBy       |
+| `collaborators`           | array           | No       | List of collaborators                                  |
+| `collaboratorLinks`       | string \| array | No       | URL(s) to collaborator(s), parallel with collaborators |
+| `spotifyLink`             | string          | No       | Spotify podcast/show link                              |
+| `appleMusicLink`          | string          | No       | Apple Music podcast link                               |
+| `trackList`               | array           | No       | List of tracks/items with contribution tags            |
 
 ### Favicon
 

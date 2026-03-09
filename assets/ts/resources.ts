@@ -29,6 +29,7 @@ export interface ImageInfo {
   releasedBy?: string[] // ["Aperture Foundation", "Label B"]
   releasedByLink?: string | string[] // ["https://aperture.org", "https://b.com"]
   collaborators?: string[] // ["Orhan Pamuk"]
+  collaboratorLinks?: string | string[] // ["https://orhanpamuk.com"] or parallel array
   trackList?: TrackInfo[] // Array of tracks/sections
 }
 

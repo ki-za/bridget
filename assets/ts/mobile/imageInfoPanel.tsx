@@ -22,6 +22,7 @@ export default function MobileImageInfoPanel(props: { info?: ImageInfo }): JSX.E
         const artistNames = createMemo(() => toArray(info().artistName))
         const artistLinks = createMemo(() => toArray(info().artistLink))
         const releasedByLinks = createMemo(() => toArray(info().releasedByLink))
+        const collaboratorLinks = createMemo(() => toArray(info().collaboratorLinks))
 
         return (
           <>
@@ -128,7 +129,18 @@ export default function MobileImageInfoPanel(props: { info?: ImageInfo }): JSX.E
                     <For each={info().collaborators}>
                       {(collaborator, index) => (
                         <>
-                          <span>{collaborator}</span>
+                          <Show
+                            when={collaboratorLinks()[index()]}
+                            fallback={<span>{collaborator}</span>}
+                          >
+                            <a
+                              href={collaboratorLinks()[index()]}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {collaborator}
+                            </a>
+                          </Show>
                           <Show when={index() < info().collaborators!.length - 1}>
                             {', '}
                           </Show>
