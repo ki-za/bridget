@@ -166,6 +166,7 @@ export default function Gallery(props: {
               setIndex(realIndex)
             })
             galleryLoadImages()
+            console.log('state index:', state().index, 'loads:', JSON.stringify(loads))
           })
           .catch((e) => {
             console.log(e)
