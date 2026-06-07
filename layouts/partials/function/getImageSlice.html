@@ -7,4 +7,4 @@
 {{- end -}}
 
 {{- $gallery := site.GetPage $Path -}}
-{{- return $gallery.Resources.ByType "image" | collections.Reverse -}}
+{{- return sort ($gallery.Resources.ByType "image") "Name" "desc" -}}
