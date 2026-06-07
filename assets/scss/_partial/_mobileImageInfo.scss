@@ -3,9 +3,7 @@
   background: white;
   color: black;
   padding: 1.25rem 1rem;
-  // No max-height - takes natural content height
 
-  // All links get underlines except buttons
   a {
     text-decoration: underline;
     color: inherit;
@@ -15,11 +13,11 @@
       opacity: 0.7;
     }
 
-    // Exception: button-style links don't get underlines
     &.link-button {
       text-decoration: none;
     }
   }
+
   .project-header {
     display: flex;
     flex-direction: column;
@@ -37,11 +35,8 @@
     flex-direction: row;
     gap: 0.5rem;
     align-self: flex-start;
+  }
 }
-
-// ============================================
-// Styles Below Apply Directly to .mobile-image-info
-// ============================================
 
 // Contribution Tags
 .contribution-tags {
@@ -65,19 +60,10 @@
   border-radius: 3px;
 }
 
-/* Tag colors based on text content, not position */
-.tag[data-tag='producer'] {
-  background: #5b7aa8;
-}
-.tag[data-tag='writer'] {
-  background: #7a9070;
-}
-.tag[data-tag='mixer'] {
-  background: #a8775b;
-}
-.tag[data-tag='violinist'] {
-  background: #8a70a8;
-}
+.tag[data-tag='producer'] { background: #5b7aa8; }
+.tag[data-tag='writer'] { background: #7a9070; }
+.tag[data-tag='mixer'] { background: #a8775b; }
+.tag[data-tag='violinist'] { background: #8a70a8; }
 
 .project-name {
   font-size: 1.5rem;
@@ -144,10 +130,6 @@
   }
 }
 
-// ============================================
-// Track List
-// ============================================
-
 .track-list {
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
@@ -160,7 +142,6 @@
   letter-spacing: 0.05em;
   color: rgba(0, 0, 0, 0.5);
   margin: 0 0 0.75rem 0;
-
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial,
     sans-serif;
@@ -188,7 +169,6 @@
   font-size: 0.9375rem;
   line-height: 1.4;
   display: block;
-
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial,
     sans-serif;
@@ -231,10 +211,6 @@
   }
 }
 
-// ============================================
-// Metadata Items (Collaborators, Released By)
-// ============================================
-
 .metadata-item {
   margin-bottom: 1.25rem;
 
@@ -251,7 +227,6 @@
   font-size: 0.9375rem;
   line-height: 1.5;
   margin: 0;
-
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial,
     sans-serif;
@@ -265,10 +240,6 @@
     }
   }
 }
-
-// ============================================
-// Track Modal
-// ============================================
 
 .track-modal-overlay {
   position: fixed;
@@ -284,12 +255,8 @@
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .track-modal {
@@ -304,12 +271,8 @@
 }
 
 @keyframes slideUp {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
 }
 
 .track-modal-header {
@@ -384,29 +347,14 @@
   margin-top: 0.5rem;
 }
 
-// ============================================
-// Very Small Screens (<375px)
-// ============================================
-
 @media (max-width: 374px) {
-  .project-header {
-    flex-direction: column;
-  }
-
-  .project-name {
-    font-size: 1.25rem;
-  }
-
-  .artist-name {
-    font-size: 1rem;
-  }
-
-  .external-links {
-    flex-direction: row;
-    width: 100%;
-
-    .link-button {
-      flex: 1;
+  .mobile-image-info {
+    .project-name { font-size: 1.25rem; }
+    .artist-name { font-size: 1rem; }
+    .external-links {
+      flex-direction: row;
+      width: 100%;
+      .link-button { flex: 1; }
     }
   }
 }
