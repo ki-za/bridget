@@ -165,6 +165,7 @@ export default function Gallery(props: {
             _swiper.on('slideChange', ({ realIndex }) => {
               setIndex(realIndex)
             })
+            galleryLoadImages()
           })
           .catch((e) => {
             console.log(e)
