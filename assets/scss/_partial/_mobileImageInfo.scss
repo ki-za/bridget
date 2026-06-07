@@ -65,17 +65,14 @@
 // Project Header
 .project-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.75rem;
   margin-bottom: 1.5rem;
-  flex-wrap: wrap;
 }
 
 .project-title-wrapper {
-  flex: 1;
+  width: 100%;
   min-width: 0;
-  max-width: calc(100% - 100px);
 }
 
 .project-name {
@@ -123,11 +120,9 @@
 
 .external-links {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 0.5rem;
   flex-shrink: 0;
-  // margin-left: auto;
-  // justify-content: flex-end;
 }
 
 .link-button {
