@@ -114,6 +114,17 @@ export default function MobileImageInfoPanel(props: { info?: ImageInfo }): JSX.E
                       {(track) => (
                         <div class="track-item">
                           <span class="track-name">{track.name}</span>
+                          <Show when={track.contributionTags?.length}>
+                            <div class="track-tags">
+                              <For each={track.contributionTags}>
+                                {(tag) => (
+                                  <span class="tag" data-tag={tag}>
+                                    {tag}
+                                  </span>
+                                )}
+                              </For>
+                            </div>
+                          </Show>
                         </div>
                       )}
                     </For>
