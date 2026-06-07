@@ -74,8 +74,8 @@
 
 .project-title-wrapper {
   flex: 1;
-  // justify-content: space-between;
-  min-width: 0; // Allow text truncation if needed
+  min-width: 0;
+  max-width: calc(100% - 100px);
 }
 
 .project-name {
