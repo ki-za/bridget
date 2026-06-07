@@ -173,7 +173,6 @@ export default function Gallery(props: {
       },
       { once: true, passive: true }
     )
-    setLoads([0, 1], true)
     mounted = true
   })
 
