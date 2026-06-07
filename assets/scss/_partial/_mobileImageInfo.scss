@@ -3,9 +3,7 @@
   background: white;
   color: black;
   padding: 1.25rem 1rem;
-  // No max-height - takes natural content height
 
-  // All links get underlines except buttons
   a {
     text-decoration: underline;
     color: inherit;
@@ -15,266 +13,231 @@
       opacity: 0.7;
     }
 
-    // Exception: button-style links don't get underlines
     &.link-button {
       text-decoration: none;
     }
   }
-}
 
-// ============================================
-// Styles Below Apply Directly to .mobile-image-info
-// ============================================
-
-// Contribution Tags
-.contribution-tags {
-  margin-bottom: 1rem;
-}
-
-.tags-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.tag {
-  display: inline-block;
-  padding: 0.25rem 0.625rem;
-  background: rgba(0, 0, 0, 0.08);
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-transform: lowercase;
-  border-radius: 3px;
-}
-
-/* Tag colors based on text content, not position */
-.tag[data-tag='producer'] {
-  background: #5b7aa8;
-}
-.tag[data-tag='writer'] {
-  background: #7a9070;
-}
-.tag[data-tag='mixer'] {
-  background: #a8775b;
-}
-.tag[data-tag='violinist'] {
-  background: #8a70a8;
-}
-
-// Project Header
-.project-header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-}
-
-.project-title-wrapper {
-  width: 100%;
-  min-width: 0;
-}
-
-.project-name {
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1.2;
-  margin: 0 0 0.5rem 0;
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial,
-    sans-serif;
-}
-
-.artist-section {
-  display: flex;
-  align-items: baseline;
-  gap: 0.25rem;
-  flex-wrap: wrap;
-}
-
-.artist-name {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin: 0;
-  margin-top: var(--sm);
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial,
-    sans-serif;
-
-  a {
-    text-decoration: underline;
-    text-decoration-color: rgba(0, 0, 0, 0.3);
-    text-underline-offset: 2px;
-
-    &:active {
-      text-decoration-color: currentColor;
-    }
+  .contribution-tags {
+    margin-bottom: 1rem;
   }
-}
 
-.release-year {
-  font-size: 1.125rem;
-  color: rgba(0, 0, 0, 0.6);
-  font-weight: 400;
-}
-
-.external-links {
-  display: flex;
-  flex-direction: row;
-  gap: 0.5rem;
-  flex-shrink: 0;
-  align-self: flex-start;
-}
-
-.link-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem 0.75rem;
-  background: whitesmoke;
-  color: white;
-  text-decoration: none;
-  left: auto;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  min-height: 36px;
-  min-width: 80px;
-  text-align: center;
-  transition: opacity 0.2s ease;
-
-  &:active {
-    opacity: 0.7;
+  .tags-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
-}
-
-// ============================================
-// Track List
-// ============================================
-
-.track-list {
-  margin-top: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.section-label {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: rgba(0, 0, 0, 0.5);
-  margin: 0 0 0.75rem 0;
-
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial,
-    sans-serif;
-}
-
-.track-items {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.track-item {
-  padding: 0.5rem 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-
-  &:last-child {
-    border-bottom: none;
-  }
-}
-
-.track-name {
-  font-size: 0.9375rem;
-  line-height: 1.4;
-  display: block;
-
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial,
-    sans-serif;
-}
-
-.track-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.375rem;
-  margin-top: 0;
 
   .tag {
-    font-size: 0 !important;
-    width: 1rem !important;
-    height: 1rem !important;
-    padding: 0 !important;
-    border-radius: 2px;
-  }
-}
-
-.track-show-more {
-  width: 100%;
-  margin-top: 0.75rem;
-  padding: 0.75rem;
-  background: rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 4px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.8);
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial,
-    sans-serif;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:active {
-    background: rgba(0, 0, 0, 0.1);
-    transform: scale(0.98);
-  }
-}
-
-// ============================================
-// Metadata Items (Collaborators, Released By)
-// ============================================
-
-.metadata-item {
-  margin-bottom: 1.25rem;
-
-  &:last-child {
-    margin-bottom: 0;
+    display: inline-block;
+    padding: 0.25rem 0.625rem;
+    background: rgba(0, 0, 0, 0.08);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: lowercase;
+    border-radius: 3px;
   }
 
-  .section-label {
-    margin-bottom: 0.5rem;
+  .tag[data-tag='producer'] { background: #5b7aa8; }
+  .tag[data-tag='writer'] { background: #7a9070; }
+  .tag[data-tag='mixer'] { background: #a8775b; }
+  .tag[data-tag='violinist'] { background: #8a70a8; }
+
+  .project-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
   }
-}
 
-.metadata-value {
-  font-size: 0.9375rem;
-  line-height: 1.5;
-  margin: 0;
+  .project-title-wrapper {
+    width: 100%;
+    min-width: 0;
+  }
 
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial,
-    sans-serif;
+  .project-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0 0 0.5rem 0;
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial,
+      sans-serif;
+  }
 
-  a {
-    color: inherit;
-    text-decoration: underline;
+  .artist-section {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+  }
+
+  .artist-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0;
+    margin-top: var(--sm);
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial,
+      sans-serif;
+
+    a {
+      text-decoration: underline;
+      text-decoration-color: rgba(0, 0, 0, 0.3);
+      text-underline-offset: 2px;
+
+      &:active {
+        text-decoration-color: currentColor;
+      }
+    }
+  }
+
+  .release-year {
+    font-size: 1.125rem;
+    color: rgba(0, 0, 0, 0.6);
+    font-weight: 400;
+  }
+
+  .external-links {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    align-self: flex-start;
+  }
+
+  .link-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0.75rem;
+    background: whitesmoke;
+    color: black;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    min-height: 36px;
+    min-width: 80px;
+    text-align: center;
+    transition: opacity 0.2s ease;
 
     &:active {
       opacity: 0.7;
     }
   }
-}
 
-// ============================================
-// Slide Content Layout
-// ============================================
-// NOTE: Swiper slide layout is now handled in _gallery.scss
-// This keeps layout logic centralized in one place
+  .track-list {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(0, 0, 0, 0.5);
+    margin: 0 0 0.75rem 0;
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial,
+      sans-serif;
+  }
+
+  .track-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .track-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .track-name {
+    font-size: 0.9375rem;
+    line-height: 1.4;
+    display: block;
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial,
+      sans-serif;
+  }
+
+  .track-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin-top: 0;
+
+    .tag {
+      font-size: 0 !important;
+      width: 1rem !important;
+      height: 1rem !important;
+      padding: 0 !important;
+      border-radius: 2px;
+    }
+  }
+
+  .track-show-more {
+    width: 100%;
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.8);
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial,
+      sans-serif;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:active {
+      background: rgba(0, 0, 0, 0.1);
+      transform: scale(0.98);
+    }
+  }
+
+  .metadata-item {
+    margin-bottom: 1.25rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-label {
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .metadata-value {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    margin: 0;
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial,
+      sans-serif;
+
+    a {
+      color: inherit;
+      text-decoration: underline;
+
+      &:active {
+        opacity: 0.7;
+      }
+    }
+  }
+}
 
 // ============================================
 // Track Modal
@@ -294,12 +257,8 @@
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .track-modal {
@@ -314,12 +273,8 @@
 }
 
 @keyframes slideUp {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
 }
 
 .track-modal-header {
@@ -399,24 +354,22 @@
 // ============================================
 
 @media (max-width: 374px) {
-  .project-header {
-    flex-direction: column;
-  }
+  .mobile-image-info {
+    .project-name {
+      font-size: 1.25rem;
+    }
 
-  .project-name {
-    font-size: 1.25rem;
-  }
+    .artist-name {
+      font-size: 1rem;
+    }
 
-  .artist-name {
-    font-size: 1rem;
-  }
+    .external-links {
+      flex-direction: row;
+      width: 100%;
 
-  .external-links {
-    flex-direction: row;
-    width: 100%;
-
-    .link-button {
-      flex: 1;
+      .link-button {
+        flex: 1;
+      }
     }
   }
 }
