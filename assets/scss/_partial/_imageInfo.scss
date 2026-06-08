@@ -76,7 +76,7 @@
   width: 100%;
   height: 1px;
   background: var(--panel-border);
-  margin-top: calc(var(--lg));
+  margin-top: calc(var(--lg) * 1.5);
   margin-bottom: calc(var(--lg));
 }
 
@@ -179,7 +179,7 @@
   z-index: var(--z-link);
   pointer-events: auto;
   margin-top: var(--lg);
-  margin-bottom: var(--lg);
+  margin-bottom: var(--sm);
 }
 
 .link-icon {
