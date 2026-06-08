@@ -15,7 +15,6 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
         return (
           <div class="panel-container">
             <div class="image-info-panel">
-              {/* Contribution Tags Section */}
               <Show when={info().projectContributionTags?.length}>
                 <section class="contribution-tags">
                   <div class="tags-wrapper">
@@ -30,29 +29,22 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
                 </section>
               </Show>
 
-              {/* Project Header Section */}
               <Show when={info().projectName}>
                 <div class="project-header">
                   <h3 class="project-name">{info().projectName}</h3>
                 </div>
               </Show>
 
-              {/* Artist Section */}
               <div class="artist-section">
                 <Show when={info().releaseYear}>
                   <p class="release-year">{info().releaseYear}</p>
                 </Show>
-
                 <h2 class="artist-name">
                   <For each={artistNames()}>
                     {(name, index) => (
                       <>
                         <Show when={artistLinks()[index()]} fallback={<>{name}</>}>
-                          
-                            href={artistLinks()[index()]}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
+                          <a href={artistLinks()[index()]} target="_blank" rel="noopener noreferrer">
                             {name}
                           </a>
                         </Show>
@@ -63,26 +55,15 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
                 </h2>
               </div>
 
-              {/* Links Section */}
               <Show when={info().spotifyLink || info().appleMusicLink}>
                 <div class="project-links">
                   <Show when={info().spotifyLink}>
-                    
-                      href={info().spotifyLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="link-button link-icon"
-                    >
+                    <a href={info().spotifyLink} target="_blank" rel="noopener noreferrer" class="link-button link-icon">
                       Spotify
                     </a>
                   </Show>
                   <Show when={info().appleMusicLink}>
-                    
-                      href={info().appleMusicLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="link-button link-icon"
-                    >
+                    <a href={info().appleMusicLink} target="_blank" rel="noopener noreferrer" class="link-button link-icon">
                       Apple Music
                     </a>
                   </Show>
@@ -91,9 +72,7 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
 
               <div class="section-divider" />
 
-              {/* Content Constrained Wrapper */}
               <div class="content-constrained">
-                {/* Track List Section */}
                 <Show when={info().trackList?.length}>
                   <section class="track-list">
                     <h4 class="track-section-label">Tracks</h4>
@@ -126,62 +105,38 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
                   <div class="section-divider" />
                 </Show>
 
-                {/* Metadata Section (Collaborators & Released By) */}
                 <Show when={info().collaborators?.length || info().releasedBy?.length}>
                   <section class="metadata-section">
-                    {/* Collaborators */}
                     <Show when={info().collaborators?.length}>
                       <div class="collaborator-list">
                         <h4 class="section-label">Collaborated:</h4>
                         <For each={info().collaborators}>
                           {(collaborator, index) => (
                             <>
-                              <Show
-                                when={collaboratorLinks()[index()]}
-                                fallback={
-                                  <span class="collaborator">{collaborator}</span>
-                                }
-                              >
-                                
-                                  href={collaboratorLinks()[index()]}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  class="collaborator"
-                                >
+                              <Show when={collaboratorLinks()[index()]} fallback={<span class="collaborator">{collaborator}</span>}>
+                                <a href={collaboratorLinks()[index()]} target="_blank" rel="noopener noreferrer" class="collaborator">
                                   {collaborator}
                                 </a>
                               </Show>
-                              <Show when={index() < info().collaborators!.length - 1}>
-                                {', '}
-                              </Show>
+                              <Show when={index() < info().collaborators!.length - 1}>{', '}</Show>
                             </>
                           )}
                         </For>
                       </div>
                     </Show>
 
-                    {/* Released By */}
                     <Show when={info().releasedBy?.length}>
                       <div class="released-by">
                         <h4 class="section-label">Released by:</h4>
                         <For each={info().releasedBy}>
                           {(publisher, index) => (
                             <>
-                              <Show
-                                when={releasedByLinks()[index()]}
-                                fallback={<span>{publisher}</span>}
-                              >
-                                
-                                  href={releasedByLinks()[index()]}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
+                              <Show when={releasedByLinks()[index()]} fallback={<span>{publisher}</span>}>
+                                <a href={releasedByLinks()[index()]} target="_blank" rel="noopener noreferrer">
                                   {publisher}
                                 </a>
                               </Show>
-                              <Show when={index() < info().releasedBy!.length - 1}>
-                                {', '}
-                              </Show>
+                              <Show when={index() < info().releasedBy!.length - 1}>{', '}</Show>
                             </>
                           )}
                         </For>
