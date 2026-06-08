@@ -47,7 +47,7 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
                   <For each={artistNames()}>
                     {(name, index) => (
                       <>
-                       <Show when={artistLinks()[index()]} fallback={<>{name}</>}>
+                        <Show when={artistLinks()[index()]} fallback={<>{name}</>}>
                           
                             href={artistLinks()[index()]}
                             target="_blank"
