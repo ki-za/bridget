@@ -176,11 +176,12 @@
 
 .project-links {
   display: inline-flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: calc(var(--xs) * 0.5);
   flex-shrink: 0;
   z-index: var(--z-link);
   pointer-events: auto;
+  margin-top: var(--sm);
 }
 
 .link-icon {
