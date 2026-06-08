@@ -154,12 +154,9 @@
 }
 
 .project-header {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-start;
+  display: block;
   width: fit-content;
   max-width: 100%;
-  gap: var(--lg);
   margin-bottom: 1em;
 }
 
@@ -175,13 +172,14 @@
 }
 
 .project-links {
-  display: inline-flex;
+  display: flex;
   flex-direction: row;
   gap: calc(var(--xs) * 0.5);
   flex-shrink: 0;
   z-index: var(--z-link);
   pointer-events: auto;
   margin-top: var(--sm);
+  margin-bottom: var(--sm);
 }
 
 .link-icon {
