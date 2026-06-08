@@ -77,7 +77,7 @@
   height: 1px;
   background: var(--panel-border);
   margin-top: calc(var(--lg));
-  margin-bottom: calc(1.1 * var(--lg));
+  margin-bottom: calc(var(--lg));
 }
 
 .track-divider {
