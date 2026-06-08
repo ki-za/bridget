@@ -34,30 +34,6 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
               <Show when={info().projectName}>
                 <div class="project-header">
                   <h3 class="project-name">{info().projectName}</h3>
-                  <Show when={info().spotifyLink || info().appleMusicLink}>
-                    <div class="project-links">
-                      <Show when={info().spotifyLink}>
-                        <a
-                          href={info().spotifyLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          class="link-button link-icon"
-                        >
-                          Spotify
-                        </a>
-                      </Show>
-                      <Show when={info().appleMusicLink}>
-                        <a
-                          href={info().appleMusicLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          class="link-button link-icon"
-                        >
-                          Apple Music
-                        </a>
-                      </Show>
-                    </div>
-                  </Show>
                 </div>
               </Show>
 
@@ -72,7 +48,7 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
                     {(name, index) => (
                       <>
                         <Show when={artistLinks()[index()]} fallback={<>{name}</>}>
-                          <a
+                          
                             href={artistLinks()[index()]}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -86,6 +62,32 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
                   </For>
                 </h2>
               </div>
+
+              {/* Links Section */}
+              <Show when={info().spotifyLink || info().appleMusicLink}>
+                <div class="project-links">
+                  <Show when={info().spotifyLink}>
+                    
+                      href={info().spotifyLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="link-button link-icon"
+                    >
+                      Spotify
+                    </a>
+                  </Show>
+                  <Show when={info().appleMusicLink}>
+                    
+                      href={info().appleMusicLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="link-button link-icon"
+                    >
+                      Apple Music
+                    </a>
+                  </Show>
+                </div>
+              </Show>
 
               <div class="section-divider" />
 
@@ -113,9 +115,6 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
                                 </div>
                               </Show>
                             </div>
-                            {/* <Show when={index() < info().trackList!.length - 1}> */}
-                            {/*   <div class="track-divider"></div> */}
-                            {/* </Show> */}
                           </>
                         )}
                       </For>
@@ -143,7 +142,7 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
                                   <span class="collaborator">{collaborator}</span>
                                 }
                               >
-                                <a
+                                
                                   href={collaboratorLinks()[index()]}
                                   target="_blank"
                                   rel="noopener noreferrer"
@@ -172,7 +171,7 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
                                 when={releasedByLinks()[index()]}
                                 fallback={<span>{publisher}</span>}
                               >
-                                <a
+                                
                                   href={releasedByLinks()[index()]}
                                   target="_blank"
                                   rel="noopener noreferrer"
