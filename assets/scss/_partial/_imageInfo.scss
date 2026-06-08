@@ -172,14 +172,14 @@
 }
 
 .project-links {
-  display: flex;
+  display: inline-flex;
   flex-direction: row;
   gap: calc(var(--xs) * 0.5);
   flex-shrink: 0;
   z-index: var(--z-link);
   pointer-events: auto;
-  margin-top: var(--sm);
-  margin-bottom: var(--sm);
+  margin-top: var(--lg);
+  margin-bottom: var(--lg);
 }
 
 .link-icon {
