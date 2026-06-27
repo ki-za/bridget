@@ -25,3 +25,9 @@ $tablet: map.get($breakpoints, 'tablet') - 1;
     pointer-events: none;
   }
 }
+
+@media (min-width: $tablet) and (hover: hover) {
+  body {
+    overflow: hidden;
+  }
+}
