@@ -5,6 +5,7 @@ exampleSite/resources/
 node_modules/
 build/
 gen_/
+.amp/portals/
 
 static/
 repo-overview.md
