@@ -395,12 +395,25 @@ export default function Stage(props: {
     _gsap.set(elc, { zIndex: stateLength + 1 })
     if (trailInactiveEls.length > 0) {
       tl.to(trailInactiveEls, {
-        ease: 'power2.in',
-        stagger: 0.055,
-        duration: 0.24,
+        y: '+=20',
+        ease: 'power3.in',
+        stagger: 0.075,
+        duration: 0.3,
+        delay: 0.1,
         opacity: 0
       })
     }
+    tl.to(
+      elc,
+      {
+        x: 0,
+        y: 0,
+        ease: 'power3.inOut',
+        duration: 0.7,
+        delay: trailInactiveEls.length > 0 ? 0.3 : 0
+      },
+      '>'
+    )
     tl.to(
       elc,
       {
@@ -409,9 +422,10 @@ export default function Stage(props: {
         scale: target.scale,
         force3D: true,
         ease: 'power3.inOut',
-        duration: 0.8
+        duration: 0.5,
+        delay: 0.1
       },
-      trailInactiveEls.length > 0 ? '>+=0.08' : 0
+      '>'
     )
     await tl.then(() => {
       if (activeTimeline === tl) activeTimeline = undefined

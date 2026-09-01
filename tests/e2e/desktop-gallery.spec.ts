@@ -298,10 +298,16 @@ test.describe('desktop gallery interaction matrix', () => {
       return Math.abs(current.x - front!.x) > 1 || Math.abs(current.y - front!.y) > 1
     })
     expect(movementStart).toBeGreaterThan(fadeEnd)
-    expect(Math.abs(movementStart - scaleStart)).toBeLessThanOrEqual(1)
+    expect(scaleStart).toBeGreaterThan(movementStart)
     const frameBeforeScale = frames[scaleStart - 1]
     expect(
       inactive.every((imageIndex) => frameBeforeScale.images[imageIndex].opacity < 0.05)
+    ).toBe(true)
+    expect(
+      frames.slice(movementStart, scaleStart).some(({ images: frameImages }) => {
+        const image = frameImages[front!.index]
+        return Math.abs(image.x) < 2 && Math.abs(image.y) < 2
+      })
     ).toBe(true)
     expect(
       frames.every(
