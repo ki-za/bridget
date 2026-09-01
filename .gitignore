@@ -5,6 +5,8 @@ exampleSite/resources/
 node_modules/
 build/
 gen_/
+playwright-report/
+test-results/
 .amp/portals/
 
 static/

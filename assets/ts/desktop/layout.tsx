@@ -65,11 +65,15 @@ export default function Desktop(props: {
   })
 
   const viewPortMode = createMemo<ViewportMode>(() => {
-    if (!isOpen()) return 'trail'
-    if (currentImageInfo() && isOpen() && isAnimating()) {
-      return 'animating-with-info'
+    if (isAnimating()) {
+      if (!isOpen()) return 'closing'
+      if (navVector() !== 'none') {
+        return currentImageInfo() ? 'navigating-with-info' : 'navigating'
+      }
+      return currentImageInfo() ? 'opening-with-info' : 'opening'
     }
-    if (currentImageInfo() && isOpen() && !isAnimating()) return 'expanded-with-info'
+    if (!isOpen()) return 'trail'
+    if (currentImageInfo()) return 'expanded-with-info'
     return 'expanded'
   })
 
@@ -100,12 +104,14 @@ export default function Desktop(props: {
           loadingText={props.loadingText}
           active={active}
           isAnimating={isAnimating}
+          setIsAnimating={setIsAnimating}
           setCordHist={setCordHist}
           isOpen={isOpen}
           setIsOpen={setIsOpen}
           setHoverText={setHoverText}
           navVector={navVector}
           setNavVector={setNavVector}
+          withInfo={() => currentImageInfo() !== undefined}
         />
       </Show>
     </>

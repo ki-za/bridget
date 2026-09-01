@@ -11,6 +11,13 @@
   cursor: none;
   pointer-events: none;
 
+  &.with-info {
+    width: min(
+      calc(100vw - var(--panel-max-width) - var(--panel-gap-max)),
+      calc(var(--window-height) - var(--nav-height))
+    );
+  }
+
   &:not(.active) {
     pointer-events: none;
     display: none;

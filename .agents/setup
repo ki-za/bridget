@@ -93,6 +93,9 @@ step "Installing JavaScript dependencies"
 cd "$REPO_ROOT"
 pnpm install --frozen-lockfile
 
+step "Installing the browser used by the interaction test matrix"
+pnpm exec playwright install chromium
+
 step "Orb setup complete"
 node --version
 pnpm --version

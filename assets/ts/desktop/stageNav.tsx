@@ -13,12 +13,14 @@ export default function StageNav(props: {
   loadingText: string
   active: Accessor<boolean>
   isAnimating: Accessor<boolean>
+  setIsAnimating: Setter<boolean>
   setCordHist: Setter<HistoryItem[]>
   isOpen: Accessor<boolean>
   setIsOpen: Setter<boolean>
   setHoverText: Setter<string>
   navVector: Accessor<Vector>
   setNavVector: Setter<Vector>
+  withInfo: Accessor<boolean>
 }): JSX.Element {
   // types
   type NavItem = (typeof navItems)[number]
@@ -34,6 +36,7 @@ export default function StageNav(props: {
   const stateLength = state().length
 
   const prevImage: () => void = () => {
+    props.setIsAnimating(true)
     props.setNavVector('prev')
     props.setCordHist((c) =>
       c.map((item) => {
@@ -48,6 +51,7 @@ export default function StageNav(props: {
   }
 
   const nextImage: () => void = () => {
+    props.setIsAnimating(true)
     props.setNavVector('next')
     props.setCordHist((c) =>
       c.map((item) => {
@@ -86,7 +90,10 @@ export default function StageNav(props: {
 
   return (
     <>
-      <div class="navOverlay" classList={{ active: props.active() }}>
+      <div
+        class="navOverlay"
+        classList={{ active: props.active(), 'with-info': props.withInfo() }}
+      >
         <For each={navItems}>
           {(item) => (
             <div

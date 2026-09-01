@@ -25,7 +25,7 @@
     }
   }
 
-  &.animating-with-info {
+  &.opening-with-info {
     .ghost-image-area {
       position: absolute;
       left: 0;
@@ -42,7 +42,8 @@
   }
 
   // Expanded with info mode
-  &.expanded-with-info {
+  &.expanded-with-info,
+  &.navigating-with-info {
     // Layout container for image + panel
     .image-info-container {
       display: flex;

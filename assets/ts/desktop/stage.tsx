@@ -3,6 +3,7 @@ import {
   For,
   Show,
   createEffect,
+  createSignal,
   on,
   onCleanup,
   onMount,
@@ -93,9 +94,13 @@ function onMutation<T extends HTMLElement>(
 
 export type ViewportMode =
   | 'trail'
+  | 'opening'
+  | 'opening-with-info'
+  | 'navigating'
+  | 'navigating-with-info'
   | 'expanded'
-  | 'animating-with-info'
   | 'expanded-with-info'
+  | 'closing'
 
 function remToPx(remValue: number) {
   const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize)
@@ -185,9 +190,11 @@ export default function Stage(props: {
   let lifecycleController: AbortController | undefined
   const mutationObservers: MutationObserver[] = []
   let renderedIndexes = new Set<number>()
+  let expandedImageIndex: number | undefined
 
   // states
   let gsapLoaded = false
+  const [visibleImageInfo, setVisibleImageInfo] = createSignal<ImageInfo>()
 
   const [state, { incIndex }] = useState()
   const stateLength = state().length
@@ -242,10 +249,20 @@ export default function Stage(props: {
     const trailElsIndex = getTrailElsIndex(visibleHistory)
     if (trailElsIndex.length === 0) return
 
+    const _isOpen = props.isOpen()
     const elsTrail = getImagesFromIndexes(imgs, trailElsIndex)
+    const currentIndex = _isOpen ? getCurrentElIndex(_cordHist) : undefined
+    const preservedExpandedImage =
+      _isOpen && expandedImageIndex !== undefined ? imgs[expandedImageIndex] : undefined
+    const previousExpandedImage =
+      currentIndex !== undefined &&
+      expandedImageIndex !== undefined &&
+      expandedImageIndex !== currentIndex
+        ? preservedExpandedImage
+        : undefined
     const nextRenderedIndexes = new Set(trailElsIndex)
     const hiddenIndexes = [...renderedIndexes].filter(
-      (index) => !nextRenderedIndexes.has(index)
+      (index) => !nextRenderedIndexes.has(index) && index !== expandedImageIndex
     )
     const hiddenImages = getImagesFromIndexes(imgs, hiddenIndexes)
     if (hiddenImages.length > 0) {
@@ -257,20 +274,27 @@ export default function Stage(props: {
     const stageWidth = stage?.clientWidth ?? window.innerWidth
     const stageHeight = stage?.clientHeight ?? window.innerHeight
 
-    const _isOpen = props.isOpen()
-
-    _gsap.killTweensOf(elsTrail, 'opacity')
-    _gsap.set(elsTrail, {
-      x: (i: number) => visibleHistory[i].x - stageWidth / 2,
-      y: (i: number) => visibleHistory[i].y - stageHeight / 2,
-      opacity: (i: number) =>
-        Math.max((i + 1 <= visibleHistory.length ? 1 : 0) - (_isOpen ? 1 : 0), 0),
+    const positionedTrail = visibleHistory.filter(
+      ({ i }) => imgs[i] !== preservedExpandedImage
+    )
+    const imagesToPosition = getImagesFromIndexes(
+      imgs,
+      getTrailElsIndex(positionedTrail)
+    )
+    _gsap.set(imagesToPosition, {
+      x: (i: number) => positionedTrail[i].x - stageWidth / 2,
+      y: (i: number) => positionedTrail[i].y - stageHeight / 2,
       zIndex: (i: number) => i,
       scale: 0.6
     })
+    const imagesToHide = _isOpen
+      ? elsTrail.filter((image) => image !== preservedExpandedImage)
+      : elsTrail
+    _gsap.killTweensOf(imagesToHide, 'opacity')
+    _gsap.set(imagesToHide, { opacity: _isOpen ? 0 : 1 })
     // Expanded modes (with or without info)
     if (_isOpen) {
-      const currentIndex = getCurrentElIndex(_cordHist)
+      if (currentIndex === undefined) return
       const elc = imgs[currentIndex]
       _gsap.set(elc, { zIndex: stateLength + 1 })
 
@@ -291,20 +315,41 @@ export default function Stage(props: {
       }
 
       hires(getImagesFromIndexes(imgs, indexArrayToHires)) // preload
-      const imagesToCleanup = getImagesFromIndexes(imgs, indexArrayToCleanup)
+      const imagesToCleanup = getImagesFromIndexes(imgs, indexArrayToCleanup).filter(
+        (image) => image !== previousExpandedImage
+      )
       if (imagesToCleanup.length > 0) {
         _gsap.killTweensOf(imagesToCleanup)
         _gsap.set(imagesToCleanup, { opacity: 0 })
       }
 
       // Position current image
-      if (props.mode === 'expanded-with-info') {
+      if (
+        props.mode === 'expanded-with-info' ||
+        props.mode === 'navigating-with-info'
+      ) {
         const { x, scale } = getImageTargetTransform()
         _gsap.set(elc, { x, y: 0, scale })
       } else {
         _gsap.set(elc, { x: 0, y: 0, scale: 1 })
       }
-      setLoaderForHiresImage(elc) // set loader, if loaded set current opacity to 1
+      expandedImageIndex = currentIndex
+      const nextImageInfo = props.currentImageInfo()
+      const finishNavigation = props.setIsAnimating
+      const navigationComplete =
+        props.isAnimating() && props.navVector() !== 'none'
+          ? () => finishNavigation(false)
+          : undefined
+      const updateVisibleInfo =
+        navigationComplete === undefined
+          ? undefined
+          : () => setVisibleImageInfo(nextImageInfo)
+      setLoaderForHiresImage(
+        elc,
+        previousExpandedImage,
+        updateVisibleInfo,
+        navigationComplete
+      )
     } else {
       lores(elsTrail)
     }
@@ -321,6 +366,8 @@ export default function Stage(props: {
 
     const elcIndex = getCurrentElIndex(_cordHist)
     const elc = imgs[elcIndex]
+    expandedImageIndex = elcIndex
+    setVisibleImageInfo(props.currentImageInfo())
 
     const hasInfo = !!props.currentImageInfo()
     const target = hasInfo ? getImageTargetTransform() : { x: 0, scale: 1 }
@@ -346,17 +393,15 @@ export default function Stage(props: {
       getTrailInactiveElsIndex(_cordHist, _state)
     )
     _gsap.set(elc, { zIndex: stateLength + 1 })
-    tl.to(
-      trailInactiveEls,
-      {
-        y: '+=20',
-        ease: 'power3.in',
-        stagger: 0.05,
-        duration: 0.3,
+    if (trailInactiveEls.length > 0) {
+      tl.to(trailInactiveEls, {
+        ease: 'power2.in',
+        stagger: 0.055,
+        duration: 0.24,
         opacity: 0
-      },
-      0
-    ).to(
+      })
+    }
+    tl.to(
       elc,
       {
         x: target.x,
@@ -365,7 +410,7 @@ export default function Stage(props: {
         ease: 'power3.inOut',
         duration: 0.8
       },
-      0.1
+      trailInactiveEls.length > 0 ? '>+=0.08' : 0
     )
     await tl.then(() => {
       if (activeTimeline === tl) activeTimeline = undefined
@@ -390,37 +435,37 @@ export default function Stage(props: {
     activeTimeline = tl
     const elc = getImagesFromIndexes(imgs, [elcIndex])[0]
     const elsTrailInactive = getImagesFromIndexes(imgs, elsTrailInactiveIndexes)
-    tl.to(
-      elc,
-      {
-        x: _cordHist.slice(-1)[0].x - (stage?.clientWidth ?? window.innerWidth) / 2,
-        y: _cordHist.slice(-1)[0].y - (stage?.clientHeight ?? window.innerHeight) / 2,
-        scale: 0.6,
-        duration: 0.8,
-        ease: 'power3.inOut'
-      },
-      0
-    ).to(
-      elsTrailInactive,
-      {
-        y: '-=20',
-        ease: 'power3.out',
-        stagger: -0.05,
-        duration: 0.3,
-        opacity: 1
-      },
-      0.65
-    )
+    const latestHistoryItem = _cordHist.at(-1)
+    if (latestHistoryItem === undefined)
+      throw new Error('missing current image position')
+
+    _gsap.killTweensOf(elsTrailInactive)
+    _gsap.set(elsTrailInactive, { opacity: 0, zIndex: 0 })
+    tl.to(elc, {
+      x: latestHistoryItem.x - (stage?.clientWidth ?? window.innerWidth) / 2,
+      y: latestHistoryItem.y - (stage?.clientHeight ?? window.innerHeight) / 2,
+      scale: 0.6,
+      duration: 0.8,
+      ease: 'power3.inOut'
+    })
     // eslint-disable-next-line solid/reactivity
     await tl.then(() => {
       if (activeTimeline === tl) activeTimeline = undefined
       lores(getImagesFromIndexes(imgs, [...elsTrailInactiveIndexes, elcIndex]))
+      renderedIndexes = new Set([elcIndex])
+      expandedImageIndex = undefined
+      props.setCordHist([latestHistoryItem])
       props.setIsAnimating(false)
       setPosition()
     })
   }
 
-  function setLoaderForHiresImage(img: DesktopImage): void {
+  function setLoaderForHiresImage(
+    img: DesktopImage,
+    previousImage?: DesktopImage,
+    onDominant?: () => void,
+    onRevealed?: () => void
+  ): void {
     if (!mounted || !gsapLoaded) return
     const revealIfCurrent = (): void => {
       const history = props.cordHist()
@@ -432,9 +477,33 @@ export default function Stage(props: {
         return
       }
       _gsap.killTweensOf(img, 'opacity')
-      _gsap
-        .to(img, { opacity: 1, ease: 'power3.out', duration: 0.5 })
+      if (previousImage !== undefined) {
+        _gsap.killTweensOf(previousImage, 'opacity')
+        _gsap.to(previousImage, { opacity: 0, ease: 'power2.out', duration: 0.4 })
+      }
+      let dominant = false
+      const revealTween = _gsap.to(img, {
+        opacity: 1,
+        ease: 'power3.out',
+        duration: 0.5,
+        onUpdate: () => {
+          const imageIsDominant =
+            previousImage === undefined
+              ? revealTween.progress() >= 0.5
+              : Number(getComputedStyle(img).opacity) >=
+                Number(getComputedStyle(previousImage).opacity)
+          if (dominant || !imageIsDominant) return
+          dominant = true
+          onDominant?.()
+        }
+      })
+      revealTween
         .then(() => {
+          const history = props.cordHist()
+          if (history.length > 0 && imgs[getCurrentElIndex(history)] === img) {
+            if (!dominant) onDominant?.()
+            onRevealed?.()
+          }
           props.setIsLoading(false)
         })
         .catch((e) => {
@@ -598,10 +667,14 @@ export default function Stage(props: {
         onKeyDown={onClick}
       >
         {/* Wrapper only appears in info mode */}
-        <Show when={props.mode === 'expanded-with-info'}>
+        <Show
+          when={
+            props.mode === 'expanded-with-info' || props.mode === 'navigating-with-info'
+          }
+        >
           <div class="image-info-container">
             <div class="image-area" />
-            <ImageInfoPanel info={props.currentImageInfo()!} />
+            <ImageInfoPanel info={visibleImageInfo()} />
           </div>
         </Show>
 
