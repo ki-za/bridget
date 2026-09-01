@@ -419,6 +419,7 @@ export default function Stage(props: {
       {
         x: target.x,
         scale: target.scale,
+        force3D: true,
         ease: 'power3.inOut',
         duration: 0.5,
         delay: 0.1

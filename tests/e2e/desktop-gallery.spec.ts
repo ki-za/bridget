@@ -245,6 +245,12 @@ test.describe('desktop gallery interaction matrix', () => {
     expect(visible(frames.at(-1)!.images, 0.95).map(({ index }) => index)).toEqual([
       front!.index
     ])
+    expect(
+      await page
+        .locator(images)
+        .nth(front!.index)
+        .evaluate((image) => (image as HTMLElement).style.transform)
+    ).toContain('translate3d')
   })
 
   test('slideshow navigation is a non-blank, geometry-stable crossfade', async ({
