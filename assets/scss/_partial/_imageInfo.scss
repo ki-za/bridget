@@ -2,7 +2,6 @@
   display: flex;
   position: relative;
   width: 100%;
-  height: 100%;
   justify-content: center;
   box-sizing: border-box;
   pointer-events: none;
@@ -11,10 +10,10 @@
 .image-info-hit-column {
   position: absolute;
   top: 0;
-  bottom: 0;
   left: 50%;
   z-index: 1000;
   width: min(var(--panel-max-width), calc(100% - var(--xl) * 2));
+  height: calc(var(--window-height) - var(--nav-height));
   transform: translateX(-50%);
   pointer-events: auto;
   user-select: text;

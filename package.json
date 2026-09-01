@@ -21,9 +21,9 @@
     "vite:dev": "vite build --mode development --minify false",
     "hugo:build": "hugo --logLevel info --source=exampleSite --minify",
     "hugo:preview": "hugo --logLevel info --source=exampleSite -D",
-    "hugo:dev": "hugo server --source=exampleSite -D --disableFastRender --watch --logLevel info",
-    "hugo:orb": "hugo server --source=exampleSite -D --disableFastRender --watch --logLevel info --bind 0.0.0.0 --port $PORT --baseURL $PUBLIC_URL --appendPort=false",
-    "hugo:test": "hugo server --source=exampleSite -D --disableFastRender --bind 127.0.0.1 --port 4173 --baseURL http://127.0.0.1:4173 --appendPort=false",
+    "hugo:dev": "hugo server --source=exampleSite -D --disableFastRender --watch --renderToMemory --logLevel info",
+    "hugo:orb": "hugo server --source=exampleSite -D --disableFastRender --watch --renderToMemory --logLevel info --bind 0.0.0.0 --port $PORT --baseURL $PUBLIC_URL --appendPort=false",
+    "hugo:test": "hugo server --source=exampleSite -D --disableFastRender --renderToMemory --bind 127.0.0.1 --port 4173 --baseURL http://127.0.0.1:4173 --appendPort=false",
     "hugo:server": "hugo server --source=exampleSite --disableFastRender -e production --watch --logLevel info"
   },
   "repository": {
