@@ -252,6 +252,25 @@ test.describe('desktop gallery interaction matrix', () => {
     await expect(openingInfo).toHaveAttribute('aria-hidden', 'true')
     const openingInfoElement = await openingInfo.elementHandle()
     const openingPanelElement = await openingPanel.elementHandle()
+    const collectionLength = await page.locator(images).count()
+    const adjacentIndexes = [
+      (front!.index + collectionLength - 1) % collectionLength,
+      (front!.index + 1) % collectionLength
+    ]
+    const usesHighResolutionSource = async (imageIndex: number): Promise<boolean> =>
+      await page
+        .locator(images)
+        .nth(imageIndex)
+        .evaluate(
+          (image) =>
+            (image as HTMLImageElement).src ===
+            new URL((image as HTMLImageElement).dataset.hiUrl!, location.href).href
+        )
+    expect(await usesHighResolutionSource(front!.index)).toBe(true)
+    expect(await Promise.all(adjacentIndexes.map(usesHighResolutionSource))).toEqual([
+      false,
+      false
+    ])
     const { frames } = await animation
     const openingFrames = frames.filter(
       ({ mode, panelOpacity }) =>
@@ -356,6 +375,11 @@ test.describe('desktop gallery interaction matrix', () => {
     })
     await expandedLink.click()
     await expect(expandedLink).toHaveAttribute('data-test-clicked', 'true')
+    await expect
+      .poll(
+        async () => await Promise.all(adjacentIndexes.map(usesHighResolutionSource))
+      )
+      .toEqual([true, true])
     expect(
       await openingInfoElement!.evaluate(
         (element) => element === document.querySelector('.image-info-container')

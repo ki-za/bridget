@@ -179,6 +179,7 @@ export default function Stage(props: {
   let _gsap: typeof gsap
   let gsapPromise: Promise<void> | undefined
   let activeTimeline: gsap.core.Timeline | undefined
+  let adjacentPreloadTimer: number | undefined
   let resizeFrame: number | undefined
   let stage: HTMLDivElement | undefined
 
@@ -200,6 +201,37 @@ export default function Stage(props: {
   const stateLength = state().length
 
   let mounted = false
+
+  const clearAdjacentPreload = (): void => {
+    if (adjacentPreloadTimer === undefined) return
+    window.clearTimeout(adjacentPreloadTimer)
+    adjacentPreloadTimer = undefined
+  }
+
+  const scheduleAdjacentPreload = (
+    currentIndex: number,
+    adjacentIndexes: [number, number]
+  ): void => {
+    clearAdjacentPreload()
+    const imageIsStillCurrent = (): boolean => {
+      const history = props.cordHist()
+      return (
+        mounted &&
+        props.isOpen() &&
+        history.length > 0 &&
+        getCurrentElIndex(history) === currentIndex
+      )
+    }
+    const preload = (position: number): void => {
+      if (!imageIsStillCurrent()) return
+      hires([imgs[adjacentIndexes[position]]])
+      if (position === 0) {
+        adjacentPreloadTimer = window.setTimeout(() => preload(1), 150)
+      } else adjacentPreloadTimer = undefined
+    }
+    // eslint-disable-next-line solid/reactivity
+    adjacentPreloadTimer = window.setTimeout(() => preload(0), 150)
+  }
 
   const ensureGsapReady = async (): Promise<void> => {
     if (gsapPromise !== undefined) return await gsapPromise
@@ -250,6 +282,7 @@ export default function Stage(props: {
     if (trailElsIndex.length === 0) return
 
     const _isOpen = props.isOpen()
+    if (_isOpen && props.navVector() !== 'none') clearAdjacentPreload()
     const elsTrail = getImagesFromIndexes(imgs, trailElsIndex)
     const currentIndex = _isOpen ? getCurrentElIndex(_cordHist) : undefined
     const preservedExpandedImage =
@@ -366,6 +399,10 @@ export default function Stage(props: {
 
     const elcIndex = getCurrentElIndex(_cordHist)
     const elc = imgs[elcIndex]
+    const adjacentIndexes: [number, number] = [
+      getPrevElIndex(_cordHist, _state),
+      getNextElIndex(_cordHist, _state)
+    ]
     expandedImageIndex = elcIndex
     setVisibleImageInfo(props.currentImageInfo())
 
@@ -373,13 +410,8 @@ export default function Stage(props: {
     const target = hasInfo ? getImageTargetTransform() : { x: 0, scale: 1 }
 
     // don't hide here because we want a better transition
-    hires(
-      getImagesFromIndexes(imgs, [
-        elcIndex,
-        getPrevElIndex(_cordHist, _state),
-        getNextElIndex(_cordHist, _state)
-      ])
-    )
+    clearAdjacentPreload()
+    hires([elc])
     setLoaderForHiresImage(elc)
 
     // to find out how big the image will be when its enlarged for
@@ -430,6 +462,7 @@ export default function Stage(props: {
     await tl.then(() => {
       if (activeTimeline === tl) activeTimeline = undefined
       props.setIsAnimating(false)
+      scheduleAdjacentPreload(elcIndex, adjacentIndexes)
     })
   }
 
@@ -438,6 +471,7 @@ export default function Stage(props: {
 
     props.setIsAnimating(true)
     props.setNavVector('none') // cleanup
+    clearAdjacentPreload()
 
     const _cordHist = props.cordHist()
     const _state = state()
@@ -617,6 +651,7 @@ export default function Stage(props: {
       abortController?.abort()
       lifecycleController?.abort()
       activeTimeline?.kill()
+      clearAdjacentPreload()
       mutationObservers.forEach((observer) => observer.disconnect())
       if (resizeFrame !== undefined) cancelAnimationFrame(resizeFrame)
     })

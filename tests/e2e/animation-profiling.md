@@ -36,3 +36,15 @@ and tile preparation back onto the final frame.
 Do not stop the trace at the `zoom-expanded` state change. Keep at least 100 ms after
 that marker so delayed paint, tile preparation, sync-tree activation, and draw work
 remain visible.
+
+## High-resolution loading policy
+
+Opening assigns the high-resolution URL only to the selected image. Once the slideshow
+is stable, it preloads the previous image after 150 ms and the next image after another
+150 ms. Closing or navigating cancels that queue; navigation immediately prioritizes
+the requested image instead.
+
+Do not diagnose `final-zoom-image-raster` as a network batching problem unless a trace
+shows `ResourceSendRequest` during the zoom. The original three-image batch completed
+about 1.7 seconds before the final scale segment; its end-of-animation `ImageDecodeTask`
+events belonged to compositor tiles for the active image, not late adjacent downloads.
