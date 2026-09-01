@@ -2,9 +2,23 @@
   display: flex;
   position: relative;
   width: 100%;
+  height: 100%;
   justify-content: center;
   box-sizing: border-box;
+  pointer-events: none;
+}
+
+.image-info-hit-column {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  z-index: 1000;
+  width: min(var(--panel-max-width), calc(100% - var(--xl) * 2));
+  transform: translateX(-50%);
   pointer-events: auto;
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .image-info-panel {
@@ -21,6 +35,10 @@
   flex: 1;
   z-index: 1001;
   background-color: white;
+  pointer-events: auto;
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
 }
 
 .image-info-panel a,
@@ -30,9 +48,8 @@
 .image-info-panel .collaborator a,
 .image-info-panel .tag,
 .image-info-panel button {
-  // z-index: var(--z-link) !important;
-  // cursor: pointer !important;
   pointer-events: auto;
+  cursor: pointer;
 }
 
 /* Force text cursor on text elements */

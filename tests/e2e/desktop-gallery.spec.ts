@@ -80,18 +80,21 @@ async function openSlideshow(page: Page): Promise<void> {
 
 async function navigate(page: Page, direction: 'previous' | 'next'): Promise<void> {
   const oldIndex = visible(await imageStates(page), 0.95)[0]?.index
-  await page
-    .locator(overlays)
-    .nth(direction === 'previous' ? 0 : 2)
-    .click()
+  const viewport = page.viewportSize()!
+  await page.mouse.click(
+    direction === 'previous' ? 2 : viewport.width - 2,
+    viewport.height / 2
+  )
   await expect
     .poll(async () => visible(await imageStates(page), 0.95)[0]?.index)
     .not.toBe(oldIndex)
   await expect.poll(async () => visible(await imageStates(page), 0.01).length).toBe(1)
+  await waitForSlideshow(page)
 }
 
 async function closeSlideshow(page: Page): Promise<void> {
-  await page.locator(overlays).nth(1).click()
+  const viewport = page.viewportSize()!
+  await page.mouse.click(viewport.width / 2, Math.min(80, viewport.height / 4))
   await expect(page.locator('.navOverlay')).not.toHaveClass(/active/)
   await expect(page.locator(stage)).toHaveClass(/closing/)
   await expect(page.locator(stage)).toHaveClass(/trail/)
@@ -279,11 +282,108 @@ test.describe('desktop gallery interaction matrix', () => {
 
     await waitForSlideshow(page)
     const overlayBox = await page.locator('.navOverlay').boundingBox()
-    const panelBox = await page.locator('.image-info-panel').boundingBox()
     expect(overlayBox).not.toBeNull()
-    expect(panelBox).not.toBeNull()
-    expect(overlayBox!.x + overlayBox!.width).toBeLessThanOrEqual(panelBox!.x)
+    expect(overlayBox!.x).toBe(0)
+    expect(overlayBox!.width).toBe(page.viewportSize()!.width)
     await expect(page.locator('.image-info-panel a').first()).toBeEnabled()
+  })
+
+  test('viewport navigation surrounds an interactive, selectable info column', async ({
+    page
+  }) => {
+    await openCollection(page, '/')
+    await buildTrail(page, 5)
+    await openSlideshow(page)
+
+    const viewport = page.viewportSize()!
+    const panel = page.locator('.image-info-panel')
+    const panelBox = await panel.boundingBox()
+    const infoColumn = page.locator('.image-info-hit-column')
+    const columnBox = await infoColumn.boundingBox()
+    expect(panelBox).not.toBeNull()
+    expect(columnBox).not.toBeNull()
+
+    const hitOwner = await page.evaluate(
+      ({ x, y }) => {
+        const hit = document.elementFromPoint(x, y)
+        return {
+          insidePanel: hit?.closest('.image-info-panel') !== null,
+          navAction: hit?.closest<HTMLElement>('[data-nav-action]')?.dataset.navAction
+        }
+      },
+      { x: panelBox!.x + panelBox!.width / 2, y: panelBox!.y + panelBox!.height / 2 }
+    )
+    expect(hitOwner).toEqual({ insidePanel: true, navAction: undefined })
+    const emptyColumnOwner = await page.evaluate(
+      ({ x, y }) => {
+        const hit = document.elementFromPoint(x, y)
+        return {
+          insideColumn: hit?.closest('.image-info-hit-column') !== null,
+          insidePanel: hit?.closest('.image-info-panel') !== null,
+          navAction: hit?.closest<HTMLElement>('[data-nav-action]')?.dataset.navAction
+        }
+      },
+      { x: columnBox!.x + columnBox!.width / 2, y: 10 }
+    )
+    expect(emptyColumnOwner).toEqual({
+      insideColumn: true,
+      insidePanel: false,
+      navAction: undefined
+    })
+    await expect(panel).toHaveCSS('user-select', 'text')
+
+    const title = panel.locator('.project-name')
+    const titleBox = await title.boundingBox()
+    expect(titleBox).not.toBeNull()
+    await page.mouse.move(titleBox!.x + 3, titleBox!.y + titleBox!.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(
+      titleBox!.x + titleBox!.width - 3,
+      titleBox!.y + titleBox!.height / 2,
+      { steps: 8 }
+    )
+    await page.mouse.up()
+    expect(
+      await page.evaluate(() => window.getSelection()?.toString().trim())
+    ).not.toBe('')
+
+    const initialIndex = visible(await imageStates(page), 0.95)[0].index
+    await title.click()
+    await page.waitForTimeout(100)
+    expect(visible(await imageStates(page), 0.95)[0].index).toBe(initialIndex)
+    await expect(page.locator('.navOverlay')).toHaveClass(/active/)
+
+    const tracks = panel.locator('.track-items')
+    await tracks.evaluate((element) => {
+      element.style.maxHeight = '2rem'
+    })
+    expect(
+      await tracks.evaluate((element) => element.scrollHeight > element.clientHeight)
+    ).toBe(true)
+    const tracksBox = await tracks.boundingBox()
+    expect(tracksBox).not.toBeNull()
+    await page.mouse.move(
+      tracksBox!.x + tracksBox!.width / 2,
+      tracksBox!.y + tracksBox!.height / 2
+    )
+    await page.mouse.wheel(0, 300)
+    await expect
+      .poll(async () => tracks.evaluate((element) => element.scrollTop))
+      .toBeGreaterThan(0)
+    expect(visible(await imageStates(page), 0.95)[0].index).toBe(initialIndex)
+
+    await page.mouse.click(2, viewport.height / 2)
+    await waitForSlideshow(page)
+    const previousIndex = visible(await imageStates(page), 0.95)[0].index
+    expect(previousIndex).not.toBe(initialIndex)
+
+    await page.mouse.click(viewport.width - 2, viewport.height / 2)
+    await waitForSlideshow(page)
+    expect(visible(await imageStates(page), 0.95)[0].index).toBe(initialIndex)
+
+    await page.mouse.click(viewport.width / 2, Math.min(80, viewport.height / 4))
+    await expect(page.locator(stage)).toHaveClass(/closing/)
+    await expect(page.locator(stage)).toHaveClass(/trail/)
   })
 
   test('closing shrinks before returning one image to the stage', async ({ page }) => {
@@ -415,7 +515,7 @@ test.describe('desktop gallery interaction matrix', () => {
     expect(visible(await imageStates(page), 0.95)).toHaveLength(1)
 
     const openIndex = visible(await imageStates(page), 0.95)[0].index
-    await page.locator(overlays).nth(2).click()
+    await page.mouse.click(page.viewportSize()!.width - 2, 100)
     await page.waitForTimeout(100)
     await page.setViewportSize({ width: 1180, height: 740 })
     await waitForSlideshow(page)

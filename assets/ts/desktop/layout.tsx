@@ -111,7 +111,6 @@ export default function Desktop(props: {
           setHoverText={setHoverText}
           navVector={navVector}
           setNavVector={setNavVector}
-          withInfo={() => currentImageInfo() !== undefined}
         />
       </Show>
     </>

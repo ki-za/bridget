@@ -11,13 +11,6 @@
   cursor: none;
   pointer-events: none;
 
-  &.with-info {
-    width: min(
-      calc(100vw - var(--panel-max-width) - var(--panel-gap-max)),
-      calc(var(--window-height) - var(--nav-height))
-    );
-  }
-
   &:not(.active) {
     pointer-events: none;
     display: none;
@@ -26,5 +19,13 @@
   .overlay {
     flex: 1;
     pointer-events: auto;
+  }
+
+  .overlay[data-nav-action='previous'] {
+    flex: 0 0 12.5vw;
+  }
+
+  .overlay[data-nav-action='close'] {
+    flex: 0 0 40vw;
   }
 }

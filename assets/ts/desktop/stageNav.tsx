@@ -20,7 +20,6 @@ export default function StageNav(props: {
   setHoverText: Setter<string>
   navVector: Accessor<Vector>
   setNavVector: Setter<Vector>
-  withInfo: Accessor<boolean>
 }): JSX.Element {
   // types
   type NavItem = (typeof navItems)[number]
@@ -90,14 +89,12 @@ export default function StageNav(props: {
 
   return (
     <>
-      <div
-        class="navOverlay"
-        classList={{ active: props.active(), 'with-info': props.withInfo() }}
-      >
+      <div class="navOverlay" classList={{ active: props.active() }}>
         <For each={navItems}>
-          {(item) => (
+          {(item, index) => (
             <div
               class="overlay"
+              data-nav-action={['previous', 'close', 'next'][index()]}
               onClick={() => {
                 handleClick(item)
               }}
