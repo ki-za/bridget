@@ -395,36 +395,23 @@ export default function Stage(props: {
     _gsap.set(elc, { zIndex: stateLength + 1 })
     if (trailInactiveEls.length > 0) {
       tl.to(trailInactiveEls, {
-        y: '+=20',
-        ease: 'power3.in',
-        stagger: 0.075,
-        duration: 0.3,
-        delay: 0.1,
+        ease: 'power2.in',
+        stagger: 0.055,
+        duration: 0.24,
         opacity: 0
       })
     }
     tl.to(
       elc,
       {
-        x: 0,
-        y: 0,
-        ease: 'power3.inOut',
-        duration: 0.7,
-        delay: trailInactiveEls.length > 0 ? 0.3 : 0
-      },
-      '>'
-    )
-    tl.to(
-      elc,
-      {
         x: target.x,
+        y: 0,
         scale: target.scale,
         force3D: true,
         ease: 'power3.inOut',
-        duration: 0.5,
-        delay: 0.1
+        duration: 0.8
       },
-      '>'
+      trailInactiveEls.length > 0 ? '>+=0.08' : 0
     )
     await tl.then(() => {
       if (activeTimeline === tl) activeTimeline = undefined
@@ -681,7 +668,17 @@ export default function Stage(props: {
       <div
         ref={stage}
         class="stage"
-        classList={{ [props.mode]: true }}
+        classList={{
+          trail: props.mode === 'trail',
+          closing: props.mode === 'closing',
+          navigating:
+            props.mode === 'navigating' || props.mode === 'navigating-with-info',
+          'with-info':
+            props.mode === 'opening-with-info' ||
+            props.mode === 'expanded-with-info' ||
+            props.mode === 'navigating-with-info'
+        }}
+        data-mode={props.mode}
         onClick={onClick}
         onKeyDown={onClick}
       >
@@ -693,7 +690,15 @@ export default function Stage(props: {
             props.mode === 'navigating-with-info'
           }
         >
-          <div class="image-info-container">
+          <div
+            class="image-info-container"
+            classList={{
+              interactive: props.mode === 'expanded-with-info',
+              preparing: props.mode === 'opening-with-info'
+            }}
+            inert={props.mode !== 'expanded-with-info'}
+            aria-hidden={props.mode !== 'expanded-with-info' ? 'true' : undefined}
+          >
             <div class="image-area" />
             <ImageInfoPanel info={visibleImageInfo()} />
           </div>

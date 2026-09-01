@@ -14,9 +14,11 @@
   img {
     position: absolute;
     top: 0;
-    left: 0;
-    width: 100vw;
+    left: calc(50% - (var(--window-height) - var(--nav-height)) / 2);
+    width: auto;
     height: 100%;
+    aspect-ratio: 1;
+    backface-visibility: hidden;
     object-fit: contain;
     transform: scale(0.6);
     opacity: 0;
@@ -30,30 +32,15 @@
     }
   }
 
-  &.opening-with-info {
-    .image-info-container {
-      visibility: hidden;
-    }
-
-    .ghost-image-area {
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: auto;
-      height: 100%;
-      max-height: calc(100vw - var(--panel-max-width) - var(--panel-gap-max));
-      aspect-ratio: 1;
-      background: rgba(255, 0, 0, 0.3); // RED DEBUG
+  .image-info-container.preparing {
+    .panel-container {
+      opacity: 0;
       pointer-events: none;
-      z-index: 9999; // Make sure it's visible
     }
   }
 
   // Expanded with info mode
-  &.opening-with-info,
-  &.expanded-with-info,
-  &.navigating-with-info {
+  &.with-info {
     // Layout container for image + panel
     .image-info-container {
       display: flex;
@@ -75,18 +62,15 @@
 
         aspect-ratio: 1;
         pointer-events: none;
-
-        .ghost-img {
-          width: 100%;
-          height: 100%;
-          aspect-ratio: 1;
-          object-fit: cover; /* or contain, depending on your main img style */
-          background: red;
-        }
-
-        img {
-        }
       }
+    }
+
+    // Keep the metadata panel on its own painted layer while the image opens.
+    // The final reveal can then be composited without rasterizing the panel in
+    // the same frame as the zoom completes.
+    .panel-container {
+      transform: translateZ(0);
+      will-change: opacity;
     }
   }
 }

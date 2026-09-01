@@ -1,21 +1,27 @@
 .panel-container {
   display: flex;
   position: relative;
+  z-index: 0;
+  isolation: isolate;
   width: 100%;
   justify-content: center;
   box-sizing: border-box;
   pointer-events: none;
 }
 
+.image-info-container.interactive .panel-container {
+  z-index: calc(var(--z-nav-gallery) + 1);
+}
+
 .image-info-hit-column {
   position: absolute;
   top: 0;
   left: 50%;
-  z-index: 1000;
+  z-index: 0;
   width: min(var(--panel-max-width), calc(100% - var(--xl) * 2));
   height: calc(var(--window-height) - var(--nav-height));
   transform: translateX(-50%);
-  pointer-events: auto;
+  pointer-events: none;
   user-select: text;
   -webkit-user-select: text;
 }
@@ -32,43 +38,22 @@
   margin: var(--xl);
   margin-left: calc(var(--xl) * 0.85);
   flex: 1;
-  z-index: 1001;
+  z-index: 1;
   background-color: white;
-  pointer-events: auto;
+  pointer-events: none;
   user-select: text;
   -webkit-user-select: text;
   cursor: text;
 }
 
-.image-info-panel a,
-.image-info-panel .link-button,
-.image-info-panel .artist-section a,
-.image-info-panel .metadata-section a,
-.image-info-panel .collaborator a,
-.image-info-panel .tag,
-.image-info-panel button {
+.image-info-container.interactive .image-info-hit-column,
+.image-info-container.interactive .image-info-panel {
   pointer-events: auto;
+}
+
+.image-info-panel a,
+.image-info-panel button {
   cursor: pointer;
-}
-
-/* Force text cursor on text elements */
-// .image-info-panel .project-name,
-// .image-info-panel .track-name,
-// .image-info-panel .section-label,
-// .image-info-panel .release-year,
-// .image-info-panel span:not(a span) {
-//   // cursor: pointer !important;
-//   // z-index: var(--z-link) !important;
-//   pointer-events: auto;
-// }
-
-.image-info-panel .image-info-panel * {
-  // cursor: default !important;
-}
-
-.image-info-panel a {
-  z-index: var(--z-link);
-  // cursor: pointer;
 }
 
 .image-info-panel::-webkit-scrollbar {
@@ -184,7 +169,6 @@
   line-height: 1.1;
   letter-spacing: -0.013em;
   margin: 0;
-  z-index: var(--z-link);
 }
 
 .project-links {
@@ -192,8 +176,6 @@
   flex-direction: row;
   gap: calc(var(--xs) * 0.5);
   flex-shrink: 0;
-  z-index: var(--z-link);
-  pointer-events: auto;
   margin-top: var(--lg);
   margin-bottom: var(--md);
 }
@@ -253,7 +235,6 @@
   justify-content: flex-start;
   align-items: baseline;
   margin-bottom: calc(-1 * var(--xs));
-  pointer-events: auto;
   // gap: var(--lg);
   /* padding-left: calc(0.5 * var(--xs)); */
 }
@@ -264,7 +245,6 @@
   text-transform: uppercase;
   margin-right: var(calc(0.7 * --lg));
   margin-bottom: 0.5rem;
-  pointer-events: auto;
 }
 
 .artist-name a {
@@ -287,9 +267,7 @@
 }
 
 .content-constrained {
-  // pointer-events: none;
   width: 100%;
-  z-index: var(--z-link);
 }
 
 .track-items {
@@ -330,9 +308,6 @@
   transition: background var(--transition-fast);
   // line-height: 1;
   flex-wrap: nowrap;
-
-  z-index: var(--z-link);
-  // pointer-events: auto;
   // align-items: center;
 }
 
@@ -361,8 +336,6 @@
   align-content: center;
   font-size: calc(1.2 * var(--panel-label-size));
   gap: calc(var(--xs) * 0.75);
-  z-index: var(--z-link);
-  // pointer-events: auto;
 }
 
 .track-tags .tag {
@@ -434,8 +407,6 @@
 
 .released-by {
   position: relative;
-  z-index: var(--z-link);
-  // pointer-events: auto;
 }
 .collaborator-list {
   font-size: var(--panel-label-size);
@@ -463,8 +434,6 @@
 
 .released-by:last-child,
 .collaborator-list:last-child {
-  z-index: var(--z-link);
-  // pointer-events: auto;
   margin-bottom: 0;
 }
 
@@ -481,8 +450,6 @@
 .metadata-section a:hover,
 .metadata-section a:focus {
   border-color: currentColor;
-
-  z-index: var(--z-link);
 }
 
 .metadata-section span {
@@ -490,8 +457,6 @@
   position: relative;
   opacity: 0.8;
   font-weight: var(--font-weight-regular);
-
-  z-index: var(--z-link);
 }
 
 .collaborator-list span {
@@ -501,7 +466,4 @@
   font-size: var(--panel-label-size);
   font-weight: var(--font-weight-regular);
   opacity: 0.8;
-
-  // pointer-events: auto;
-  z-index: var(--z-link);
 }

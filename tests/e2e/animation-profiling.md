@@ -1,0 +1,38 @@
+# Final zoom profiling
+
+## Symptom: “the final zoom drops a frame”
+
+Search for `final-zoom-image-raster`. The active asset is square, but a regression can
+make its composited layer viewport-wide. Chromium then discovers too many
+high-resolution tiles in the last part of the scale animation and presents the final
+frame late.
+
+Run the cold-cache, 2322×1010 compositor check:
+
+```sh
+PROFILE_FINAL_ZOOM=1 pnpm exec playwright test tests/e2e/final-zoom-profile.spec.ts
+```
+
+The command prints a JSON summary and saves `final-zoom-trace.json` in that test's
+reported output directory. A healthy run has:
+
+- `maxFrameIntervalMs` below 20 ms;
+- no more than 40 post-completion raster tasks (square image plus atomic panel reveal);
+- less than 12 ms total post-completion raster work; and
+- `rasterSettledMs` below 20 ms.
+
+If `postCompletionRasterTasks` grows, first inspect the `.stage img` box: its width and
+height must remain equal. In the trace, search `RasterTask` and compare its `layerId`
+with `UpdateLayer`; repeated high-resolution work on the active image is the failure.
+
+If the image layer is square but `rasterSettledMs` is high, search
+`final-zoom-panel-raster`: verify `.image-info-container` exists during
+`opening-with-info`, the same node survives into `expanded-with-info`, and
+`.panel-container` retains `will-change: opacity`. During opening, `preparing` must
+give the panel `opacity: 0`, and the container must be `inert` and `aria-hidden` so
+real links cannot flash or receive input. A newly mounted panel moves layout, paint,
+and tile preparation back onto the final frame.
+
+Do not stop the trace at the `zoom-expanded` state change. Keep at least 100 ms after
+that marker so delayed paint, tile preparation, sync-tree activation, and draw work
+remain visible.

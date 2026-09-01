@@ -11,7 +11,13 @@ interface ImageState {
 
 interface AnimationFrame {
   images: ImageState[]
+  linkIsHitTarget?: boolean
+  linkVisuallyVisible?: boolean
+  linkZIndex?: string
   mode: string
+  panelInert?: boolean
+  panelOpacity?: number
+  panelZIndex?: string
   title?: string
 }
 
@@ -135,9 +141,39 @@ async function recordAnimation(
         let count = 0
         const sample = (): void => {
           const overlay = document.querySelector('.navOverlay')
+          const stageElement = document.querySelector<HTMLElement>(stageSelector)
+          const infoContainer = document.querySelector<HTMLElement>(
+            '.image-info-container'
+          )
+          const panel = document.querySelector<HTMLElement>('.panel-container')
+          const link = document.querySelector<HTMLElement>('.image-info-panel a')
+          const linkBox = link?.getBoundingClientRect()
+          const linkHit =
+            linkBox === undefined
+              ? undefined
+              : document.elementFromPoint(
+                  linkBox.left + linkBox.width / 2,
+                  linkBox.top + linkBox.height / 2
+                )
           const frame = {
             images: readImages(),
-            mode: document.querySelector(stageSelector)?.className ?? '',
+            linkIsHitTarget:
+              link === null || linkHit === undefined
+                ? undefined
+                : link.contains(linkHit),
+            linkVisuallyVisible:
+              link === null
+                ? undefined
+                : link.checkVisibility({
+                    checkOpacity: true,
+                    checkVisibilityCSS: true
+                  }),
+            linkZIndex: link === null ? undefined : getComputedStyle(link).zIndex,
+            mode: stageElement?.dataset.mode ?? stageElement?.className ?? '',
+            panelInert: infoContainer?.inert,
+            panelOpacity:
+              panel === null ? undefined : Number(getComputedStyle(panel).opacity),
+            panelZIndex: panel === null ? undefined : getComputedStyle(panel).zIndex,
             title:
               document.querySelector('.project-name')?.textContent?.trim() ?? undefined
           }
@@ -206,12 +242,40 @@ test.describe('desktop gallery interaction matrix', () => {
     expect(front).toBeDefined()
 
     const animation = recordAnimation(page)
-    await expect(page.locator(stage)).toHaveClass(/opening-with-info/)
+    await expect(page.locator(stage)).toHaveAttribute('data-mode', 'opening-with-info')
     const openingInfo = page.locator('.image-info-container')
+    const openingPanel = page.locator('.panel-container')
     await expect(openingInfo).toBeAttached()
-    await expect(openingInfo).toHaveCSS('visibility', 'hidden')
+    await expect(openingPanel).toHaveCSS('opacity', '0')
+    await expect(openingPanel).toHaveCSS('will-change', 'opacity')
+    await expect(openingInfo).toHaveAttribute('inert', '')
+    await expect(openingInfo).toHaveAttribute('aria-hidden', 'true')
     const openingInfoElement = await openingInfo.elementHandle()
+    const openingPanelElement = await openingPanel.elementHandle()
     const { frames } = await animation
+    const openingFrames = frames.filter(
+      ({ mode, panelOpacity }) =>
+        mode === 'opening-with-info' && panelOpacity !== undefined
+    )
+    expect(openingFrames.length).toBeGreaterThan(0)
+    expect(
+      openingFrames.every(
+        ({
+          linkIsHitTarget,
+          linkVisuallyVisible,
+          linkZIndex,
+          panelInert,
+          panelOpacity,
+          panelZIndex
+        }) =>
+          panelOpacity === 0 &&
+          panelInert === true &&
+          linkIsHitTarget === false &&
+          linkVisuallyVisible === false &&
+          linkZIndex === 'auto' &&
+          panelZIndex === '0'
+      )
+    ).toBe(true)
     const inactive = orderedTrail.slice(0, -1).map(({ index }) => index)
     const fadeStart = inactive.map((imageIndex) =>
       frames.findIndex(
@@ -222,7 +286,8 @@ test.describe('desktop gallery interaction matrix', () => {
     expect(fadeStart).toEqual([...fadeStart].sort((left, right) => left - right))
 
     const scaleStart = frames.findIndex(
-      ({ images: frameImages }) => frameImages[front!.index].scale > 0.61
+      ({ images: frameImages }) =>
+        frameImages[front!.index].scale > front!.scale + 0.001
     )
     expect(scaleStart).toBeGreaterThan(0)
     const fadeEnd = frames.findIndex(({ images: frameImages }) =>
@@ -233,15 +298,10 @@ test.describe('desktop gallery interaction matrix', () => {
       return Math.abs(current.x - front!.x) > 1 || Math.abs(current.y - front!.y) > 1
     })
     expect(movementStart).toBeGreaterThan(fadeEnd)
+    expect(Math.abs(movementStart - scaleStart)).toBeLessThanOrEqual(1)
     const frameBeforeScale = frames[scaleStart - 1]
     expect(
       inactive.every((imageIndex) => frameBeforeScale.images[imageIndex].opacity < 0.05)
-    ).toBe(true)
-    expect(
-      frames.slice(0, scaleStart).some(({ images: frameImages }) => {
-        const image = frameImages[front!.index]
-        return Math.abs(image.x) < 2 && Math.abs(image.y) < 2
-      })
     ).toBe(true)
     expect(
       frames.every(
@@ -257,10 +317,47 @@ test.describe('desktop gallery interaction matrix', () => {
         .nth(front!.index)
         .evaluate((image) => (image as HTMLElement).style.transform)
     ).toContain('translate3d')
-    await expect(openingInfo).toHaveCSS('visibility', 'visible')
+    await expect(openingPanel).toHaveCSS('opacity', '1')
+    await expect(openingInfo).not.toHaveAttribute('inert', '')
+    await expect(openingInfo).not.toHaveAttribute('aria-hidden', 'true')
+    const expandedLink = page.locator('.image-info-panel a').first()
+    await expect(expandedLink).toBeEnabled()
+    await expect(expandedLink).toHaveCSS('z-index', 'auto')
+    await expect(page.locator('.image-info-panel')).toHaveCSS('pointer-events', 'auto')
+    expect(
+      await page.locator('.panel-container').evaluate((panel) => {
+        const overlay = document.querySelector('.navOverlay')
+        const link = panel.querySelector<HTMLAnchorElement>('.image-info-panel a')!
+        const box = link.getBoundingClientRect()
+        return {
+          aboveNavigation:
+            Number(getComputedStyle(panel).zIndex) >
+            Number(getComputedStyle(overlay!).zIndex),
+          linkIsHitTarget: link.contains(
+            document.elementFromPoint(
+              box.left + box.width / 2,
+              box.top + box.height / 2
+            )
+          )
+        }
+      })
+    ).toEqual({ aboveNavigation: true, linkIsHitTarget: true })
+    await expandedLink.evaluate((link) => {
+      link.addEventListener('click', (event) => {
+        event.preventDefault()
+        link.dataset.testClicked = 'true'
+      })
+    })
+    await expandedLink.click()
+    await expect(expandedLink).toHaveAttribute('data-test-clicked', 'true')
     expect(
       await openingInfoElement!.evaluate(
         (element) => element === document.querySelector('.image-info-container')
+      )
+    ).toBe(true)
+    expect(
+      await openingPanelElement!.evaluate(
+        (element) => element === document.querySelector('.panel-container')
       )
     ).toBe(true)
   })
