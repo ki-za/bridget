@@ -146,11 +146,14 @@ async function recordAnimation(
             overlay?.classList.contains('active') === true
           const navigationComplete =
             requestedOverlay !== undefined &&
+            requestedOverlay !== 1 &&
             count > 2 &&
             frame.images.filter(({ opacity }) => opacity > 0.01).length === 1 &&
             frame.images.some(({ opacity }) => opacity > 0.99) &&
             (initialTitle === undefined || frame.title !== initialTitle)
-          if (openingComplete || navigationComplete || count >= 240) resolve()
+          const closingComplete = requestedOverlay === 1 && frame.mode.includes('trail')
+          if (openingComplete || navigationComplete || closingComplete || count >= 240)
+            resolve()
           else requestAnimationFrame(sample)
         }
         requestAnimationFrame(sample)
@@ -213,9 +216,23 @@ test.describe('desktop gallery interaction matrix', () => {
       ({ images: frameImages }) => frameImages[front!.index].scale > 0.61
     )
     expect(scaleStart).toBeGreaterThan(0)
+    const fadeEnd = frames.findIndex(({ images: frameImages }) =>
+      inactive.every((imageIndex) => frameImages[imageIndex].opacity < 0.05)
+    )
+    const movementStart = frames.findIndex(({ images: frameImages }) => {
+      const current = frameImages[front!.index]
+      return Math.abs(current.x - front!.x) > 1 || Math.abs(current.y - front!.y) > 1
+    })
+    expect(movementStart).toBeGreaterThan(fadeEnd)
     const frameBeforeScale = frames[scaleStart - 1]
     expect(
       inactive.every((imageIndex) => frameBeforeScale.images[imageIndex].opacity < 0.05)
+    ).toBe(true)
+    expect(
+      frames.slice(0, scaleStart).some(({ images: frameImages }) => {
+        const image = frameImages[front!.index]
+        return Math.abs(image.x) < 2 && Math.abs(image.y) < 2
+      })
     ).toBe(true)
     expect(
       frames.every(
@@ -267,6 +284,37 @@ test.describe('desktop gallery interaction matrix', () => {
     expect(panelBox).not.toBeNull()
     expect(overlayBox!.x + overlayBox!.width).toBeLessThanOrEqual(panelBox!.x)
     await expect(page.locator('.image-info-panel a').first()).toBeEnabled()
+  })
+
+  test('closing shrinks before returning one image to the stage', async ({ page }) => {
+    await openCollection(page, '/')
+    await buildTrail(page, 5)
+    await openSlideshow(page)
+
+    const current = visible(await imageStates(page), 0.95)[0]
+    const { frames } = await recordAnimation(page, 1)
+    expect(frames.at(-1)!.mode).toContain('trail')
+    expect(
+      frames.every((frame) => {
+        const shown = visible(frame.images)
+        return shown.length === 1 && shown[0].index === current.index
+      })
+    ).toBe(true)
+
+    const shrinkStart = frames.findIndex(
+      ({ images: frameImages }) =>
+        frameImages[current.index].scale < current.scale - 0.01
+    )
+    const movementStart = frames.findIndex(({ images: frameImages }) => {
+      const image = frameImages[current.index]
+      return Math.abs(image.x - current.x) > 1 || Math.abs(image.y - current.y) > 1
+    })
+    expect(shrinkStart).toBeGreaterThanOrEqual(0)
+    expect(movementStart).toBeGreaterThan(shrinkStart)
+    expect(frames[movementStart - 1].images[current.index].scale).toBeLessThan(0.61)
+
+    const finalImage = visible(frames.at(-1)!.images, 0.95)[0]
+    expect(finalImage.scale).toBeCloseTo(0.6, 2)
   })
 
   test('navigation serializes rapid pointer and keyboard input', async ({ page }) => {

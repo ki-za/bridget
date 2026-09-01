@@ -395,22 +395,35 @@ export default function Stage(props: {
     _gsap.set(elc, { zIndex: stateLength + 1 })
     if (trailInactiveEls.length > 0) {
       tl.to(trailInactiveEls, {
-        ease: 'power2.in',
-        stagger: 0.055,
-        duration: 0.24,
+        y: '+=20',
+        ease: 'power3.in',
+        stagger: 0.075,
+        duration: 0.3,
+        delay: 0.1,
         opacity: 0
       })
     }
     tl.to(
       elc,
       {
-        x: target.x,
+        x: 0,
         y: 0,
+        ease: 'power3.inOut',
+        duration: 0.7,
+        delay: trailInactiveEls.length > 0 ? 0.3 : 0
+      },
+      '>'
+    )
+    tl.to(
+      elc,
+      {
+        x: target.x,
         scale: target.scale,
         ease: 'power3.inOut',
-        duration: 0.8
+        duration: 0.5,
+        delay: 0.1
       },
-      trailInactiveEls.length > 0 ? '>+=0.08' : 0
+      '>'
     )
     await tl.then(() => {
       if (activeTimeline === tl) activeTimeline = undefined
@@ -442,10 +455,15 @@ export default function Stage(props: {
     _gsap.killTweensOf(elsTrailInactive)
     _gsap.set(elsTrailInactive, { opacity: 0, zIndex: 0 })
     tl.to(elc, {
+      scale: 0.6,
+      duration: 0.6,
+      ease: 'power3.inOut'
+    })
+    tl.to(elc, {
       x: latestHistoryItem.x - (stage?.clientWidth ?? window.innerWidth) / 2,
       y: latestHistoryItem.y - (stage?.clientHeight ?? window.innerHeight) / 2,
-      scale: 0.6,
-      duration: 0.8,
+      delay: 0.3,
+      duration: 0.7,
       ease: 'power3.inOut'
     })
     // eslint-disable-next-line solid/reactivity
