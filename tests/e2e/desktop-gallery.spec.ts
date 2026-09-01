@@ -631,6 +631,66 @@ test.describe('desktop gallery interaction matrix', () => {
     await expect(cursorText).toHaveText(nextText!)
   })
 
+  test('track contribution tags expand as one stable hover group', async ({ page }) => {
+    await openCollection(page, '/')
+    await buildTrail(page, 5)
+    await openSlideshow(page)
+
+    const multiTagTrack = page.locator('.track-item').filter({
+      has: page.locator('.track-tags .tag:nth-child(2)')
+    })
+    for (
+      let attempt = 0;
+      attempt < 14 && (await multiTagTrack.count()) === 0;
+      attempt += 1
+    )
+      await navigate(page, 'next')
+
+    const track = multiTagTrack.first()
+    await expect(track).toBeVisible()
+    const tags = track.locator('.track-tags .tag')
+    const labels = track.locator('.tag-label')
+    expect(await tags.count()).toBeGreaterThan(1)
+
+    await track.locator('.track-name').hover()
+    await expect
+      .poll(
+        async () =>
+          await tags.first().evaluate((tag) => tag.getBoundingClientRect().width)
+      )
+      .toBeGreaterThan(5)
+    await expect(tags.first()).toHaveCSS('color', 'rgba(0, 0, 0, 0)')
+
+    const tagGroup = track.locator('.track-tags')
+    await tagGroup.hover()
+    await expect(tags.first()).toHaveCSS('color', 'rgb(255, 255, 255)')
+    await expect(labels.first()).toHaveCSS('overflow', 'visible')
+    expect(
+      await labels.evaluateAll((elements) =>
+        elements.every((label) => label.getBoundingClientRect().width > 0)
+      )
+    ).toBe(true)
+
+    const tagBoxes = await tags.evaluateAll((elements) =>
+      elements.map((tag) => {
+        const box = tag.getBoundingClientRect()
+        return { left: box.left, right: box.right, y: box.top + box.height / 2 }
+      })
+    )
+    await page.mouse.move((tagBoxes[0].right + tagBoxes[1].left) / 2, tagBoxes[0].y)
+    await expect(tags.first()).toHaveCSS('color', 'rgb(255, 255, 255)')
+
+    const groupBox = await tagGroup.boundingBox()
+    expect(groupBox).not.toBeNull()
+    await page.mouse.move(groupBox!.x - 2, groupBox!.y + groupBox!.height / 2)
+    await expect(tags.first()).toHaveCSS('color', 'rgb(255, 255, 255)')
+
+    await page.locator('.project-name').hover()
+    await expect(tags.first()).toHaveCSS('color', 'rgba(0, 0, 0, 0)')
+    await tagGroup.hover()
+    await expect(tags.first()).toHaveCSS('color', 'rgb(255, 255, 255)')
+  })
+
   test('closing shrinks before returning one image to the stage', async ({ page }) => {
     await openCollection(page, '/')
     await buildTrail(page, 5)

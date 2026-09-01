@@ -102,7 +102,7 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
                                   <For each={track.contributionTags}>
                                     {(tag) => (
                                       <span class="tag" data-tag={tag}>
-                                        {tag}
+                                        <span class="tag-label">{tag}</span>
                                       </span>
                                     )}
                                   </For>

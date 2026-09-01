@@ -22,6 +22,7 @@ invariants; a test passing only from a fresh page is not sufficient.
 | Info collection     | Navigate                          | Slideshow                                       | Metadata remains paired with the visible image; links remain interactive                         | Frame-level navigation       |
 | Info collection     | Click viewport sides              | Slideshow                                       | Left/right viewport regions navigate even beyond the image area                                  | Hit-region ownership         |
 | Info collection     | Select, click, or scroll info     | Slideshow                                       | The full info column overrides navigation; text selects, links click, and the track list scrolls | Hit-region ownership         |
+| Info collection     | Hover track contribution tags     | Slideshow                                       | Track hover shows slivers; hovering tags, gaps, or nearby edges expands every unclipped label    | Group-hover ownership        |
 | Plain collection    | Open, navigate, close             | Corresponding state                             | Centered image behavior works without an info panel                                              | Collection permutations      |
 
 Trail settings are tested at every configured threshold: 20/20, 40/10, 80/5, 140/5,
