@@ -3,9 +3,12 @@ import {
   Show,
   Switch,
   createEffect,
+  createMemo,
   createResource,
   createSignal,
   lazy,
+  onCleanup,
+  onMount,
   type JSX
 } from 'solid-js'
 import { render } from 'solid-js/web'
@@ -38,12 +41,34 @@ const Mobile = lazy(async () => await import('./mobile/layout'))
 function Main(): JSX.Element {
   // variables
   const [ijs] = createResource(getImageJSON)
-  const isMobile =
-    window.matchMedia('(hover: none)').matches &&
-    !window.navigator.userAgent.includes('Win')
+  const mobileWidth = window.matchMedia('(max-width: 767px)')
+  const coarsePointer = window.matchMedia('(pointer: coarse)')
+  const noHover = window.matchMedia('(hover: none)')
+  const [isNarrow, setIsNarrow] = createSignal(mobileWidth.matches)
+
+  const ua = window.navigator.userAgent.toLowerCase()
+  const hasTouchInput = 'ontouchstart' in window || window.navigator.maxTouchPoints > 0
+  const isMobileUA = /android|iphone|ipad|ipod|mobile/.test(ua)
+  const isWindowsDesktop = /windows nt/.test(ua)
+  const isMobile = createMemo(
+    () =>
+      isNarrow() ||
+      isMobileUA ||
+      (hasTouchInput && (coarsePointer.matches || noHover.matches) && !isWindowsDesktop)
+  )
 
   // states
   const [scrollable, setScollable] = createSignal(true)
+
+  onMount(() => {
+    const updateWidth = (event: MediaQueryListEvent): void => {
+      setIsNarrow(event.matches)
+    }
+    mobileWidth.addEventListener('change', updateWidth)
+    onCleanup(() => {
+      mobileWidth.removeEventListener('change', updateWidth)
+    })
+  })
 
   createEffect(() => {
     if (scrollable()) {
@@ -58,7 +83,7 @@ function Main(): JSX.Element {
       <Show when={ijs.state === 'ready'}>
         <StateProvider length={ijs()?.length ?? 0}>
           <Switch fallback={<div>Error</div>}>
-            <Match when={isMobile}>
+            <Match when={isMobile()}>
               <Mobile
                 ijs={ijs() ?? []}
                 closeText={container.dataset.close}
@@ -66,7 +91,7 @@ function Main(): JSX.Element {
                 setScrollable={setScollable}
               />
             </Match>
-            <Match when={!isMobile}>
+            <Match when={!isMobile()}>
               <Desktop
                 ijs={ijs() ?? []}
                 prevText={container.dataset.prev}

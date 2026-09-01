@@ -1,5 +1,7 @@
-import { createEffect, onMount, type JSX } from 'solid-js'
+import { type gsap } from 'gsap'
+import { createEffect, on, onMount, type JSX } from 'solid-js'
 import invariant from 'tiny-invariant'
+
 import type { ImageJSON } from '../resources'
 import { useState } from '../state'
 import { loadGsap } from '../utils'
@@ -12,45 +14,77 @@ export default function GalleryImage(props: {
 }): JSX.Element {
   let img: HTMLImageElement | undefined
   let loadingDiv: HTMLDivElement | undefined
-  let _gsap: typeof gsap
-  let listenerAttached = false
+  let _gsap: typeof gsap | undefined
+  let gsapPromise: Promise<typeof gsap> | undefined
+  let revealed = false
   const [state] = useState()
 
-  const setupLoadListener = () => {
-    if (listenerAttached || !img || !loadingDiv || !_gsap) return
-    listenerAttached = true
-    img.src = props.ij.hiUrl
-    img.addEventListener('load', () => {
-      invariant(img, 'ref must be defined')
-      invariant(loadingDiv, 'loadingDiv must be defined')
-      if (state().index !== props.ij.index) {
-        _gsap.set(img, { opacity: 1 })
-        _gsap.set(loadingDiv, { opacity: 0 })
-      } else {
-        _gsap.to(img, { opacity: 1, delay: 0.5, duration: 0.5, ease: 'power3.out' })
-        _gsap.to(loadingDiv, { opacity: 0, duration: 0.5, ease: 'power3.in' })
-      }
-    }, { once: true, passive: true })
+  const revealImage = async (): Promise<void> => {
+    if (revealed) return
+    revealed = true
+
+    invariant(img, 'ref must be defined')
+    invariant(loadingDiv, 'loadingDiv must be defined')
+
+    gsapPromise ??= loadGsap()
+    try {
+      _gsap ??= await gsapPromise
+    } catch (e) {
+      console.log(e)
+    }
+
+    if (_gsap === undefined) {
+      img.style.opacity = '1'
+      loadingDiv.style.opacity = '0'
+      return
+    }
+
+    if (state().index !== props.ij.index) {
+      _gsap.set(img, { opacity: 1 })
+      _gsap.set(loadingDiv, { opacity: 0 })
+      return
+    }
+
+    _gsap.to(img, { opacity: 1, delay: 0.5, duration: 0.5, ease: 'power3.out' })
+    _gsap.to(loadingDiv, { opacity: 0, duration: 0.5, ease: 'power3.in' })
   }
 
   onMount(() => {
-    loadGsap()
+    gsapPromise = loadGsap()
       .then((g) => {
         _gsap = g
-        if (props.load) setupLoadListener()
+        return g
       })
-      .catch((e) => { console.log(e) })
+      .catch((e) => {
+        console.log(e)
+        throw e
+      })
+
+    img?.addEventListener('load', () => void revealImage(), {
+      once: true,
+      passive: true
+    })
+
+    if (props.load && img?.complete && img.currentSrc !== '') void revealImage()
   })
 
-  createEffect(() => {
-    if (props.load) setupLoadListener()
-  })
+  createEffect(
+    on(
+      () => props.load,
+      (load) => {
+        if (!load || img === undefined || !img.complete || img.currentSrc === '') return
+        void revealImage()
+      },
+      { defer: true }
+    )
+  )
 
   return (
     <>
       <div class="slideContainer">
         <img
           ref={img}
+          {...(props.load && { src: props.ij.hiUrl })}
           height={props.ij.hiImgH}
           width={props.ij.hiImgW}
           data-src={props.ij.hiUrl}

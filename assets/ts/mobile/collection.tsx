@@ -94,11 +94,9 @@ export default function Collection(props: {
 
   createEffect(
     on(
-      () => {
-        props.isOpen()
-      },
-      () => {
-        if (!props.isOpen()) scrollToActive() // scroll to active when closed
+      () => [props.isOpen(), props.isAnimating()] as const,
+      ([isOpen, isAnimating]) => {
+        if (!isOpen && !isAnimating) scrollToActive()
       },
       { defer: true }
     )

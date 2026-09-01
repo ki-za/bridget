@@ -4,6 +4,7 @@ import {
   Show,
   createEffect,
   on,
+  onCleanup,
   onMount,
   type Accessor,
   type JSX,
@@ -77,15 +78,17 @@ function onMutation<T extends HTMLElement>(
   element: T,
   trigger: (arg0: MutationRecord) => boolean,
   observeOptions: MutationObserverInit = { attributes: true }
-): void {
-  new MutationObserver((mutations, observer) => {
+): MutationObserver {
+  const observer = new MutationObserver((mutations, currentObserver) => {
     for (const mutation of mutations) {
       if (trigger(mutation)) {
-        observer.disconnect()
+        currentObserver.disconnect()
         break
       }
     }
-  }).observe(element, observeOptions)
+  })
+  observer.observe(element, observeOptions)
+  return observer
 }
 
 export type ViewportMode =
@@ -99,6 +102,15 @@ function remToPx(remValue: number) {
   return remValue * rootFontSize
 }
 
+function getCssLength(property: string, fallback: number): number {
+  const probe = document.createElement('div')
+  probe.style.cssText = `position:fixed;visibility:hidden;width:var(${property})`
+  document.body.append(probe)
+  const value = probe.getBoundingClientRect().width
+  probe.remove()
+  return value || fallback
+}
+
 function getImageTargetTransform(): { x: number; scale: number } {
   const viewportWidth = window.innerWidth
   const navHeight = remToPx(
@@ -109,18 +121,8 @@ function getImageTargetTransform(): { x: number; scale: number } {
   const viewportHeight = window.innerHeight - navHeight
 
   // Get panel width from CSS variable or measure existing panel
-  const panelMaxWidth =
-    remToPx(
-      parseInt(
-        getComputedStyle(document.documentElement).getPropertyValue('--panel-max-width')
-      )
-    ) || 401 // fallback
-
-  const panelGapMax = remToPx(
-    parseInt(
-      getComputedStyle(document.documentElement).getPropertyValue('--panel-gap-max')
-    ) || 1
-  )
+  const panelMaxWidth = getCssLength('--panel-max-width', 480)
+  const panelGapMax = getCssLength('--panel-gap-max', remToPx(1))
 
   // Calculate image area dimensions (same as CSS)
   const imageAreaMaxHeight = viewportWidth - panelMaxWidth - panelGapMax
@@ -170,12 +172,19 @@ export default function Stage(props: {
 }): JSX.Element {
   // variables
   let _gsap: typeof gsap
+  let gsapPromise: Promise<void> | undefined
+  let activeTimeline: gsap.core.Timeline | undefined
+  let resizeFrame: number | undefined
+  let stage: HTMLDivElement | undefined
 
   // eslint-disable-next-line solid/reactivity
   const imgs: DesktopImage[] = Array<DesktopImage>(props.ijs.length)
   let last = { x: 0, y: 0 }
 
   let abortController: AbortController | undefined
+  let lifecycleController: AbortController | undefined
+  const mutationObservers: MutationObserver[] = []
+  let renderedIndexes = new Set<number>()
 
   // states
   let gsapLoaded = false
@@ -184,6 +193,22 @@ export default function Stage(props: {
   const stateLength = state().length
 
   let mounted = false
+
+  const ensureGsapReady = async (): Promise<void> => {
+    if (gsapPromise !== undefined) return await gsapPromise
+
+    gsapPromise = loadGsap()
+      .then((g) => {
+        _gsap = g
+        gsapLoaded = true
+      })
+      .catch((e) => {
+        gsapPromise = undefined
+        console.log(e)
+      })
+
+    await gsapPromise
+  }
 
   const onMouse: (e: MouseEvent) => void = (e) => {
     if (props.isOpen() || props.isAnimating() || !gsapLoaded || !mounted) return
@@ -200,8 +225,11 @@ export default function Stage(props: {
     }
   }
 
-  const onClick: () => void = () => {
-    if (!props.isAnimating()) props.setIsOpen(true)
+  const onClick = async (): Promise<void> => {
+    if (!gsapLoaded) await ensureGsapReady()
+    if (props.isAnimating() || !gsapLoaded) return
+    if (props.cordHist().length === 0) return
+    props.setIsOpen(true)
   }
 
   const setPosition: () => void = () => {
@@ -209,55 +237,42 @@ export default function Stage(props: {
     if (imgs.length === 0) return
     // if (props.isAnimating()) return
     const _cordHist = props.cordHist()
-    const trailElsIndex = getTrailElsIndex(_cordHist)
+    const _state = state()
+    const visibleHistory = _cordHist.slice(-_state.trailLength)
+    const trailElsIndex = getTrailElsIndex(visibleHistory)
     if (trailElsIndex.length === 0) return
 
     const elsTrail = getImagesFromIndexes(imgs, trailElsIndex)
+    const nextRenderedIndexes = new Set(trailElsIndex)
+    const hiddenIndexes = [...renderedIndexes].filter(
+      (index) => !nextRenderedIndexes.has(index)
+    )
+    const hiddenImages = getImagesFromIndexes(imgs, hiddenIndexes)
+    if (hiddenImages.length > 0) {
+      _gsap.killTweensOf(hiddenImages)
+      _gsap.set(hiddenImages, { opacity: 0, zIndex: 0 })
+    }
+    renderedIndexes = nextRenderedIndexes
+
+    const stageWidth = stage?.clientWidth ?? window.innerWidth
+    const stageHeight = stage?.clientHeight ?? window.innerHeight
 
     const _isOpen = props.isOpen()
-    const _state = state()
 
-    // Trail mode positioning
-
+    _gsap.killTweensOf(elsTrail, 'opacity')
     _gsap.set(elsTrail, {
-      x: (i: number) => _cordHist[i].x - window.innerWidth / 2,
-      y: (i: number) => _cordHist[i].y - window.innerHeight / 2,
+      x: (i: number) => visibleHistory[i].x - stageWidth / 2,
+      y: (i: number) => visibleHistory[i].y - stageHeight / 2,
       opacity: (i: number) =>
-        Math.max(
-          (i + 1 + _state.trailLength <= _cordHist.length ? 0 : 1) - (_isOpen ? 1 : 0),
-          0
-        ),
+        Math.max((i + 1 <= visibleHistory.length ? 1 : 0) - (_isOpen ? 1 : 0), 0),
       zIndex: (i: number) => i,
       scale: 0.6
     })
-    // if (props.mode === 'trail') {
-    //   // First hide ALL images to clean up any stale state
-    //   _gsap.set(imgs, { opacity: 0 })
-    //   // Then position and show trail images
-    //   _gsap.set(elsTrail, {
-    //     x: (i: number) => _cordHist[i].x - window.innerWidth / 2,
-    //     y: (i: number) => _cordHist[i].y - window.innerHeight / 2,
-    //     opacity: (i: number) =>
-    //       Math.max(
-    //         (i + 1 + _state.trailLength <= _cordHist.length ? 0 : 1) -
-    //           (_isOpen ? 1 : 0),
-    //         0
-    //       ),
-    //     zIndex: (i: number) => i,
-    //     scale: 0.6
-    //   })
-    // }
     // Expanded modes (with or without info)
     if (_isOpen) {
       const currentIndex = getCurrentElIndex(_cordHist)
       const elc = imgs[currentIndex]
-
-      // Hide all non-current images to prevent background flash
-      imgs.forEach((img, idx) => {
-        if (idx !== currentIndex) {
-          _gsap.set(img, { opacity: 0 })
-        }
-      })
+      _gsap.set(elc, { zIndex: stateLength + 1 })
 
       // Preload adjacent images
       const indexArrayToHires: number[] = []
@@ -276,7 +291,11 @@ export default function Stage(props: {
       }
 
       hires(getImagesFromIndexes(imgs, indexArrayToHires)) // preload
-      _gsap.set(getImagesFromIndexes(imgs, indexArrayToCleanup), { opacity: 0 })
+      const imagesToCleanup = getImagesFromIndexes(imgs, indexArrayToCleanup)
+      if (imagesToCleanup.length > 0) {
+        _gsap.killTweensOf(imagesToCleanup)
+        _gsap.set(imagesToCleanup, { opacity: 0 })
+      }
 
       // Position current image
       if (props.mode === 'expanded-with-info') {
@@ -285,30 +304,13 @@ export default function Stage(props: {
       } else {
         _gsap.set(elc, { x: 0, y: 0, scale: 1 })
       }
-      // // Position current image based on mode
-      // if (props.mode === 'expanded-with-info') {
-      //   // In info mode: CSS handles positioning, GSAP only sets scale
-      //   // Clear x/y transforms to let CSS take over
-      //   const { x, scale } = getImageTargetTransform()
-      //   _gsap.set(elc, {
-      //     x: x,
-      //     y: 0,
-      //     scale: scale
-      //   })
-      // } else {
-      //   // Regular expanded mode: GSAP centers the image
-      //   _gsap.set(elc, { x: 0, y: 0, scale: 1 })
-      // }
-
       setLoaderForHiresImage(elc) // set loader, if loaded set current opacity to 1
     } else {
       lores(elsTrail)
     }
   }
 
-  const expandImage: () => Promise<
-    gsap.core.Omit<gsap.core.Timeline, 'then'>
-  > = async () => {
+  const expandImage = async (): Promise<void> => {
     // isAnimating is prechecked in isOpen effect
     if (!mounted || !gsapLoaded) throw new Error('not mounted or gsap not loaded')
 
@@ -321,12 +323,7 @@ export default function Stage(props: {
     const elc = imgs[elcIndex]
 
     const hasInfo = !!props.currentImageInfo()
-    const infoTransform = hasInfo ? getImageTargetTransform() : { x: 0, scale: 1 }
-
-    if (props.currentImageInfo()) {
-      // console.log('current has image info')
-      const { x, scale } = getImageTargetTransform()
-    }
+    const target = hasInfo ? getImageTargetTransform() : { x: 0, scale: 1 }
 
     // don't hide here because we want a better transition
     hires(
@@ -341,50 +338,42 @@ export default function Stage(props: {
     // to find out how big the image will be when its enlarged for
     // responsiveness
 
+    activeTimeline?.kill()
     const tl = _gsap.timeline()
+    activeTimeline = tl
     const trailInactiveEls = getImagesFromIndexes(
       imgs,
       getTrailInactiveElsIndex(_cordHist, _state)
     )
-    // move down and hide trail inactive
-    tl.to(trailInactiveEls, {
-      y: '+=20',
-      ease: 'power3.in',
-      stagger: 0.075,
-      duration: 0.3,
-      delay: 0.1,
-      opacity: 0
-    })
-    // current move to center
-    tl.to(elc, {
-      y: 0,
-      x: 0,
-      ease: 'power3.inOut',
-      duration: 0.7,
-      delay: 0.3
-    })
-    // current expand
-    tl.to(elc, {
-      delay: 0.1,
-      scale: 1,
-      ease: 'power3.inOut'
-    })
-    if (hasInfo) {
-      tl.to(elc, {
-        delay: 0,
-        transformOrigin: 'left-center',
-        scale: infoTransform.scale,
-        x: infoTransform.x
-      })
-    }
-    return await tl.then(() => {
+    _gsap.set(elc, { zIndex: stateLength + 1 })
+    tl.to(
+      trailInactiveEls,
+      {
+        y: '+=20',
+        ease: 'power3.in',
+        stagger: 0.05,
+        duration: 0.3,
+        opacity: 0
+      },
+      0
+    ).to(
+      elc,
+      {
+        x: target.x,
+        y: 0,
+        scale: target.scale,
+        ease: 'power3.inOut',
+        duration: 0.8
+      },
+      0.1
+    )
+    await tl.then(() => {
+      if (activeTimeline === tl) activeTimeline = undefined
       props.setIsAnimating(false)
     })
   }
 
-  const minimizeImage: () => Promise<
-    gsap.core.Omit<gsap.core.Timeline, 'then'>
-  > = async () => {
+  const minimizeImage = async (): Promise<void> => {
     if (!mounted || !gsapLoaded) throw new Error('not mounted or gsap not loaded')
 
     props.setIsAnimating(true)
@@ -396,41 +385,63 @@ export default function Stage(props: {
     const elcIndex = getCurrentElIndex(_cordHist)
     const elsTrailInactiveIndexes = getTrailInactiveElsIndex(_cordHist, _state)
 
-    lores(getImagesFromIndexes(imgs, [...elsTrailInactiveIndexes, elcIndex]))
-
+    activeTimeline?.kill()
     const tl = _gsap.timeline()
+    activeTimeline = tl
     const elc = getImagesFromIndexes(imgs, [elcIndex])[0]
     const elsTrailInactive = getImagesFromIndexes(imgs, elsTrailInactiveIndexes)
-    // shrink current
-    tl.to(elc, {
-      scale: 0.6,
-      duration: 0.6,
-      ease: 'power3.inOut'
-    })
-    // move current to original position
-    tl.to(elc, {
-      delay: 0.3,
-      duration: 0.7,
-      ease: 'power3.inOut',
-      x: _cordHist.slice(-1)[0].x - window.innerWidth / 2,
-      y: _cordHist.slice(-1)[0].y - window.innerHeight / 2
-    })
-    // show trail inactive
-    tl.to(elsTrailInactive, {
-      y: '-=20',
-      ease: 'power3.out',
-      stagger: -0.1,
-      duration: 0.3,
-      opacity: 1
-    })
+    tl.to(
+      elc,
+      {
+        x: _cordHist.slice(-1)[0].x - (stage?.clientWidth ?? window.innerWidth) / 2,
+        y: _cordHist.slice(-1)[0].y - (stage?.clientHeight ?? window.innerHeight) / 2,
+        scale: 0.6,
+        duration: 0.8,
+        ease: 'power3.inOut'
+      },
+      0
+    ).to(
+      elsTrailInactive,
+      {
+        y: '-=20',
+        ease: 'power3.out',
+        stagger: -0.05,
+        duration: 0.3,
+        opacity: 1
+      },
+      0.65
+    )
     // eslint-disable-next-line solid/reactivity
-    return await tl.then(() => {
+    await tl.then(() => {
+      if (activeTimeline === tl) activeTimeline = undefined
+      lores(getImagesFromIndexes(imgs, [...elsTrailInactiveIndexes, elcIndex]))
       props.setIsAnimating(false)
+      setPosition()
     })
   }
 
   function setLoaderForHiresImage(img: DesktopImage): void {
     if (!mounted || !gsapLoaded) return
+    const revealIfCurrent = (): void => {
+      const history = props.cordHist()
+      const current = history.length > 0 ? imgs[getCurrentElIndex(history)] : undefined
+      if (!props.isOpen() || current !== img) {
+        _gsap.killTweensOf(img, 'opacity')
+        _gsap.set(img, { opacity: 0 })
+        props.setIsLoading(false)
+        return
+      }
+      _gsap.killTweensOf(img, 'opacity')
+      _gsap
+        .to(img, { opacity: 1, ease: 'power3.out', duration: 0.5 })
+        .then(() => {
+          props.setIsLoading(false)
+        })
+        .catch((e) => {
+          console.log(e)
+        })
+    }
+
     if (!img.complete) {
       props.setIsLoading(true)
       // abort controller for cleanup
@@ -440,49 +451,21 @@ export default function Stage(props: {
       img.addEventListener(
         'load',
         () => {
-          _gsap
-            .to(img, { opacity: 1, ease: 'power3.out', duration: 0.5 })
-            // eslint-disable-next-line solid/reactivity
-            .then(() => {
-              props.setIsLoading(false)
-            })
-            .catch((e) => {
-              console.log(e)
-            })
-            .finally(() => {
-              controller.abort()
-            })
+          revealIfCurrent()
+          controller.abort()
         },
         { once: true, passive: true, signal: abortSignal }
       )
       img.addEventListener(
         'error',
         () => {
-          _gsap
-            .set(img, { opacity: 1 })
-            // eslint-disable-next-line solid/reactivity
-            .then(() => {
-              props.setIsLoading(false)
-            })
-            .catch((e) => {
-              console.log(e)
-            })
-            .finally(() => {
-              controller.abort()
-            })
+          revealIfCurrent()
+          controller.abort()
         },
         { once: true, passive: true, signal: abortSignal }
       )
     } else {
-      _gsap
-        .set(img, { opacity: 1 })
-        // eslint-disable-next-line solid/reactivity
-        .then(() => {
-          props.setIsLoading(false)
-        })
-        .catch((e) => {
-          console.log(e)
-        })
+      revealIfCurrent()
     }
   }
 
@@ -494,38 +477,29 @@ export default function Stage(props: {
         img.src = img.dataset.loUrl
       }
       // lores preloader for rest of the images
-      // eslint-disable-next-line solid/reactivity
-      onMutation(img, (mutation) => {
-        // if open or animating, hold
-        if (props.isOpen() || props.isAnimating()) return false
-        // if mutation is not about style attribute, hold
-        if (mutation.attributeName !== 'style') return false
-        const opacity = parseFloat(img.style.opacity)
-        // if opacity is not 1, hold
-        if (opacity !== 1) return false
-        // preload the i + 5th image, if it exists
-        if (i + 5 < imgs.length) {
-          imgs[i + 5].src = imgs[i + 5].dataset.loUrl
-        }
-        // triggered
-        return true
-      })
+      mutationObservers.push(
+        onMutation(img, (mutation) => {
+          if (props.isOpen() || props.isAnimating()) return false
+          if (mutation.attributeName !== 'style') return false
+          const opacity = parseFloat(img.style.opacity)
+          if (opacity !== 1) return false
+          if (i + 5 < imgs.length) imgs[i + 5].src = imgs[i + 5].dataset.loUrl
+          return true
+        })
+      )
     })
-    // load gsap on mousemove
-    window.addEventListener(
-      'mousemove',
-      () => {
-        loadGsap()
-          .then((g) => {
-            _gsap = g
-            gsapLoaded = true
-          })
-          .catch((e) => {
-            console.log(e)
-          })
-      },
-      { passive: true, once: true }
-    )
+    window.addEventListener('pointermove', () => void ensureGsapReady(), {
+      passive: true,
+      once: true
+    })
+    window.addEventListener('pointerdown', () => void ensureGsapReady(), {
+      passive: true,
+      once: true
+    })
+    window.addEventListener('click', () => void ensureGsapReady(), {
+      passive: true,
+      once: true
+    })
     // event listeners
     abortController = new AbortController()
     const abortSignal = abortController.signal
@@ -533,8 +507,30 @@ export default function Stage(props: {
       passive: true,
       signal: abortSignal
     })
+    lifecycleController = new AbortController()
+    window.addEventListener(
+      'resize',
+      () => {
+        activeTimeline?.progress(1)
+        if (resizeFrame !== undefined) cancelAnimationFrame(resizeFrame)
+        resizeFrame = requestAnimationFrame(() => {
+          resizeFrame = undefined
+          setPosition()
+        })
+      },
+      { passive: true, signal: lifecycleController.signal }
+    )
     // mounted
     mounted = true
+
+    onCleanup(() => {
+      mounted = false
+      abortController?.abort()
+      lifecycleController?.abort()
+      activeTimeline?.kill()
+      mutationObservers.forEach((observer) => observer.disconnect())
+      if (resizeFrame !== undefined) cancelAnimationFrame(resizeFrame)
+    })
   })
 
   createEffect(
@@ -553,10 +549,16 @@ export default function Stage(props: {
       async () => {
         if (props.isAnimating()) return
         if (props.isOpen()) {
+          if (props.cordHist().length === 0) {
+            props.setIsOpen(false)
+            return
+          }
           // expand image
           await expandImage()
             .catch(() => {
-              void 0
+              props.setIsOpen(false)
+              props.setIsAnimating(false)
+              props.setIsLoading(false)
             })
             .then(() => {
               // abort controller for cleanup
@@ -589,6 +591,7 @@ export default function Stage(props: {
   return (
     <>
       <div
+        ref={stage}
         class="stage"
         classList={{ [props.mode]: true }}
         onClick={onClick}

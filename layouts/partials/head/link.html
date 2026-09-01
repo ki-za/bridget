@@ -12,29 +12,26 @@
 
 {{- /* fuck safari */ -}}
 <script>
-  var _lastW = window.innerWidth
-  function z() {
+  var viewportFrame
+  function syncViewportHeight() {
     document
       .querySelector(':root')
       .style.setProperty('--window-height', window.innerHeight + 'px')
   }
-  z()
-  window.addEventListener(
-    'resize',
-    function () {
-      // Only update on actual resize (width change), not mobile browser chrome show/hide
-      if (window.innerWidth !== _lastW) {
-        _lastW = window.innerWidth
-        z()
-      }
-    },
-    { passive: true }
-  )
+  function scheduleViewportSync() {
+    cancelAnimationFrame(viewportFrame)
+    viewportFrame = requestAnimationFrame(syncViewportHeight)
+  }
+  syncViewportHeight()
+  window.addEventListener('resize', scheduleViewportSync, { passive: true })
+  window.visualViewport?.addEventListener('resize', scheduleViewportSync, {
+    passive: true
+  })
   // Handle orientation changes explicitly
   window.addEventListener(
     'orientationchange',
     function () {
-      setTimeout(z, 200)
+      setTimeout(scheduleViewportSync, 200)
     },
     { passive: true }
   )

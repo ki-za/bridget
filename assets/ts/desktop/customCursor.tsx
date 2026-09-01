@@ -6,63 +6,49 @@ export default function CustomCursor(props: {
   cursorText: Accessor<string>
   isOpen: Accessor<boolean>
 }): JSX.Element {
-  // types
-  interface XY {
-    x: number
-    y: number
-  }
-
   // variables
   let controller: AbortController | undefined
+  let cursor: HTMLDivElement | undefined
+  let frame: number | undefined
+  let nextX = 0
+  let nextY = 0
 
   // states
-  const [xy, setXy] = createSignal<XY>({ x: 0, y: 0 })
   const [suppressed, setSuppressed] = createSignal(false) // whether to hide the custom-cursor
 
   // helper functions
 
   const onMouse: (e: MouseEvent) => void = (e) => {
-    const { clientX, clientY, target } = e
-    setXy({ x: clientX, y: clientY })
+    nextX = e.clientX
+    nextY = e.clientY
+    if (frame !== undefined) return
 
-    const elementUnderCursor = document.elementFromPoint(clientX, clientY)
+    frame = requestAnimationFrame(() => {
+      frame = undefined
+      if (cursor !== undefined) {
+        cursor.style.transform = `translate3d(${nextX}px, ${nextY}px, 0)`
+      }
 
-    if (elementUnderCursor instanceof HTMLElement) {
-      const cursorStyle = getComputedStyle(elementUnderCursor).cursor
-      const tag = elementUnderCursor.tagName
+      const elementUnderCursor = document.elementFromPoint(nextX, nextY)
 
-      const isInteractiveElement =
-        tag === 'A' ||
-        tag === 'BUTTON' ||
-        tag === 'INPUT' ||
-        tag === 'TEXTAREA' ||
-        tag === 'SELECT'
+      if (elementUnderCursor instanceof HTMLElement) {
+        const cursorStyle = getComputedStyle(elementUnderCursor).cursor
+        const tag = elementUnderCursor.tagName
 
-      const hasDefaultCursor = cursorStyle === 'default' || cursorStyle === 'text'
+        const isInteractiveElement =
+          tag === 'A' ||
+          tag === 'BUTTON' ||
+          tag === 'INPUT' ||
+          tag === 'TEXTAREA' ||
+          tag === 'SELECT'
 
-      const shouldSuppress = hasDefaultCursor || isInteractiveElement
+        const hasDefaultCursor = cursorStyle === 'default' || cursorStyle === 'text'
 
-      setSuppressed(shouldSuppress)
-    }
-
-    // if (target instanceof HTMLElement) {
-    //   const tag = target.tagName // category of mouse hover location
-    //   const pointerStyle = getComputedStyle(target).cursor
-    //   console.log(pointerStyle)
-    //
-    //   const shouldHide =
-    //     tag === 'A' ||
-    //     tag === 'BUTTON' ||
-    //     tag === 'INPUT' ||
-    //     tag === 'TEXTAREA' ||
-    //     tag === 'SELECT' ||
-    //     pointerStyle === 'text' ||
-    //     pointerStyle === 'pointer' ||
-    //     pointerStyle === 'default'
-    //
-    //   setSuppressed(shouldHide)
-    // }
+        setSuppressed(hasDefaultCursor || isInteractiveElement)
+      }
+    })
   }
+
   // effects
   onMount(() => {
     controller = new AbortController()
@@ -75,14 +61,15 @@ export default function CustomCursor(props: {
 
   onCleanup(() => {
     controller?.abort()
+    if (frame !== undefined) cancelAnimationFrame(frame)
   })
 
   return (
     <>
       <div
+        ref={cursor}
         class="cursor"
         classList={{ active: props.active(), suppressed: suppressed() }}
-        style={{ transform: `translate3d(${xy().x}px, ${xy().y}px, 0)` }}
       >
         <div class="cursorInner">{props.cursorText()}</div>
       </div>

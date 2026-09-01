@@ -4,8 +4,10 @@ import {
   createSignal,
   For,
   on,
+  onCleanup,
   onMount,
   Show,
+  untrack,
   type Accessor,
   type JSX,
   type Setter
@@ -45,7 +47,10 @@ export default function Gallery(props: {
 }): JSX.Element {
   // variables
   let _gsap: typeof gsap
-  let _swiper: Swiper
+  let _swiper: Swiper | undefined
+  let initPromise: Promise<void> | undefined
+  let activeTransition: gsap.core.Timeline | undefined
+  let resizeFrame: number | undefined
 
   let curtain: HTMLDivElement | undefined
   let gallery: HTMLDivElement | undefined
@@ -61,34 +66,30 @@ export default function Gallery(props: {
 
   const [state, { setIndex }] = useState()
   const [libLoaded, setLibLoaded] = createSignal(false)
+  const [swiperReady, setSwiperReady] = createSignal(false)
   // eslint-disable-next-line solid/reactivity
   const [loads, setLoads] = createStore(Array<boolean>(props.ijs.length).fill(false))
 
   // helper functions
   const slideUp: () => void = () => {
-    // isAnimating is prechecked in isOpen effect
     if (!libLoaded() || !mounted) return
     props.setIsAnimating(true)
+    props.setScrollable(false)
 
     invariant(curtain, 'curtain is not defined')
     invariant(gallery, 'gallery is not defined')
 
-    _gsap.to(curtain, {
-      opacity: 1,
-      duration: 1
-    })
-
-    _gsap.to(gallery, {
-      y: 0,
-      ease: 'power3.inOut',
-      duration: 1,
-      delay: 0.4
-    })
-
-    setTimeout(() => {
-      props.setScrollable(false)
-      props.setIsAnimating(false)
-    }, 1200)
+    activeTransition?.kill()
+    _gsap.killTweensOf([curtain, gallery])
+    activeTransition = _gsap
+      .timeline({
+        onComplete: () => {
+          activeTransition = undefined
+          props.setIsAnimating(false)
+        }
+      })
+      .to(curtain, { opacity: 1, duration: 1 }, 0)
+      .to(gallery, { yPercent: 0, ease: 'power3.inOut', duration: 1 }, 0.4)
   }
 
   const slideDown: () => void = () => {
@@ -98,24 +99,19 @@ export default function Gallery(props: {
     invariant(gallery, 'curtain is not defined')
     invariant(curtain, 'gallery is not defined')
 
-    _gsap.to(gallery, {
-      y: '100%',
-      ease: 'power3.inOut',
-      duration: 1
-    })
-
-    _gsap.to(curtain, {
-      opacity: 0,
-      duration: 1.2,
-      delay: 0.4
-    })
-
-    setTimeout(() => {
-      // cleanup
-      props.setScrollable(true)
-      props.setIsAnimating(false)
-      lastIndex = -1
-    }, 1400)
+    activeTransition?.kill()
+    _gsap.killTweensOf([curtain, gallery])
+    activeTransition = _gsap
+      .timeline({
+        onComplete: () => {
+          activeTransition = undefined
+          props.setScrollable(true)
+          props.setIsAnimating(false)
+          lastIndex = -1
+        }
+      })
+      .to(gallery, { yPercent: 100, ease: 'power3.inOut', duration: 1 }, 0)
+      .to(curtain, { opacity: 0, duration: 1.2 }, 0.4)
   }
 
   const galleryLoadImages: () => void = () => {
@@ -139,52 +135,88 @@ export default function Gallery(props: {
   }
 
   const changeSlide: (slide: number) => void = (slide) => {
-    // we are already in the gallery, don't need to
-    // check mounted or libLoaded
+    if (!swiperReady() || _swiper === undefined) return
     galleryLoadImages()
     _swiper.slideTo(slide, 0)
   }
 
+  const ensureGalleryReady = async (): Promise<void> => {
+    if (initPromise !== undefined) return await initPromise
+
+    initPromise = (async () => {
+      try {
+        const [g, S] = await Promise.all([loadGsap(), loadSwiper()])
+        _gsap = g
+
+        invariant(galleryInner, 'galleryInner is not defined')
+        invariant(gallery, 'gallery is not defined')
+        _gsap.set(gallery, { y: 0, yPercent: 100 })
+        _swiper = new S(galleryInner, { spaceBetween: 20 })
+        _swiper.on('slideChange', ({ realIndex }) => {
+          setIndex(realIndex)
+        })
+
+        setLibLoaded(true)
+        setSwiperReady(true)
+
+        const initialIndex = untrack(() => state().index)
+        if (initialIndex >= 0) {
+          changeSlide(initialIndex)
+          lastIndex = initialIndex
+        }
+      } catch (e) {
+        initPromise = undefined
+        setSwiperReady(false)
+        console.log(e)
+      }
+    })()
+
+    await initPromise
+  }
+
   // effects
   onMount(() => {
+    const controller = new AbortController()
+    const signal = controller.signal
+    window.addEventListener('pointerdown', () => void ensureGalleryReady(), {
+      once: true,
+      passive: true,
+      signal
+    })
     window.addEventListener(
-      'touchstart',
+      'resize',
       () => {
-        loadGsap()
-          .then((g) => {
-            _gsap = g
-          })
-          .catch((e) => {
-            console.log(e)
-          })
-        loadSwiper()
-          .then((S) => {
-            invariant(galleryInner, 'galleryInner is not defined')
-            _swiper = new S(galleryInner, { spaceBetween: 20 })
-
-            _swiper.on('slideChange', ({ realIndex }) => {
-              setIndex(realIndex)
-            })
-            galleryLoadImages()
-            console.log('state index:', state().index, 'loads:', JSON.stringify(loads))
-          })
-          .catch((e) => {
-            console.log(e)
-          })
-        setLibLoaded(true)
+        if (resizeFrame !== undefined) cancelAnimationFrame(resizeFrame)
+        resizeFrame = requestAnimationFrame(() => {
+          resizeFrame = undefined
+          _swiper?.update()
+          if (
+            _gsap !== undefined &&
+            gallery !== undefined &&
+            activeTransition === undefined
+          ) {
+            _gsap.set(gallery, { yPercent: props.isOpen() ? 0 : 100 })
+          }
+        })
       },
-      { once: true, passive: true }
+      { passive: true, signal }
     )
     mounted = true
+
+    onCleanup(() => {
+      mounted = false
+      controller.abort()
+      activeTransition?.kill()
+      _swiper?.destroy()
+      if (resizeFrame !== undefined) cancelAnimationFrame(resizeFrame)
+    })
   })
 
   createEffect(
     on(
-      () => {
-        state()
-      },
-      () => {
-        const i = state().index
+      () => [swiperReady(), state().index] as const,
+      ([ready, i]) => {
+        if (!ready || i < 0) return
         if (i === lastIndex)
           return // change slide only when index is changed
         else if (lastIndex === -1)
@@ -202,12 +234,12 @@ export default function Gallery(props: {
 
   createEffect(
     on(
-      () => {
-        props.isOpen()
-      },
-      () => {
+      () => props.isOpen(),
+      async (isOpen) => {
+        if (isOpen && !swiperReady()) await ensureGalleryReady()
+        if (!libLoaded() || !swiperReady()) return
         if (props.isAnimating()) return
-        if (props.isOpen()) slideUp()
+        if (isOpen) slideUp()
         else slideDown()
       },
       { defer: true }
@@ -219,25 +251,22 @@ export default function Gallery(props: {
       <div ref={gallery} class="gallery">
         <div ref={galleryInner} class="galleryInner">
           <div class="swiper-wrapper">
-            <Show when={libLoaded()}>
-              <For each={props.ijs}>
-                {(ij, i) => (
-                  <div class={`swiper-slide ${ij.imageInfo ? 'has-info' : ''}`}>
-                    <div class="slide-content">
-                      <GalleryImage
-                        load={loads[i()]}
-                        ij={ij}
-                        loadingText={_loadingText}
-                      />
-                      {/* NEW: Add info panel below image */}
-                      <Show when={ij.imageInfo}>
-                        <MobileImageInfoPanel info={ij.imageInfo} />
-                      </Show>
-                    </div>
+            <For each={props.ijs}>
+              {(ij, i) => (
+                <div class={`swiper-slide ${ij.imageInfo ? 'has-info' : ''}`}>
+                  <div class="slide-content">
+                    <GalleryImage
+                      load={loads[i()]}
+                      ij={ij}
+                      loadingText={_loadingText}
+                    />
+                    <Show when={Math.abs(state().index - i()) <= 1 && ij.imageInfo}>
+                      <MobileImageInfoPanel info={ij.imageInfo} />
+                    </Show>
                   </div>
-                )}
-              </For>
-            </Show>
+                </div>
+              )}
+            </For>
           </div>
         </div>
         <GalleryNav

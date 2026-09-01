@@ -44,7 +44,11 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
                     {(name, index) => (
                       <>
                         <Show when={artistLinks()[index()]} fallback={<>{name}</>}>
-                          <a href={artistLinks()[index()]} target="_blank" rel="noopener noreferrer">
+                          <a
+                            href={artistLinks()[index()]}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
                             {name}
                           </a>
                         </Show>
@@ -58,12 +62,22 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
               <Show when={info().spotifyLink || info().appleMusicLink}>
                 <div class="project-links">
                   <Show when={info().spotifyLink}>
-                    <a href={info().spotifyLink} target="_blank" rel="noopener noreferrer" class="link-button link-icon">
+                    <a
+                      href={info().spotifyLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="link-button link-icon"
+                    >
                       Spotify
                     </a>
                   </Show>
                   <Show when={info().appleMusicLink}>
-                    <a href={info().appleMusicLink} target="_blank" rel="noopener noreferrer" class="link-button link-icon">
+                    <a
+                      href={info().appleMusicLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="link-button link-icon"
+                    >
                       Apple Music
                     </a>
                   </Show>
@@ -78,7 +92,7 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
                     <h4 class="track-section-label">Tracks</h4>
                     <div class="track-items">
                       <For each={info().trackList}>
-                        {(track, index) => (
+                        {(track) => (
                           <>
                             <div class="track-item">
                               <span class="track-name">{track.name}</span>
@@ -113,12 +127,24 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
                         <For each={info().collaborators}>
                           {(collaborator, index) => (
                             <>
-                              <Show when={collaboratorLinks()[index()]} fallback={<span class="collaborator">{collaborator}</span>}>
-                                <a href={collaboratorLinks()[index()]} target="_blank" rel="noopener noreferrer" class="collaborator">
+                              <Show
+                                when={collaboratorLinks()[index()]}
+                                fallback={
+                                  <span class="collaborator">{collaborator}</span>
+                                }
+                              >
+                                <a
+                                  href={collaboratorLinks()[index()]}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  class="collaborator"
+                                >
                                   {collaborator}
                                 </a>
                               </Show>
-                              <Show when={index() < info().collaborators!.length - 1}>{', '}</Show>
+                              <Show when={index() < info().collaborators!.length - 1}>
+                                {', '}
+                              </Show>
                             </>
                           )}
                         </For>
@@ -131,12 +157,21 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
                         <For each={info().releasedBy}>
                           {(publisher, index) => (
                             <>
-                              <Show when={releasedByLinks()[index()]} fallback={<span>{publisher}</span>}>
-                                <a href={releasedByLinks()[index()]} target="_blank" rel="noopener noreferrer">
+                              <Show
+                                when={releasedByLinks()[index()]}
+                                fallback={<span>{publisher}</span>}
+                              >
+                                <a
+                                  href={releasedByLinks()[index()]}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
                                   {publisher}
                                 </a>
                               </Show>
-                              <Show when={index() < info().releasedBy!.length - 1}>{', '}</Show>
+                              <Show when={index() < info().releasedBy!.length - 1}>
+                                {', '}
+                              </Show>
                             </>
                           )}
                         </For>

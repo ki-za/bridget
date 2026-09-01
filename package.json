@@ -11,6 +11,7 @@
     "lint": "eslint . --fix && prettier --write .",
     "lint:check": "eslint . && prettier . --check",
     "dev": "run-p vite:dev hugo:dev",
+    "dev:orb": "run-p vite:dev hugo:orb",
     "build": "run-s vite:build hugo:build",
     "server": "run-p vite:server hugo:server",
     "vite:build": "DISABLE_WATCH=1 vite build",
@@ -19,6 +20,7 @@
     "hugo:build": "hugo --logLevel info --source=exampleSite --minify",
     "hugo:preview": "hugo --logLevel info --source=exampleSite -D",
     "hugo:dev": "hugo server --source=exampleSite -D --disableFastRender --watch --logLevel info",
+    "hugo:orb": "hugo server --source=exampleSite -D --disableFastRender --watch --logLevel info --bind 0.0.0.0 --port $PORT --baseURL $PUBLIC_URL --appendPort=false",
     "hugo:server": "hugo server --source=exampleSite --disableFastRender -e production --watch --logLevel info"
   },
   "repository": {

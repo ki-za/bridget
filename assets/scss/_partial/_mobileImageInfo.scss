@@ -76,10 +76,18 @@
   border-radius: 3px;
 }
 
-.tag[data-tag='producer'] { background: #5b7aa8; }
-.tag[data-tag='writer'] { background: #7a9070; }
-.tag[data-tag='mixer'] { background: #a8775b; }
-.tag[data-tag='violinist'] { background: #8a70a8; }
+.tag[data-tag='producer'] {
+  background: #5b7aa8;
+}
+.tag[data-tag='writer'] {
+  background: #7a9070;
+}
+.tag[data-tag='mixer'] {
+  background: #a8775b;
+}
+.tag[data-tag='violinist'] {
+  background: #8a70a8;
+}
 
 .project-name {
   font-size: 1.5rem;
@@ -256,8 +264,12 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .track-modal {
@@ -272,8 +284,12 @@
 }
 
 @keyframes slideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 .track-modal-header {
@@ -350,12 +366,18 @@
 
 @media (max-width: 374px) {
   .mobile-image-info {
-    .project-name { font-size: 1.25rem; }
-    .artist-name { font-size: 1rem; }
+    .project-name {
+      font-size: 1.25rem;
+    }
+    .artist-name {
+      font-size: 1rem;
+    }
     .external-links {
       flex-direction: row;
       width: 100%;
-      .link-button { flex: 1; }
+      .link-button {
+        flex: 1;
+      }
     }
   }
 }

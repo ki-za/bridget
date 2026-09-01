@@ -64,8 +64,6 @@ export default function Desktop(props: {
     return img?.imageInfo
   })
 
-  const hasImageInfo = createMemo(() => currentImage()?.imageInfo !== undefined)
-
   const viewPortMode = createMemo<ViewportMode>(() => {
     if (!isOpen()) return 'trail'
     if (currentImageInfo() && isOpen() && isAnimating()) {

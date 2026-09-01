@@ -13,13 +13,16 @@
   {{- $context.Scratch.Add "img" slice -}}
   {{- range sort . "Name" "desc" -}}
     {{- $image := . -}}
+    {{- if ne site.Params.autoOrient false -}}
+      {{- $image = $image | images.Filter (images.AutoOrient) -}}
+    {{- end -}}
     {{- $index = sub $index 1 -}}
     {{- $alt := .Name -}}
     {{- with $params.unifiedAlt -}}
       {{- $alt = . -}}
     {{- end -}}
-    {{- $lores := .Resize (site.Params.loResOpt | default "700x webp Lanczos q60") -}}
-    {{- $hires := .Resize (site.Params.hiResOpt | default "2000x webp Lanczos q75") -}}
+    {{- $lores := $image.Resize (site.Params.loResOpt | default "700x webp Lanczos q60") -}}
+    {{- $hires := $image.Resize (site.Params.hiResOpt | default "2000x webp Lanczos q75") -}}
     {{- /* Get imageInfo for this specific image */ -}}
     {{- $imageInfo := index $imageInfoData .Name -}}
     {{- $context.Scratch.Add "img" (dict

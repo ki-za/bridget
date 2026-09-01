@@ -1,0 +1,8 @@
+services:
+  bridget:
+    command: pnpm run dev:orb
+    health: /
+    portal:
+      title: Bridget
+      description: Review the responsive gallery and its animations.
+    agent: control

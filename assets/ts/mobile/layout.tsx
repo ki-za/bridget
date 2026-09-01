@@ -1,4 +1,4 @@
-import { Show, createSignal, type JSX, type Setter } from 'solid-js'
+import { Show, createSignal, onCleanup, type JSX, type Setter } from 'solid-js'
 
 import type { ImageJSON } from '../resources'
 
@@ -26,6 +26,10 @@ export default function Mobile(props: {
   // states
   const [isOpen, setIsOpen] = createSignal(false)
   const [isAnimating, setIsAnimating] = createSignal(false)
+
+  onCleanup(() => {
+    props.setScrollable(true)
+  })
 
   return (
     <>

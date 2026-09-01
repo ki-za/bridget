@@ -331,6 +331,13 @@ _[Contents](#contents)_
 
 _[Contents](#contents)_
 
+By default, Bridget auto-orients gallery images from EXIF orientation before resizing. This behavior is enabled when `autoOrient` is omitted; only explicit `false` disables it:
+
+```toml
+# config/_default/params.toml
+autoOrient = false
+```
+
 Detailed description in the comments.
 
 ### `sitemap.toml`

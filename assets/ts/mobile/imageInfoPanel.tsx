@@ -6,11 +6,6 @@ import { toArray } from '../resources'
 export default function MobileImageInfoPanel(props: { info?: ImageInfo }): JSX.Element {
   const [showTrackModal, setShowTrackModal] = createSignal(false)
 
-  const openTrackModal = () => {
-    setShowTrackModal(true)
-    document.body.style.overflow = 'hidden'
-  }
-
   const closeTrackModal = () => {
     setShowTrackModal(false)
     document.body.style.overflow = ''
