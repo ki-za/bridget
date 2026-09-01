@@ -414,6 +414,10 @@ export default function Stage(props: {
     hires([elc])
     setLoaderForHiresImage(elc)
 
+    // Keep first-use network and decode work out of the movement timeline. The
+    // browser retains the decoded image for subsequent openings and navigation.
+    await elc.decode().catch(() => undefined)
+
     // to find out how big the image will be when its enlarged for
     // responsiveness
 

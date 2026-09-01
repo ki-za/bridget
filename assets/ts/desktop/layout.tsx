@@ -50,7 +50,7 @@ export default function Desktop(props: {
 
   const active = createMemo(() => isOpen() && !isAnimating())
   const cursorActive = createMemo(
-    () => isOpen() && (!isAnimating() || navVector() !== 'none')
+    () => isOpen() && (isLoading() || !isAnimating() || navVector() !== 'none')
   )
   const cursorText = createMemo(() => (isLoading() ? props.loadingText : hoverText()))
 

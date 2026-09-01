@@ -18,8 +18,13 @@ reported output directory. A healthy run has:
 
 - `maxFrameIntervalMs` below 20 ms;
 - no more than 40 post-completion raster tasks (square image plus atomic panel reveal);
-- less than 12 ms total post-completion raster work; and
-- `rasterSettledMs` below 20 ms.
+- less than 30 ms total post-completion raster worker time; and
+- `rasterSettledMs` below 40 ms.
+
+The frame interval and raster-task count are the primary regression signals. Individual
+`RasterTask` durations are worker-CPU time and vary with shared orb load, so their
+bounds intentionally allow that noise while still rejecting work that does not settle
+promptly.
 
 If `postCompletionRasterTasks` grows, first inspect the `.stage img` box: its width and
 height must remain equal. In the trace, search `RasterTask` and compare its `layerId`
@@ -39,10 +44,19 @@ remain visible.
 
 ## High-resolution loading policy
 
-Opening assigns the high-resolution URL only to the selected image. Once the slideshow
-is stable, it preloads the previous image after 150 ms and the next image after another
-150 ms. Closing or navigating cancels that queue; navigation immediately prioritizes
-the requested image instead.
+Opening assigns the high-resolution URL only to the selected image and waits for its
+`decode()` promise before movement begins. On a cold cache, the cursor can therefore
+show genuine loading while the image remains stationary instead of letting decode work
+interrupt the fade, center, or zoom choreography. Once the slideshow is stable, it
+preloads the previous image after 150 ms and the next image after another 150 ms.
+Closing or navigating cancels that queue; navigation immediately prioritizes the
+requested image instead.
+
+If only the first opening stutters, compare cold and warm traces before changing the
+timeline. A large first-only `ImageDecodeTask` or layout cost is cache warm-up, not a
+late adjacent-image request. Verify the selected image stays stationary until decode
+completes; do not eagerly preload the entire collection, because that makes memory and
+network contention grow with gallery size.
 
 Do not diagnose `final-zoom-image-raster` as a network batching problem unless a trace
 shows `ResourceSendRequest` during the zoom. The original three-image batch completed

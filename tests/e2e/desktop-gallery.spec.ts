@@ -241,6 +241,17 @@ test.describe('desktop gallery interaction matrix', () => {
     const front = orderedTrail.at(-1)
     expect(front).toBeDefined()
 
+    await page
+      .locator(images)
+      .nth(front!.index)
+      .evaluate((image) => {
+        const decodeGate = new Promise<void>((resolve) => {
+          ;(
+            window as typeof window & { releaseOpeningDecode?: () => void }
+          ).releaseOpeningDecode = resolve
+        })
+        ;(image as HTMLImageElement).decode = async () => await decodeGate
+      })
     const animation = recordAnimation(page)
     await expect(page.locator(stage)).toHaveAttribute('data-mode', 'opening-with-info')
     const openingInfo = page.locator('.image-info-container')
@@ -271,6 +282,27 @@ test.describe('desktop gallery interaction matrix', () => {
       false,
       false
     ])
+    await page.waitForTimeout(100)
+    const loadingText = await page.locator('.container').getAttribute('data-loading')
+    await expect(page.locator('.cursor')).toHaveClass(/active/)
+    await expect(page.locator('.cursorInner')).toHaveText(loadingText!)
+    const waitingForDecode = await imageStates(page)
+    expect(
+      orderedTrail.every(({ index, opacity, scale, x, y }) => {
+        const waitingImage = waitingForDecode[index]
+        return (
+          Math.abs(waitingImage.opacity - opacity) < 0.01 &&
+          Math.abs(waitingImage.scale - scale) < 0.001 &&
+          Math.abs(waitingImage.x - x) < 1 &&
+          Math.abs(waitingImage.y - y) < 1
+        )
+      })
+    ).toBe(true)
+    await page.evaluate(() => {
+      ;(
+        window as typeof window & { releaseOpeningDecode?: () => void }
+      ).releaseOpeningDecode?.()
+    })
     const { frames } = await animation
     const openingFrames = frames.filter(
       ({ mode, panelOpacity }) =>
