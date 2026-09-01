@@ -8,6 +8,7 @@ nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  column-gap: var(--space-standard);
 
   width: 100%;
   height: var(--nav-height);
@@ -37,6 +38,22 @@ nav {
 @media (max-width: $tablet), (hover: none) {
   nav {
     top: 0;
+
+    .navArtist {
+      flex: 0 0 auto;
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .links {
+      flex: 0 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
   }
 
   .index,

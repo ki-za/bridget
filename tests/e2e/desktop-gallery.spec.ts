@@ -66,8 +66,12 @@ async function openCollection(
 }
 
 async function buildTrail(page: Page, crossings: number): Promise<ImageState[]> {
+  const viewport = page.viewportSize()!
   for (let index = 0; index < crossings; index += 1) {
-    await page.mouse.move(index % 2 === 0 ? 1100 : 120, 160 + (index % 5) * 110)
+    await page.mouse.move(
+      index % 2 === 0 ? viewport.width - 20 : 20,
+      160 + (index % 5) * 110
+    )
     await page.waitForTimeout(25)
   }
   return visible(await imageStates(page), 0.95)
@@ -256,8 +260,10 @@ test.describe('desktop gallery interaction matrix', () => {
     await expect(page.locator(stage)).toHaveAttribute('data-mode', 'opening-with-info')
     const openingInfo = page.locator('.image-info-container')
     const openingPanel = page.locator('.panel-container')
+    const openingDivider = page.locator('.section-divider').first()
     await expect(openingInfo).toBeAttached()
     await expect(openingPanel).toHaveCSS('opacity', '0')
+    await expect(openingDivider).toHaveCSS('opacity', '0')
     await expect(openingPanel).toHaveCSS('will-change', 'opacity')
     await expect(openingInfo).toHaveAttribute('inert', '')
     await expect(openingInfo).toHaveAttribute('aria-hidden', 'true')
@@ -375,6 +381,9 @@ test.describe('desktop gallery interaction matrix', () => {
         .evaluate((image) => (image as HTMLElement).style.transform)
     ).toContain('translate3d')
     await expect(openingPanel).toHaveCSS('opacity', '1')
+    await expect(openingDivider).toHaveCSS('opacity', '1')
+    await expect(openingDivider).toHaveCSS('transition-duration', '0.3s')
+    await expect(openingDivider).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.08)')
     await expect(openingInfo).not.toHaveAttribute('inert', '')
     await expect(openingInfo).not.toHaveAttribute('aria-hidden', 'true')
     const expandedLink = page.locator('.image-info-panel a').first()
@@ -833,5 +842,196 @@ test.describe('desktop gallery interaction matrix', () => {
     await page.setViewportSize({ width: 1280, height: 800 })
     await expect.poll(async () => visible(await imageStates(page), 0.95).length).toBe(1)
     await expect(page.locator('.navOverlay')).not.toHaveClass(/active/)
+  })
+
+  test('narrow desktop fits the expanded image to its layout area', async ({
+    page
+  }) => {
+    await page.setViewportSize({ width: 853, height: 900 })
+    await openCollection(page, '/')
+    await buildTrail(page, 5)
+    await openSlideshow(page)
+
+    const geometry = await page.evaluate(() => {
+      const imageArea = document.querySelector<HTMLElement>('.image-area')!
+      const areaBounds = imageArea.getBoundingClientRect()
+      const activeImage = Array.from(
+        document.querySelectorAll<HTMLImageElement>('.stage img')
+      ).find((image) => Number(getComputedStyle(image).opacity) > 0.95)!
+      const imageBounds = activeImage.getBoundingClientRect()
+      const panel = document.querySelector<HTMLElement>('.panel-container')!
+      const panelBounds = panel.getBoundingClientRect()
+      return {
+        area: { left: areaBounds.left, width: areaBounds.width },
+        image: { left: imageBounds.left, width: imageBounds.width },
+        panel: {
+          backgroundColor: getComputedStyle(panel, '::before').backgroundColor,
+          left: panelBounds.left,
+          right: panelBounds.right
+        }
+      }
+    })
+
+    expect(geometry.image.width).toBeGreaterThan(853 * 0.5)
+    expect(Math.abs(geometry.image.width - geometry.area.width)).toBeLessThanOrEqual(
+      0.75
+    )
+    expect(Math.abs(geometry.image.left - geometry.area.left)).toBeLessThanOrEqual(0.75)
+    expect(geometry.panel.left).toBeLessThan(geometry.image.left + geometry.image.width)
+    expect(geometry.panel.right).toBeLessThanOrEqual(853)
+    expect(geometry.panel.backgroundColor).toBe('rgb(255, 255, 255)')
+  })
+
+  test('overlap handoff preserves image and info geometry without a jump', async ({
+    page
+  }) => {
+    await page.setViewportSize({ width: 1200, height: 1375 })
+    await openCollection(page, '/')
+    await buildTrail(page, 5)
+    await openSlideshow(page)
+
+    const readGeometry = async (): Promise<{
+      imageTop: number
+      imageWidth: number
+      infoHeight: number
+      infoTop: number
+      infoWidth: number
+      overlaps: boolean
+      releaseTop: number
+      rightEdgeNavigatesNext: boolean
+    }> =>
+      await page.evaluate(() => {
+        const image = Array.from(
+          document.querySelectorAll<HTMLImageElement>('.stage img')
+        ).find((element) => Number(getComputedStyle(element).opacity) > 0.95)!
+        const info = document.querySelector<HTMLElement>('.image-info-panel')!
+        const imageArea = document.querySelector<HTMLElement>('.image-area')!
+        const releaseRow = document.querySelector<HTMLElement>('.artist-section')!
+        const imageBounds = image.getBoundingClientRect()
+        const infoBounds = info.getBoundingClientRect()
+        const rightEdgeTarget = document.elementFromPoint(
+          window.innerWidth - 4,
+          infoBounds.top + 4
+        )
+        return {
+          imageTop: imageArea.getBoundingClientRect().top,
+          imageWidth: imageBounds.width,
+          infoHeight: infoBounds.height,
+          infoTop: infoBounds.top,
+          infoWidth: infoBounds.width,
+          overlaps: document
+            .querySelector('.stage')!
+            .classList.contains('image-info-overlap'),
+          releaseTop: releaseRow.getBoundingClientRect().top,
+          rightEdgeNavigatesNext:
+            rightEdgeTarget?.getAttribute('data-nav-action') === 'next'
+        }
+      })
+
+    let overlapWidth: number | undefined
+    for (let width = 1190; width >= 600; width -= 10) {
+      await page.setViewportSize({ width, height: 1375 })
+      await page.waitForTimeout(30)
+      if ((await readGeometry()).overlaps) {
+        overlapWidth = width
+        break
+      }
+    }
+    expect(overlapWidth).toBeDefined()
+
+    await page.setViewportSize({ width: overlapWidth! + 10, height: 1375 })
+    await expect.poll(async () => (await readGeometry()).overlaps).toBe(false)
+
+    let before = await readGeometry()
+    let after: Awaited<ReturnType<typeof readGeometry>> | undefined
+    for (let width = overlapWidth! + 9; width >= overlapWidth!; width -= 1) {
+      await page.setViewportSize({ width, height: 1375 })
+      await page.waitForTimeout(30)
+      const current = await readGeometry()
+      if (current.overlaps) {
+        after = current
+        break
+      }
+      before = current
+    }
+    expect(after).toBeDefined()
+
+    expect(before.imageTop).toBeLessThan(before.releaseTop - 2)
+    expect(after!.imageTop).toBeGreaterThanOrEqual(after!.releaseTop - 2)
+    expect(Math.abs(after!.imageWidth - before.imageWidth)).toBeLessThanOrEqual(2)
+    expect(Math.abs(after!.infoTop - before.infoTop)).toBeLessThanOrEqual(0.5)
+    expect(Math.abs(after!.infoWidth - before.infoWidth)).toBeLessThanOrEqual(1)
+    expect(Math.abs(after!.infoHeight - before.infoHeight)).toBeLessThanOrEqual(1)
+    expect(after!.rightEdgeNavigatesNext).toBe(true)
+  })
+
+  test('wide desktop preserves the established image-info layout', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await openCollection(page, '/')
+    await buildTrail(page, 5)
+    await openSlideshow(page)
+
+    const geometry = await page.evaluate(() => {
+      const imageArea = document.querySelector<HTMLElement>('.image-area')!
+      const panel = document.querySelector<HTMLElement>('.panel-container')!
+      const info = document.querySelector<HTMLElement>('.image-info-panel')!
+      const imageBounds = imageArea.getBoundingClientRect()
+      const panelBounds = panel.getBoundingClientRect()
+      const infoBounds = info.getBoundingClientRect()
+      return {
+        imageRight: imageBounds.right,
+        infoWidth: infoBounds.width,
+        panelLeft: panelBounds.left,
+        panelWidth: panelBounds.width
+      }
+    })
+
+    expect(Math.abs(geometry.panelLeft - geometry.imageRight)).toBeLessThanOrEqual(0.5)
+    expect(geometry.panelWidth).toBeCloseTo(1440 - geometry.imageRight, 0)
+    expect(geometry.infoWidth).toBeGreaterThanOrEqual(400)
+    expect(geometry.infoWidth).toBeLessThanOrEqual(480)
+  })
+
+  test('narrow desktop keeps its gallery and branding visible above the image', async ({
+    page
+  }) => {
+    for (const width of [640, 427, 320, 240, 180]) {
+      await page.setViewportSize({ width, height: 900 })
+      await openCollection(page, '/')
+      await buildTrail(page, 5)
+      await openSlideshow(page)
+
+      await expect(page.locator('.collection')).toHaveCount(0)
+      const title = page.locator('.project-name')
+      await expect(title).toBeVisible()
+      const titleBounds = await title.boundingBox()
+      expect(titleBounds).not.toBeNull()
+      expect(titleBounds!.x).toBeGreaterThanOrEqual(0)
+      expect(titleBounds!.x + titleBounds!.width).toBeLessThanOrEqual(width)
+      expect(
+        await page
+          .locator('.image-info-panel')
+          .evaluate((panel) => panel.scrollWidth <= panel.clientWidth)
+      ).toBe(true)
+      expect(
+        await page.locator('nav').evaluate((nav) => {
+          const artistBounds = nav.querySelector('.navArtist')!.getBoundingClientRect()
+          const linksBounds = nav.querySelector('.links')!.getBoundingClientRect()
+          return (
+            artistBounds.right <= linksBounds.left &&
+            linksBounds.right <= window.innerWidth
+          )
+        })
+      ).toBe(true)
+
+      const image = visible(await imageStates(page), 0.95)[0]
+      expect(image.scale).toBeGreaterThan(0)
+
+      await page.mouse.move(width - 2, 450)
+      const cursorBounds = await page.locator('.cursorInner').boundingBox()
+      expect(cursorBounds).not.toBeNull()
+      expect(cursorBounds!.x).toBeGreaterThanOrEqual(0)
+      expect(cursorBounds!.x + cursorBounds!.width).toBeLessThanOrEqual(width)
+    }
   })
 })

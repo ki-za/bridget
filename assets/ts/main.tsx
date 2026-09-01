@@ -7,8 +7,6 @@ import {
   createResource,
   createSignal,
   lazy,
-  onCleanup,
-  onMount,
   type JSX
 } from 'solid-js'
 import { render } from 'solid-js/web'
@@ -41,10 +39,8 @@ const Mobile = lazy(async () => await import('./mobile/layout'))
 function Main(): JSX.Element {
   // variables
   const [ijs] = createResource(getImageJSON)
-  const mobileWidth = window.matchMedia('(max-width: 767px)')
   const coarsePointer = window.matchMedia('(pointer: coarse)')
   const noHover = window.matchMedia('(hover: none)')
-  const [isNarrow, setIsNarrow] = createSignal(mobileWidth.matches)
 
   const ua = window.navigator.userAgent.toLowerCase()
   const hasTouchInput = 'ontouchstart' in window || window.navigator.maxTouchPoints > 0
@@ -52,23 +48,12 @@ function Main(): JSX.Element {
   const isWindowsDesktop = /windows nt/.test(ua)
   const isMobile = createMemo(
     () =>
-      isNarrow() ||
       isMobileUA ||
       (hasTouchInput && (coarsePointer.matches || noHover.matches) && !isWindowsDesktop)
   )
 
   // states
   const [scrollable, setScollable] = createSignal(true)
-
-  onMount(() => {
-    const updateWidth = (event: MediaQueryListEvent): void => {
-      setIsNarrow(event.matches)
-    }
-    mobileWidth.addEventListener('change', updateWidth)
-    onCleanup(() => {
-      mobileWidth.removeEventListener('change', updateWidth)
-    })
-  })
 
   createEffect(() => {
     if (scrollable()) {

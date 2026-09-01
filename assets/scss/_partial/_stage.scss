@@ -47,7 +47,6 @@
       flex: 1;
       align-items: flex-start;
       justify-content: flex-start;
-      // gap: 3.5vw;
       width: 100%;
       height: 100%;
       position: relative;
@@ -58,8 +57,10 @@
         position: relative;
         align-self: center;
         height: 100%;
-        max-height: calc(100vw - var(--panel-max-width) - var(--panel-gap-max));
-
+        max-height: max(
+          50vw,
+          calc(100vw - var(--panel-max-width) - var(--panel-gap-max))
+        );
         aspect-ratio: 1;
         pointer-events: none;
       }
@@ -71,6 +72,81 @@
     .panel-container {
       transform: translateZ(0);
       will-change: opacity;
+    }
+  }
+
+  &.image-info-overlap.with-info {
+    .panel-container {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: calc(var(--z-nav-gallery) + 1);
+      width: min(
+        100%,
+        var(
+          --image-info-overlap-width,
+          calc(var(--panel-max-width) + var(--panel-gap-max))
+        )
+      );
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: -1;
+        width: 100%;
+        height: calc(var(--window-height) - var(--nav-height));
+        background: white;
+        border-left: 1px solid var(--panel-border);
+        pointer-events: none;
+      }
+    }
+  }
+
+  @media (max-width: 30rem) {
+    &.with-info {
+      .panel-container {
+        min-width: 0;
+      }
+
+      .image-info-panel {
+        min-width: 0;
+        grid-template-columns: minmax(0, 1fr);
+        align-content: start;
+
+        .project-header {
+          width: 100%;
+        }
+
+        .project-name,
+        .artist-name,
+        .metadata-section {
+          overflow-wrap: anywhere;
+        }
+
+        .project-links {
+          flex-wrap: wrap;
+          max-width: 100%;
+        }
+
+        .artist-section {
+          max-width: 100%;
+          flex-wrap: wrap;
+        }
+      }
+    }
+  }
+
+  @media (max-width: 20rem) {
+    &.image-info-overlap.with-info .image-info-panel {
+      margin-right: var(--sm);
+      margin-left: var(--sm);
+
+      .project-name {
+        font-size: clamp(1.5rem, 11vw, 2rem);
+        text-wrap: wrap;
+      }
     }
   }
 }

@@ -102,59 +102,17 @@ export type ViewportMode =
   | 'expanded-with-info'
   | 'closing'
 
-function remToPx(remValue: number) {
-  const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize)
-  return remValue * rootFontSize
-}
-
-function getCssLength(property: string, fallback: number): number {
-  const probe = document.createElement('div')
-  probe.style.cssText = `position:fixed;visibility:hidden;width:var(${property})`
-  document.body.append(probe)
-  const value = probe.getBoundingClientRect().width
-  probe.remove()
-  return value || fallback
-}
-
-function getImageTargetTransform(): { x: number; scale: number } {
-  const viewportWidth = window.innerWidth
-  const navHeight = remToPx(
-    parseInt(
-      getComputedStyle(document.documentElement).getPropertyValue('--nav-height')
-    )
-  )
-  const viewportHeight = window.innerHeight - navHeight
-
-  // Get panel width from CSS variable or measure existing panel
-  const panelMaxWidth = getCssLength('--panel-max-width', 480)
-  const panelGapMax = getCssLength('--panel-gap-max', remToPx(1))
-
-  // Calculate image area dimensions (same as CSS)
-  const imageAreaMaxHeight = viewportWidth - panelMaxWidth - panelGapMax
-  const imageAreaHeight = Math.min(imageAreaMaxHeight, viewportHeight)
-  const imageAreaWidth = imageAreaHeight // 1:1 aspect ratio
-
-  // Image area is left-aligned and vertically centered
-  const imageAreaLeft = 0
-  const imageAreaCenterX = imageAreaLeft + imageAreaWidth / 2
-
-  // Calculate offset from viewport center
-  const viewportCenterX = viewportWidth / 2
-  const x = imageAreaCenterX - viewportCenterX
-
-  // console.log('targetimagetransform-values', { panelMaxWidth, panelGapMax })
-  // Scale from full viewport height to image area height
-  const scale = imageAreaHeight / viewportHeight
-
-  // console.log('Calculated transform:', {
-  //   x,
-  //   scale,
-  //   imageAreaHeight,
-  //   imageAreaWidth,
-  //   imageAreaMaxHeight
-  // })
-  //
-  return { x, scale }
+function getImageTargetTransform(
+  imageArea: HTMLDivElement,
+  image: HTMLImageElement
+): { x: number; scale: number } {
+  return {
+    x:
+      imageArea.offsetLeft +
+      imageArea.offsetWidth / 2 -
+      (image.offsetLeft + image.offsetWidth / 2),
+    scale: imageArea.offsetWidth / image.offsetWidth
+  }
 }
 
 /**
@@ -182,6 +140,7 @@ export default function Stage(props: {
   let adjacentPreloadTimer: number | undefined
   let resizeFrame: number | undefined
   let stage: HTMLDivElement | undefined
+  let imageArea: HTMLDivElement | undefined
 
   // eslint-disable-next-line solid/reactivity
   const imgs: DesktopImage[] = Array<DesktopImage>(props.ijs.length)
@@ -196,6 +155,7 @@ export default function Stage(props: {
   // states
   let gsapLoaded = false
   const [visibleImageInfo, setVisibleImageInfo] = createSignal<ImageInfo>()
+  const [imageInfoOverlaps, setImageInfoOverlaps] = createSignal(false)
 
   const [state, { incIndex }] = useState()
   const stateLength = state().length
@@ -307,6 +267,8 @@ export default function Stage(props: {
     const stageWidth = stage?.clientWidth ?? window.innerWidth
     const stageHeight = stage?.clientHeight ?? window.innerHeight
 
+    updateImageInfoOverlap()
+
     const positionedTrail = visibleHistory.filter(
       ({ i }) => imgs[i] !== preservedExpandedImage
     )
@@ -361,7 +323,8 @@ export default function Stage(props: {
         props.mode === 'expanded-with-info' ||
         props.mode === 'navigating-with-info'
       ) {
-        const { x, scale } = getImageTargetTransform()
+        if (imageArea === undefined) throw new Error('missing image area')
+        const { x, scale } = getImageTargetTransform(imageArea, elc)
         _gsap.set(elc, { x, y: 0, scale })
       } else {
         _gsap.set(elc, { x: 0, y: 0, scale: 1 })
@@ -376,7 +339,10 @@ export default function Stage(props: {
       const updateVisibleInfo =
         navigationComplete === undefined
           ? undefined
-          : () => setVisibleImageInfo(nextImageInfo)
+          : () => {
+              setVisibleImageInfo(nextImageInfo)
+              requestAnimationFrame(updateImageInfoOverlap)
+            }
       setLoaderForHiresImage(
         elc,
         previousExpandedImage,
@@ -405,9 +371,15 @@ export default function Stage(props: {
     ]
     expandedImageIndex = elcIndex
     setVisibleImageInfo(props.currentImageInfo())
+    updateImageInfoOverlap()
+    requestAnimationFrame(updateImageInfoOverlap)
 
     const hasInfo = !!props.currentImageInfo()
-    const target = hasInfo ? getImageTargetTransform() : { x: 0, scale: 1 }
+    if (hasInfo && imageArea === undefined) throw new Error('missing image area')
+    const target =
+      hasInfo && imageArea !== undefined
+        ? getImageTargetTransform(imageArea, elc)
+        : { x: 0, scale: 1 }
 
     // don't hide here because we want a better transition
     clearAdjacentPreload()
@@ -596,6 +568,37 @@ export default function Stage(props: {
     }
   }
 
+  function updateImageInfoOverlap(): void {
+    if (stage === undefined || imageArea === undefined || !props.currentImageInfo()) {
+      setImageInfoOverlaps(false)
+      stage?.style.removeProperty('--image-info-overlap-width')
+      return
+    }
+
+    const releaseRow = stage.querySelector<HTMLElement>('.artist-section')
+    const panel = stage.querySelector<HTMLElement>('.panel-container')
+    if (releaseRow === null || panel === null) return
+
+    const panelBounds = panel.getBoundingClientRect()
+    const stageBounds = stage.getBoundingClientRect()
+    const panelMinWidth = parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue('--panel-min-width')
+    )
+    const panelOverflows = panelBounds.right > stageBounds.right + 0.5
+    const panelIsTooNarrow = panelBounds.width < panelMinWidth
+    const shouldOverlap =
+      imageArea.getBoundingClientRect().top >=
+        releaseRow.getBoundingClientRect().top - 2 ||
+      panelOverflows ||
+      panelIsTooNarrow
+    if (shouldOverlap === imageInfoOverlaps()) return
+
+    if (shouldOverlap && !panelOverflows && !panelIsTooNarrow) {
+      stage.style.setProperty('--image-info-overlap-width', `${panelBounds.width}px`)
+    } else stage.style.removeProperty('--image-info-overlap-width')
+    setImageInfoOverlaps(shouldOverlap)
+  }
+
   onMount(() => {
     // preload logic
     imgs.forEach((img, i) => {
@@ -724,6 +727,7 @@ export default function Stage(props: {
         classList={{
           trail: props.mode === 'trail',
           closing: props.mode === 'closing',
+          'image-info-overlap': imageInfoOverlaps(),
           navigating:
             props.mode === 'navigating' || props.mode === 'navigating-with-info',
           'with-info':
@@ -752,7 +756,7 @@ export default function Stage(props: {
             inert={props.mode !== 'expanded-with-info'}
             aria-hidden={props.mode !== 'expanded-with-info' ? 'true' : undefined}
           >
-            <div class="image-area" />
+            <div ref={imageArea} class="image-area" />
             <ImageInfoPanel info={visibleImageInfo()} />
           </div>
         </Show>

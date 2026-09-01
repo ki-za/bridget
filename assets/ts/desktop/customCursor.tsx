@@ -25,7 +25,12 @@ export default function CustomCursor(props: {
     frame = requestAnimationFrame(() => {
       frame = undefined
       if (cursor !== undefined) {
-        cursor.style.transform = `translate3d(${nextX}px, ${nextY}px, 0)`
+        const halfWidth = cursor.offsetWidth / 2
+        const cursorX = Math.max(
+          halfWidth,
+          Math.min(nextX, window.innerWidth - halfWidth)
+        )
+        cursor.style.transform = `translate3d(${cursorX}px, ${nextY}px, 0)`
       }
 
       const elementUnderCursor = document.elementFromPoint(nextX, nextY)
