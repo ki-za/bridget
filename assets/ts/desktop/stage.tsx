@@ -688,7 +688,9 @@ export default function Stage(props: {
         {/* Wrapper only appears in info mode */}
         <Show
           when={
-            props.mode === 'expanded-with-info' || props.mode === 'navigating-with-info'
+            props.mode === 'opening-with-info' ||
+            props.mode === 'expanded-with-info' ||
+            props.mode === 'navigating-with-info'
           }
         >
           <div class="image-info-container">

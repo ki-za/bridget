@@ -31,6 +31,10 @@
   }
 
   &.opening-with-info {
+    .image-info-container {
+      visibility: hidden;
+    }
+
     .ghost-image-area {
       position: absolute;
       left: 0;
@@ -47,6 +51,7 @@
   }
 
   // Expanded with info mode
+  &.opening-with-info,
   &.expanded-with-info,
   &.navigating-with-info {
     // Layout container for image + panel

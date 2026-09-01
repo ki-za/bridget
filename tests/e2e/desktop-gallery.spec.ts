@@ -205,7 +205,13 @@ test.describe('desktop gallery interaction matrix', () => {
     const front = orderedTrail.at(-1)
     expect(front).toBeDefined()
 
-    const { frames } = await recordAnimation(page)
+    const animation = recordAnimation(page)
+    await expect(page.locator(stage)).toHaveClass(/opening-with-info/)
+    const openingInfo = page.locator('.image-info-container')
+    await expect(openingInfo).toBeAttached()
+    await expect(openingInfo).toHaveCSS('visibility', 'hidden')
+    const openingInfoElement = await openingInfo.elementHandle()
+    const { frames } = await animation
     const inactive = orderedTrail.slice(0, -1).map(({ index }) => index)
     const fadeStart = inactive.map((imageIndex) =>
       frames.findIndex(
@@ -251,6 +257,12 @@ test.describe('desktop gallery interaction matrix', () => {
         .nth(front!.index)
         .evaluate((image) => (image as HTMLElement).style.transform)
     ).toContain('translate3d')
+    await expect(openingInfo).toHaveCSS('visibility', 'visible')
+    expect(
+      await openingInfoElement!.evaluate(
+        (element) => element === document.querySelector('.image-info-container')
+      )
+    ).toBe(true)
   })
 
   test('slideshow navigation is a non-blank, geometry-stable crossfade', async ({
