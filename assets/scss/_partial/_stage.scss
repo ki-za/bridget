@@ -5,6 +5,11 @@
   height: calc(var(--window-height) - var(--nav-height));
   cursor: default;
 
+  &.navigating,
+  &.navigating-with-info {
+    cursor: none;
+  }
+
   // Default image styles (trail + expanded modes)
   img {
     position: absolute;

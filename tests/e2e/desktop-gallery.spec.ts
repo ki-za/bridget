@@ -386,6 +386,74 @@ test.describe('desktop gallery interaction matrix', () => {
     await expect(page.locator(stage)).toHaveClass(/trail/)
   })
 
+  test('navigation keeps its cursor label unless the image is loading', async ({
+    page
+  }) => {
+    await openCollection(page, '/')
+    await buildTrail(page, 5)
+    await openSlideshow(page)
+
+    const viewport = page.viewportSize()!
+    const cursor = page.locator('.cursor')
+    const cursorText = cursor.locator('.cursorInner')
+    await page.mouse.move(viewport.width - 2, viewport.height / 2)
+    const nextText = (await cursorText.textContent())?.trim()
+    expect(nextText).not.toBe('')
+
+    await page.mouse.click(viewport.width - 2, viewport.height / 2)
+    await expect(page.locator(stage)).toHaveClass(/navigating/)
+    await expect(cursor).toHaveClass(/active/)
+    await expect(cursor).not.toHaveClass(/suppressed/)
+    await expect(cursorText).toHaveText(nextText!)
+    await page.mouse.move(viewport.width - 3, viewport.height / 2 + 3)
+    await expect(cursor).not.toHaveClass(/suppressed/)
+    await expect(cursorText).toHaveText(nextText!)
+    await waitForSlideshow(page)
+
+    let releaseImage!: () => void
+    const imageGate = new Promise<void>((resolve) => {
+      releaseImage = resolve
+    })
+    await page.route('**/cursor-loading-*.png', async (route) => {
+      await imageGate
+      await route.fulfill({
+        contentType: 'image/png',
+        body: Buffer.from(
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAF/gL+XyB7WQAAAABJRU5ErkJggg==',
+          'base64'
+        )
+      })
+    })
+    await page.locator(images).evaluateAll((elements) => {
+      elements.forEach((image, index) => {
+        const target = image as HTMLImageElement
+        target.dataset.hiUrl = `/cursor-loading-${index}.png`
+        Object.defineProperty(target, 'complete', {
+          configurable: true,
+          get: () => false
+        })
+      })
+    })
+
+    const loadingText = await page.locator('.container').getAttribute('data-loading')
+    await page.mouse.move(viewport.width - 2, viewport.height / 2)
+    await page.mouse.click(viewport.width - 2, viewport.height / 2)
+    await expect(page.locator(stage)).toHaveClass(/navigating/)
+    await expect(cursor).toHaveClass(/active/)
+    await expect(cursor).not.toHaveClass(/suppressed/)
+    await expect(cursorText).toHaveText(loadingText!)
+
+    releaseImage()
+    await page.locator(images).evaluateAll((elements) => {
+      elements.forEach((image) => {
+        Reflect.deleteProperty(image, 'complete')
+        image.dispatchEvent(new Event('load'))
+      })
+    })
+    await waitForSlideshow(page)
+    await expect(cursorText).toHaveText(nextText!)
+  })
+
   test('closing shrinks before returning one image to the stage', async ({ page }) => {
     await openCollection(page, '/')
     await buildTrail(page, 5)

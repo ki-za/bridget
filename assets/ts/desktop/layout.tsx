@@ -49,6 +49,9 @@ export default function Desktop(props: {
   const [navVector, setNavVector] = createSignal<Vector>('none')
 
   const active = createMemo(() => isOpen() && !isAnimating())
+  const cursorActive = createMemo(
+    () => isOpen() && (!isAnimating() || navVector() !== 'none')
+  )
   const cursorText = createMemo(() => (isLoading() ? props.loadingText : hoverText()))
 
   const currentImage = createMemo(() => {
@@ -96,7 +99,7 @@ export default function Desktop(props: {
           currentImageInfo={currentImageInfo}
         />
 
-        <CustomCursor cursorText={cursorText} active={active} isOpen={isOpen} />
+        <CustomCursor cursorText={cursorText} active={cursorActive} />
         <StageNav
           prevText={props.prevText}
           closeText={props.closeText}
