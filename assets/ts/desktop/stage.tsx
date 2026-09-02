@@ -137,6 +137,7 @@ export default function Stage(props: {
   let _gsap: typeof gsap
   let gsapPromise: Promise<void> | undefined
   let activeTimeline: gsap.core.Timeline | undefined
+  let panelFadeTimeline: gsap.core.Timeline | undefined
   let adjacentPreloadTimer: number | undefined
   let resizeFrame: number | undefined
   let stage: HTMLDivElement | undefined
@@ -267,7 +268,12 @@ export default function Stage(props: {
     const stageWidth = stage?.clientWidth ?? window.innerWidth
     const stageHeight = stage?.clientHeight ?? window.innerHeight
 
-    updateImageInfoOverlap()
+    // Navigation preserves the established panel geometry. Re-measuring an
+    // active overlay against its own overlaid bounds briefly removes the
+    // overlay class and makes the panel jump during the image crossfade.
+    if (!props.isAnimating() || props.navVector() === 'none') {
+      updateImageInfoOverlap()
+    }
 
     const positionedTrail = visibleHistory.filter(
       ({ i }) => imgs[i] !== preservedExpandedImage
@@ -341,7 +347,6 @@ export default function Stage(props: {
           ? undefined
           : () => {
               setVisibleImageInfo(nextImageInfo)
-              requestAnimationFrame(updateImageInfoOverlap)
             }
       setLoaderForHiresImage(
         elc,
@@ -512,11 +517,36 @@ export default function Stage(props: {
         _gsap.to(previousImage, { opacity: 0, ease: 'power2.out', duration: 0.4 })
       }
       let dominant = false
+      const panelContent =
+        previousImage !== undefined && onDominant !== undefined
+          ? stage?.querySelector<HTMLElement>('.image-info-panel')
+          : undefined
+      if (panelContent !== undefined && panelContent !== null) {
+        panelFadeTimeline?.kill()
+        _gsap.killTweensOf(panelContent, 'opacity')
+        const timeline = _gsap.timeline()
+        panelFadeTimeline = timeline
+        timeline
+          .to(panelContent, { opacity: 0, ease: 'power2.in', duration: 0.09 })
+          .call(() => {
+            dominant = true
+            onDominant?.()
+          })
+          .to(panelContent, { opacity: 1, ease: 'power2.out', duration: 0.31 })
+        timeline
+          .then(() => {
+            if (panelFadeTimeline === timeline) panelFadeTimeline = undefined
+          })
+          .catch((e) => {
+            console.log(e)
+          })
+      }
       const revealTween = _gsap.to(img, {
         opacity: 1,
         ease: 'power3.out',
         duration: 0.5,
         onUpdate: () => {
+          if (panelContent !== undefined && panelContent !== null) return
           const imageIsDominant =
             previousImage === undefined
               ? revealTween.progress() >= 0.5
@@ -579,6 +609,11 @@ export default function Stage(props: {
     const panel = stage.querySelector<HTMLElement>('.panel-container')
     if (releaseRow === null || panel === null) return
 
+    // Overlap changes the bounds used to decide whether overlap is needed.
+    // Measure the natural side-by-side layout synchronously, then restore the
+    // current class before the browser can paint. This avoids an off/on frame.
+    const wasOverlapping = stage.classList.contains('image-info-overlap')
+    if (wasOverlapping) stage.classList.remove('image-info-overlap')
     const panelBounds = panel.getBoundingClientRect()
     const stageBounds = stage.getBoundingClientRect()
     const panelMinWidth = parseFloat(
@@ -591,6 +626,7 @@ export default function Stage(props: {
         releaseRow.getBoundingClientRect().top - 2 ||
       panelOverflows ||
       panelIsTooNarrow
+    if (wasOverlapping && shouldOverlap) stage.classList.add('image-info-overlap')
     if (shouldOverlap === imageInfoOverlaps()) return
 
     if (shouldOverlap && !panelOverflows && !panelIsTooNarrow) {
@@ -658,6 +694,7 @@ export default function Stage(props: {
       abortController?.abort()
       lifecycleController?.abort()
       activeTimeline?.kill()
+      panelFadeTimeline?.kill()
       clearAdjacentPreload()
       mutationObservers.forEach((observer) => observer.disconnect())
       if (resizeFrame !== undefined) cancelAnimationFrame(resizeFrame)

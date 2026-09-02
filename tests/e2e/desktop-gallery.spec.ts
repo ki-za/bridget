@@ -15,8 +15,12 @@ interface AnimationFrame {
   linkVisuallyVisible?: boolean
   linkZIndex?: string
   mode: string
+  panelContentOpacity?: number
   panelInert?: boolean
   panelOpacity?: number
+  panelOverlaps?: boolean
+  panelWidth?: number
+  panelX?: number
   panelZIndex?: string
   title?: string
 }
@@ -150,6 +154,8 @@ async function recordAnimation(
             '.image-info-container'
           )
           const panel = document.querySelector<HTMLElement>('.panel-container')
+          const panelBounds = panel?.getBoundingClientRect()
+          const panelContent = document.querySelector<HTMLElement>('.image-info-panel')
           const link = document.querySelector<HTMLElement>('.image-info-panel a')
           const linkBox = link?.getBoundingClientRect()
           const linkHit =
@@ -174,9 +180,16 @@ async function recordAnimation(
                   }),
             linkZIndex: link === null ? undefined : getComputedStyle(link).zIndex,
             mode: stageElement?.dataset.mode ?? stageElement?.className ?? '',
+            panelContentOpacity:
+              panelContent === null
+                ? undefined
+                : Number(getComputedStyle(panelContent).opacity),
             panelInert: infoContainer?.inert,
             panelOpacity:
               panel === null ? undefined : Number(getComputedStyle(panel).opacity),
+            panelOverlaps: stageElement?.classList.contains('image-info-overlap'),
+            panelWidth: panelBounds?.width,
+            panelX: panelBounds?.x,
             panelZIndex: panel === null ? undefined : getComputedStyle(panel).zIndex,
             title:
               document.querySelector('.project-name')?.textContent?.trim() ?? undefined
@@ -473,6 +486,32 @@ test.describe('desktop gallery interaction matrix', () => {
     expect(overlayBox!.x).toBe(0)
     expect(overlayBox!.width).toBe(page.viewportSize()!.width)
     await expect(page.locator('.image-info-panel a').first()).toBeEnabled()
+  })
+
+  test('narrow overlay navigation keeps the panel fixed while its content fades', async ({
+    page
+  }) => {
+    await page.setViewportSize({ width: 700, height: 600 })
+    await openCollection(page, '/')
+    await buildTrail(page, 4)
+    await openSlideshow(page)
+
+    await expect(page.locator(stage)).toHaveClass(/image-info-overlap/)
+    const initialPanel = await page.locator('.panel-container').boundingBox()
+    expect(initialPanel).not.toBeNull()
+
+    const { frames } = await recordAnimation(page, 2)
+    for (const frame of frames) {
+      expect(frame.panelOverlaps).toBe(true)
+      expect(Math.abs(frame.panelX! - initialPanel!.x)).toBeLessThanOrEqual(0.5)
+      expect(Math.abs(frame.panelWidth! - initialPanel!.width)).toBeLessThanOrEqual(0.5)
+    }
+
+    expect(
+      Math.min(...frames.map(({ panelContentOpacity }) => panelContentOpacity ?? 1))
+    ).toBeLessThan(0.1)
+    expect(frames.every(({ panelOpacity }) => panelOpacity === 1)).toBe(true)
+    expect(frames.at(-1)!.panelOpacity).toBeGreaterThan(0.99)
   })
 
   test('viewport navigation surrounds interactive, selectable info blocks', async ({
