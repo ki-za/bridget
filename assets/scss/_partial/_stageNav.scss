@@ -20,12 +20,4 @@
     flex: 1;
     pointer-events: auto;
   }
-
-  .overlay[data-nav-action='previous'] {
-    flex: 0 0 12.5vw;
-  }
-
-  .overlay[data-nav-action='close'] {
-    flex: 0 0 40vw;
-  }
 }

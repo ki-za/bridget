@@ -389,7 +389,8 @@ test.describe('desktop gallery interaction matrix', () => {
     const expandedLink = page.locator('.image-info-panel a').first()
     await expect(expandedLink).toBeEnabled()
     await expect(expandedLink).toHaveCSS('z-index', 'auto')
-    await expect(page.locator('.image-info-panel')).toHaveCSS('pointer-events', 'auto')
+    await expect(page.locator('.image-info-panel')).toHaveCSS('pointer-events', 'none')
+    await expect(page.locator('.project-header')).toHaveCSS('pointer-events', 'auto')
     expect(
       await page.locator('.panel-container').evaluate((panel) => {
         const overlay = document.querySelector('.navOverlay')
@@ -474,7 +475,7 @@ test.describe('desktop gallery interaction matrix', () => {
     await expect(page.locator('.image-info-panel a').first()).toBeEnabled()
   })
 
-  test('viewport navigation surrounds an interactive, selectable info column', async ({
+  test('viewport navigation surrounds interactive, selectable info blocks', async ({
     page
   }) => {
     await openCollection(page, '/')
@@ -482,45 +483,87 @@ test.describe('desktop gallery interaction matrix', () => {
     await openSlideshow(page)
 
     const viewport = page.viewportSize()!
+    const navWidths = await page
+      .locator(overlays)
+      .evaluateAll((elements) =>
+        elements.map((element) => element.getBoundingClientRect().width)
+      )
+    expect(navWidths).toHaveLength(3)
+    navWidths.forEach((width) => {
+      expect(width).toBeCloseTo(viewport.width / 3, 0)
+    })
+
     const panel = page.locator('.image-info-panel')
     const panelBox = await panel.boundingBox()
-    const infoColumn = page.locator('.image-info-hit-column')
-    const columnBox = await infoColumn.boundingBox()
     expect(panelBox).not.toBeNull()
-    expect(columnBox).not.toBeNull()
-
-    const hitOwner = await page.evaluate(
-      ({ x, y }) => {
-        const hit = document.elementFromPoint(x, y)
-        return {
-          insidePanel: hit?.closest('.image-info-panel') !== null,
-          navAction: hit?.closest<HTMLElement>('[data-nav-action]')?.dataset.navAction
-        }
-      },
-      { x: panelBox!.x + panelBox!.width / 2, y: panelBox!.y + panelBox!.height / 2 }
-    )
-    expect(hitOwner).toEqual({ insidePanel: true, navAction: undefined })
-    const emptyColumnOwner = await page.evaluate(
-      ({ x, y }) => {
-        const hit = document.elementFromPoint(x, y)
-        return {
-          insideColumn: hit?.closest('.image-info-hit-column') !== null,
-          insidePanel: hit?.closest('.image-info-panel') !== null,
-          navAction: hit?.closest<HTMLElement>('[data-nav-action]')?.dataset.navAction
-        }
-      },
-      { x: columnBox!.x + columnBox!.width / 2, y: 10 }
-    )
-    expect(emptyColumnOwner).toEqual({
-      insideColumn: true,
-      insidePanel: false,
-      navAction: undefined
-    })
-    await expect(panel).toHaveCSS('user-select', 'text')
 
     const title = panel.locator('.project-name')
     const titleBox = await title.boundingBox()
     expect(titleBox).not.toBeNull()
+    const textHitOwner = await page.evaluate(
+      ({ x, y }) => {
+        const hit = document.elementFromPoint(x, y)
+        return {
+          insidePanel: hit?.closest('.image-info-panel') !== null,
+          navAction: hit?.closest<HTMLElement>('[data-nav-action]')?.dataset.navAction
+        }
+      },
+      { x: titleBox!.x + titleBox!.width / 2, y: titleBox!.y + titleBox!.height / 2 }
+    )
+    expect(textHitOwner).toEqual({ insidePanel: true, navAction: undefined })
+    const paddedTitleHitOwner = await page.evaluate(
+      ({ x, y }) =>
+        document.elementFromPoint(x, y)?.closest<HTMLElement>('[data-nav-action]')
+          ?.dataset.navAction,
+      { x: titleBox!.x - 4, y: titleBox!.y + titleBox!.height / 2 }
+    )
+    expect(paddedTitleHitOwner).toBeUndefined()
+
+    const emptyPanelPoint = await page.evaluate(
+      ({ left, right, top, bottom }) => {
+        for (let y = Math.ceil(top); y < Math.floor(bottom); y += 4) {
+          for (let x = Math.ceil(left); x < Math.floor(right); x += 4) {
+            const action = document
+              .elementFromPoint(x, y)
+              ?.closest<HTMLElement>('[data-nav-action]')?.dataset.navAction
+            if (action !== undefined) return { action, x, y }
+          }
+        }
+        return null
+      },
+      {
+        left: panelBox!.x,
+        right: panelBox!.x + panelBox!.width,
+        top: panelBox!.y,
+        bottom: panelBox!.y + panelBox!.height
+      }
+    )
+    expect(emptyPanelPoint?.action).toBe('next')
+    await expect(panel).toHaveCSS('user-select', 'text')
+
+    const cursorText = page.locator('.cursorInner')
+    await page.mouse.move(viewport.width - 2, viewport.height / 2)
+    await expect(cursorText).not.toHaveText('')
+    await page.mouse.move(
+      titleBox!.x + titleBox!.width / 2,
+      titleBox!.y + titleBox!.height / 2
+    )
+    await expect(cursorText).toHaveText('')
+
+    const trackListBox = await panel.locator('.track-list').boundingBox()
+    expect(trackListBox).not.toBeNull()
+    expect(trackListBox!.width).toBeGreaterThan(panelBox!.width * 0.9)
+    const trackWhitespaceOwner = await page.evaluate(
+      ({ x, y }) =>
+        document.elementFromPoint(x, y)?.closest<HTMLElement>('[data-nav-action]')
+          ?.dataset.navAction,
+      {
+        x: trackListBox!.x + trackListBox!.width - 2,
+        y: trackListBox!.y + trackListBox!.height / 2
+      }
+    )
+    expect(trackWhitespaceOwner).toBeUndefined()
+
     await page.mouse.move(titleBox!.x + 3, titleBox!.y + titleBox!.height / 2)
     await page.mouse.down()
     await page.mouse.move(

@@ -13,19 +13,6 @@
   z-index: calc(var(--z-nav-gallery) + 1);
 }
 
-.image-info-hit-column {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  z-index: 0;
-  width: min(var(--panel-max-width), calc(100% - var(--xl) * 2));
-  height: calc(var(--window-height) - var(--nav-height));
-  transform: translateX(-50%);
-  pointer-events: none;
-  user-select: text;
-  -webkit-user-select: text;
-}
-
 .image-info-panel {
   position: relative;
   top: 16.5vh;
@@ -46,8 +33,35 @@
   cursor: text;
 }
 
-.image-info-container.interactive .image-info-hit-column,
-.image-info-container.interactive .image-info-panel {
+.image-info-container.interactive {
+  .tags-wrapper,
+  .project-header,
+  .artist-section,
+  .project-links,
+  .track-list,
+  .metadata-section {
+    position: relative;
+    z-index: 0;
+    pointer-events: auto;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: calc(-1 * var(--xs));
+      z-index: -1;
+      pointer-events: auto;
+    }
+  }
+
+  .tags-wrapper,
+  .metadata-section {
+    width: fit-content;
+    max-width: 100%;
+  }
+}
+
+.image-info-container.interactive .image-info-panel a,
+.image-info-container.interactive .image-info-panel button {
   pointer-events: auto;
 }
 

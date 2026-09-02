@@ -14,7 +14,6 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
 
         return (
           <div class="panel-container">
-            <div class="image-info-hit-column" />
             <div class="image-info-panel">
               <Show when={info().projectContributionTags?.length}>
                 <section class="contribution-tags">
