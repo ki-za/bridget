@@ -536,6 +536,58 @@ test.describe('desktop gallery interaction matrix', () => {
     const panelBox = await panel.boundingBox()
     expect(panelBox).not.toBeNull()
 
+    const hitSpine = panel.locator('.image-info-hit-spine')
+    const hitSpineBox = await hitSpine.boundingBox()
+    expect(hitSpineBox).not.toBeNull()
+    expect(hitSpineBox!.height).toBeCloseTo(panelBox!.height, 0)
+    const spineActions = await page.evaluate(
+      ({ x, top, bottom }) => {
+        const actions = new Set<string>()
+        for (let y = Math.ceil(top + 2); y < Math.floor(bottom - 2); y += 2) {
+          const action = document
+            .elementFromPoint(x, y)
+            ?.closest<HTMLElement>('[data-nav-action]')?.dataset.navAction
+          actions.add(action ?? 'blocked')
+        }
+        return [...actions]
+      },
+      {
+        x: hitSpineBox!.x + hitSpineBox!.width / 2,
+        top: hitSpineBox!.y,
+        bottom: hitSpineBox!.y + hitSpineBox!.height
+      }
+    )
+    expect(spineActions).toEqual(['blocked'])
+    const verticalGap = await page.evaluate(
+      ({ left, right, top, bottom }) => {
+        for (let x = Math.ceil(left + 2); x < Math.floor(right - 2); x += 2) {
+          const column: Array<{ blocked: boolean; y: number }> = []
+          for (let y = Math.ceil(top + 2); y < Math.floor(bottom - 2); y += 2) {
+            const navAction = document
+              .elementFromPoint(x, y)
+              ?.closest<HTMLElement>('[data-nav-action]')?.dataset.navAction
+            column.push({ blocked: navAction === undefined, y })
+          }
+
+          const firstBlocked = column.findIndex(({ blocked }) => blocked)
+          const lastBlocked = column.findLastIndex(({ blocked }) => blocked)
+          if (firstBlocked === -1) continue
+          const gap = column
+            .slice(firstBlocked, lastBlocked + 1)
+            .find(({ blocked }) => !blocked)
+          if (gap !== undefined) return { x, y: gap.y }
+        }
+        return null
+      },
+      {
+        left: panelBox!.x,
+        right: panelBox!.x + panelBox!.width,
+        top: panelBox!.y,
+        bottom: panelBox!.y + panelBox!.height
+      }
+    )
+    expect(verticalGap).toBeNull()
+
     const title = panel.locator('.project-name')
     const titleBox = await title.boundingBox()
     expect(titleBox).not.toBeNull()
@@ -588,10 +640,21 @@ test.describe('desktop gallery interaction matrix', () => {
       titleBox!.y + titleBox!.height / 2
     )
     await expect(cursorText).toHaveText('')
+    for (const y of [
+      hitSpineBox!.y + 2,
+      hitSpineBox!.y + hitSpineBox!.height / 2,
+      hitSpineBox!.y + hitSpineBox!.height - 2
+    ]) {
+      await page.mouse.move(hitSpineBox!.x + hitSpineBox!.width / 2, y)
+      await expect(cursorText).toHaveText('')
+    }
 
     const trackListBox = await panel.locator('.track-list').boundingBox()
     expect(trackListBox).not.toBeNull()
     expect(trackListBox!.width).toBeGreaterThan(panelBox!.width * 0.9)
+    const projectLinksBox = await panel.locator('.project-links').boundingBox()
+    expect(projectLinksBox).not.toBeNull()
+    expect(projectLinksBox!.width).toBeLessThan(panelBox!.width * 0.9)
     const trackWhitespaceOwner = await page.evaluate(
       ({ x, y }) =>
         document.elementFromPoint(x, y)?.closest<HTMLElement>('[data-nav-action]')

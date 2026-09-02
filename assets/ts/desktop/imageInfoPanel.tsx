@@ -1,9 +1,136 @@
-import { createMemo, For, Show, type JSX } from 'solid-js'
+import {
+  createEffect,
+  createMemo,
+  createSignal,
+  For,
+  onCleanup,
+  onMount,
+  Show,
+  type JSX
+} from 'solid-js'
 
 import type { ImageInfo } from '../resources'
 import { toArray } from '../resources'
 
+interface HitAreaSegment {
+  height: number
+  top: number
+  width: number
+}
+
+const hitAreaSelector = [
+  '.tags-wrapper',
+  '.project-header',
+  '.artist-section',
+  '.project-links',
+  '.track-list',
+  '.metadata-section'
+].join(', ')
+
 export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element {
+  let panel: HTMLDivElement | undefined
+  let resizeObserver: ResizeObserver | undefined
+  let updateFrame: number | undefined
+  const [hitAreaSegments, setHitAreaSegments] = createSignal<HitAreaSegment[]>([])
+
+  const updateHitAreaSegments = (): void => {
+    updateFrame = undefined
+    if (panel === undefined || props.info === undefined) {
+      setHitAreaSegments([])
+      return
+    }
+
+    const panelBox = panel.getBoundingClientRect()
+    if (panelBox.width === 0 || panelBox.height === 0) return
+
+    const scaleX = panel.clientWidth / panelBox.width
+    const scaleY = panel.clientHeight / panelBox.height
+    const targets = Array.from(panel.querySelectorAll<HTMLElement>(hitAreaSelector))
+    const spine = panel.querySelector<HTMLElement>('.image-info-hit-spine')
+    if (targets.length === 0 || spine === null) return
+    const hitPadding = Number.parseFloat(getComputedStyle(panel).paddingLeft) || 0
+
+    resizeObserver?.observe(panel)
+    targets.forEach((target) => resizeObserver?.observe(target))
+
+    const blocks = targets.map((target) => {
+      const box = target.getBoundingClientRect()
+      return {
+        bottom: Math.min(
+          panel.clientHeight,
+          (box.bottom - panelBox.top) * scaleY + hitPadding
+        ),
+        right: Math.min(
+          panel.clientWidth,
+          (box.right - panelBox.left) * scaleX + hitPadding
+        ),
+        top: Math.max(0, (box.top - panelBox.top) * scaleY - hitPadding)
+      }
+    })
+    const spineBox = spine.getBoundingClientRect()
+    const spineWidth = Math.min(
+      panel.clientWidth,
+      (spineBox.right - panelBox.left) * scaleX
+    )
+    const boundaries = [
+      0,
+      panel.clientHeight,
+      ...blocks.flatMap(({ bottom, top }) => [bottom, top])
+    ]
+      .map((value) => Math.round(value * 100) / 100)
+      .filter((value, index, values) => values.indexOf(value) === index)
+      .sort((left, right) => left - right)
+
+    // Fill each vertical slice between its highest and lowest protected content.
+    const segments: HitAreaSegment[] = []
+    for (let index = 0; index < boundaries.length - 1; index += 1) {
+      const top = boundaries[index]
+      const bottom = boundaries[index + 1]
+      if (bottom - top < 0.5) continue
+
+      const middle = (top + bottom) / 2
+      const widestAbove = Math.max(
+        spineWidth,
+        ...blocks.filter((block) => block.top <= middle).map((block) => block.right)
+      )
+      const widestBelow = Math.max(
+        spineWidth,
+        ...blocks.filter((block) => block.bottom >= middle).map((block) => block.right)
+      )
+      const width = Math.min(widestAbove, widestBelow)
+      const previous = segments.at(-1)
+      if (previous !== undefined && Math.abs(previous.width - width) < 0.5) {
+        previous.height = bottom - previous.top
+      } else {
+        segments.push({ height: bottom - top, top, width })
+      }
+    }
+    setHitAreaSegments(segments)
+  }
+
+  const scheduleHitAreaUpdate = (): void => {
+    if (updateFrame !== undefined) cancelAnimationFrame(updateFrame)
+    updateFrame = requestAnimationFrame(updateHitAreaSegments)
+  }
+
+  createEffect(() => {
+    if (props.info === undefined) {
+      setHitAreaSegments([])
+      return
+    }
+    scheduleHitAreaUpdate()
+  })
+
+  onMount(() => {
+    resizeObserver = new ResizeObserver(scheduleHitAreaUpdate)
+    scheduleHitAreaUpdate()
+  })
+
+  onCleanup(() => {
+    resizeObserver?.disconnect()
+    if (updateFrame !== undefined) cancelAnimationFrame(updateFrame)
+  })
+
   return (
     <Show when={props.info}>
       {(info) => {
@@ -14,7 +141,23 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
 
         return (
           <div class="panel-container">
-            <div class="image-info-panel">
+            <div class="image-info-panel" ref={panel}>
+              <div class="image-info-hit-layer" aria-hidden="true">
+                <For each={hitAreaSegments()}>
+                  {(segment) => (
+                    <div
+                      class="image-info-hit-segment"
+                      style={{
+                        height: `${segment.height}px`,
+                        top: `${segment.top}px`,
+                        width: `${segment.width}px`
+                      }}
+                    />
+                  )}
+                </For>
+              </div>
+              <div class="image-info-hit-spine" aria-hidden="true" />
+
               <Show when={info().projectContributionTags?.length}>
                 <section class="contribution-tags">
                   <div class="tags-wrapper">

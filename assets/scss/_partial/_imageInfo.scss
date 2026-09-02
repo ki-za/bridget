@@ -33,6 +33,37 @@
   cursor: text;
 }
 
+.image-info-hit-layer,
+.image-info-hit-spine {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  cursor: text;
+}
+
+.image-info-hit-segment {
+  position: absolute;
+  left: 0;
+  pointer-events: none;
+  cursor: text;
+}
+
+.image-info-hit-spine {
+  right: auto;
+  width: min(9rem, 100%);
+}
+
+.image-info-panel > :not(.image-info-hit-layer):not(.image-info-hit-spine) {
+  position: relative;
+  z-index: 1;
+}
+
+.image-info-container.interactive .image-info-hit-segment,
+.image-info-container.interactive .image-info-hit-spine {
+  pointer-events: auto;
+}
+
 .image-info-container.interactive {
   .tags-wrapper,
   .project-header,
@@ -41,7 +72,7 @@
   .track-list,
   .metadata-section {
     position: relative;
-    z-index: 0;
+    z-index: 1;
     pointer-events: auto;
 
     &::before {
@@ -49,6 +80,7 @@
       position: absolute;
       inset: calc(-1 * var(--xs));
       z-index: -1;
+      border-radius: var(--sm);
       pointer-events: auto;
     }
   }
@@ -194,6 +226,8 @@
 .project-links {
   display: inline-flex;
   flex-direction: row;
+  width: fit-content;
+  max-width: 100%;
   gap: calc(var(--xs) * 0.5);
   flex-shrink: 0;
   margin-top: var(--lg);
