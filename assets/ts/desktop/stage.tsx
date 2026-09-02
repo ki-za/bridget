@@ -526,13 +526,27 @@ export default function Stage(props: {
         _gsap.killTweensOf(panelContent, 'opacity')
         const timeline = _gsap.timeline()
         panelFadeTimeline = timeline
+        timeline.to(panelContent, { opacity: 0, ease: 'power2.in', duration: 0.09 })
         timeline
-          .to(panelContent, { opacity: 0, ease: 'power2.in', duration: 0.09 })
-          .call(() => {
-            dominant = true
-            onDominant?.()
+          .then(() => {
+            if (panelFadeTimeline === timeline) panelFadeTimeline = undefined
           })
-          .to(panelContent, { opacity: 1, ease: 'power2.out', duration: 0.31 })
+          .catch((e) => {
+            console.log(e)
+          })
+      }
+      const handOff = (): void => {
+        if (dominant) return
+        if (panelContent !== undefined && panelContent !== null) {
+          panelFadeTimeline?.kill()
+          _gsap.set(panelContent, { opacity: 0 })
+        }
+        dominant = true
+        onDominant?.()
+        if (panelContent === undefined || panelContent === null) return
+        const timeline = _gsap.timeline()
+        panelFadeTimeline = timeline
+        timeline.to(panelContent, { opacity: 1, ease: 'power2.out', duration: 0.31 })
         timeline
           .then(() => {
             if (panelFadeTimeline === timeline) panelFadeTimeline = undefined
@@ -546,22 +560,20 @@ export default function Stage(props: {
         ease: 'power3.out',
         duration: 0.5,
         onUpdate: () => {
-          if (panelContent !== undefined && panelContent !== null) return
           const imageIsDominant =
             previousImage === undefined
               ? revealTween.progress() >= 0.5
               : Number(getComputedStyle(img).opacity) >=
                 Number(getComputedStyle(previousImage).opacity)
           if (dominant || !imageIsDominant) return
-          dominant = true
-          onDominant?.()
+          handOff()
         }
       })
       revealTween
         .then(() => {
           const history = props.cordHist()
           if (history.length > 0 && imgs[getCurrentElIndex(history)] === img) {
-            if (!dominant) onDominant?.()
+            handOff()
             onRevealed?.()
           }
           props.setIsLoading(false)
