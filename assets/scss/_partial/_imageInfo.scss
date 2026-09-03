@@ -337,28 +337,14 @@
   margin-top: var(--xs);
   max-height: 20.3vh;
   overflow-y: auto;
+  scrollbar-width: none;
 
-  /* Subtle scrollbar matching panel theme */
+  /* The persistent indicator below replaces auto-hiding platform scrollbars. */
   &::-webkit-scrollbar {
-    width: 4px;
+    display: none;
+    width: 0;
+    height: 0;
   }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.12);
-    border-radius: 3px;
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.22);
-  }
-
-  /* Firefox */
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
 }
 
 .track-scrollbar {

@@ -694,6 +694,12 @@ test.describe('desktop gallery interaction matrix', () => {
     const trackScrollbar = tracks.locator('.track-scrollbar')
     await expect(trackScrollbar).toHaveClass(/track-scrollbar--visible/)
     await expect(trackScrollbar).toHaveCSS('width', '4px')
+    await expect(tracks).toHaveCSS('scrollbar-width', 'none')
+    expect(
+      await tracks.evaluate(
+        (element) => getComputedStyle(element, '::-webkit-scrollbar').display
+      )
+    ).toBe('none')
     const initialScrollbarBox = await trackScrollbar.boundingBox()
     expect(initialScrollbarBox).not.toBeNull()
     const tracksBox = await tracks.boundingBox()

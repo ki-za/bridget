@@ -119,6 +119,12 @@ test('overflowing track list keeps a visible scroll indicator', async ({ page })
   ).toBe(true)
   await expect(scrollbar).toHaveClass(/track-scrollbar--visible/)
   await expect(scrollbar).toHaveCSS('width', '4px')
+  await expect(tracks).toHaveCSS('scrollbar-width', 'none')
+  expect(
+    await tracks.evaluate(
+      (element) => getComputedStyle(element, '::-webkit-scrollbar').display
+    )
+  ).toBe('none')
   const initialBox = await scrollbar.boundingBox()
   expect(initialBox).not.toBeNull()
 
