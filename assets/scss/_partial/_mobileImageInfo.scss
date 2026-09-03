@@ -60,6 +60,10 @@
     padding: 0.25rem 0.625rem !important;
     font-size: 0.75rem !important;
   }
+
+  .track-item--preview .track-tags .tag {
+    transform: skewX(var(--tag-skew-angle)) scaleX(1);
+  }
 }
 
 // Contribution Tags

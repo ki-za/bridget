@@ -3,12 +3,26 @@ import { createMemo, createSignal, For, Show, type JSX } from 'solid-js'
 import type { ImageInfo, TrackInfo } from '../resources'
 import { toArray } from '../resources'
 
+type TrackTagDisplay = 'hidden' | 'small' | 'full'
+
 export default function MobileImageInfoPanel(props: { info?: ImageInfo }): JSX.Element {
   const [showTrackModal, setShowTrackModal] = createSignal(false)
-  const [selectedTrack, setSelectedTrack] = createSignal<TrackInfo>()
+  const [trackTagState, setTrackTagState] = createSignal<{
+    track: TrackInfo
+    display: Exclude<TrackTagDisplay, 'hidden'>
+  }>()
+
+  const trackTagDisplay = (track: TrackInfo): TrackTagDisplay => {
+    const state = trackTagState()
+    return state?.track === track ? state.display : 'hidden'
+  }
 
   const toggleTrack = (track: TrackInfo): void => {
-    setSelectedTrack((selected) => (selected === track ? undefined : track))
+    setTrackTagState((state) => {
+      if (state?.track !== track) return { track, display: 'small' }
+      if (state.display === 'small') return { track, display: 'full' }
+      return undefined
+    })
   }
 
   const handleTrackKeyDown = (event: KeyboardEvent, track: TrackInfo): void => {
@@ -121,11 +135,13 @@ export default function MobileImageInfoPanel(props: { info?: ImageInfo }): JSX.E
                         <div
                           class="track-item"
                           classList={{
-                            'track-item--selected': selectedTrack() === track
+                            'track-item--preview': trackTagDisplay(track) === 'small',
+                            'track-item--selected': trackTagDisplay(track) === 'full'
                           }}
                           role="button"
                           tabIndex={0}
-                          aria-pressed={selectedTrack() === track}
+                          aria-pressed={trackTagDisplay(track) !== 'hidden'}
+                          data-tag-state={trackTagDisplay(track)}
                           onClick={() => toggleTrack(track)}
                           onKeyDown={(event) => handleTrackKeyDown(event, track)}
                         >

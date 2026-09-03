@@ -10,7 +10,9 @@ test.use({
   viewport: { width: 390, height: 844 }
 })
 
-test('tap toggles full contribution labels for only one track', async ({ page }) => {
+test('taps cycle one track through small tags, full labels, and hidden', async ({
+  page
+}) => {
   await page.goto('/')
   await page.locator('.collection img').nth(4).tap()
 
@@ -25,12 +27,23 @@ test('tap toggles full contribution labels for only one track', async ({ page })
   const firstTag = first.locator('.track-tags .tag').first()
   const secondTag = second.locator('.track-tags .tag').first()
 
+  await expect(first).toHaveAttribute('data-tag-state', 'hidden')
   await expect(firstTag).toHaveCSS('font-size', '0px')
   await expect
     .poll(async () => firstTag.evaluate((tag) => tag.getBoundingClientRect().width))
     .toBe(0)
+
   await first.tap()
   await expect(first).toHaveAttribute('aria-pressed', 'true')
+  await expect(first).toHaveAttribute('data-tag-state', 'small')
+  await expect(firstTag).toHaveCSS('font-size', '0px')
+  await expect(firstTag.locator('.tag-label')).toHaveCSS('opacity', '0')
+  await expect
+    .poll(async () => firstTag.evaluate((tag) => tag.getBoundingClientRect().width))
+    .toBeGreaterThan(5)
+
+  await first.tap()
+  await expect(first).toHaveAttribute('data-tag-state', 'full')
   await expect(firstTag).toHaveCSS('font-size', '12px')
   await expect(secondTag).toHaveCSS('font-size', '0px')
   await expect
@@ -39,15 +52,22 @@ test('tap toggles full contribution labels for only one track', async ({ page })
 
   await second.tap()
   await expect(first).toHaveAttribute('aria-pressed', 'false')
+  await expect(first).toHaveAttribute('data-tag-state', 'hidden')
   await expect(second).toHaveAttribute('aria-pressed', 'true')
+  await expect(second).toHaveAttribute('data-tag-state', 'small')
   await expect(firstTag).toHaveCSS('font-size', '0px')
-  await expect(secondTag).toHaveCSS('font-size', '12px')
+  await expect(secondTag).toHaveCSS('font-size', '0px')
   await expect
     .poll(async () => firstTag.evaluate((tag) => tag.getBoundingClientRect().width))
     .toBe(0)
 
   await second.tap()
+  await expect(second).toHaveAttribute('data-tag-state', 'full')
+  await expect(secondTag).toHaveCSS('font-size', '12px')
+
+  await second.tap()
   await expect(second).toHaveAttribute('aria-pressed', 'false')
+  await expect(second).toHaveAttribute('data-tag-state', 'hidden')
   await expect(secondTag).toHaveCSS('font-size', '0px')
   await expect
     .poll(async () => secondTag.evaluate((tag) => tag.getBoundingClientRect().width))
@@ -79,8 +99,11 @@ test('hover-capable mobile layout keeps selected tag text visible', async ({
     .toBe(0)
 
   await track.locator('.track-name').click()
+  await expect(track).toHaveAttribute('data-tag-state', 'small')
+  await track.locator('.track-name').click()
   await track.locator('.track-tags').hover()
   await expect(track).toHaveAttribute('aria-pressed', 'true')
+  await expect(track).toHaveAttribute('data-tag-state', 'full')
   await expect(tag).toHaveCSS('color', 'rgb(255, 255, 255)')
   await expect(label).toHaveCSS('color', 'rgb(255, 255, 255)')
   await expect(label).toHaveCSS('display', 'block')
