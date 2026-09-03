@@ -135,7 +135,7 @@ export default function MobileImageInfoPanel(props: { info?: ImageInfo }): JSX.E
                         <div
                           class="track-item"
                           classList={{
-                            'track-item--preview': trackTagDisplay(track) === 'small',
+                            'track-item--active': trackTagDisplay(track) !== 'hidden',
                             'track-item--selected': trackTagDisplay(track) === 'full'
                           }}
                           role="button"

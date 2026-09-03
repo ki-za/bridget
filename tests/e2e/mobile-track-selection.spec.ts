@@ -33,17 +33,45 @@ test('taps cycle one track through small tags, full labels, and hidden', async (
     .poll(async () => firstTag.evaluate((tag) => tag.getBoundingClientRect().width))
     .toBe(0)
 
-  await first.tap()
+  const previewWidths = await first.evaluate(async (track) => {
+    const tag = track.querySelector<HTMLElement>('.track-tags .tag')!
+    track.click()
+    const widths = [tag.getBoundingClientRect().width]
+    for (let frame = 0; frame < 16; frame += 1) {
+      await new Promise(requestAnimationFrame)
+      widths.push(tag.getBoundingClientRect().width)
+    }
+    return widths
+  })
   await expect(first).toHaveAttribute('aria-pressed', 'true')
   await expect(first).toHaveAttribute('data-tag-state', 'small')
+  expect(previewWidths[0]).toBeLessThan(1)
+  expect(
+    previewWidths.some(
+      (width) => width > 1 && width < previewWidths[previewWidths.length - 1]! - 1
+    )
+  ).toBe(true)
   await expect(firstTag).toHaveCSS('font-size', '0px')
   await expect(firstTag.locator('.tag-label')).toHaveCSS('opacity', '0')
   await expect
     .poll(async () => firstTag.evaluate((tag) => tag.getBoundingClientRect().width))
     .toBeGreaterThan(5)
 
-  await first.tap()
+  const smallTagWidth = await firstTag.evaluate(
+    (tag) => tag.getBoundingClientRect().width
+  )
+  const expansionWidths = await first.evaluate(async (track) => {
+    const tag = track.querySelector<HTMLElement>('.track-tags .tag')!
+    track.click()
+    const widths = [tag.getBoundingClientRect().width]
+    for (let frame = 0; frame < 8; frame += 1) {
+      await new Promise(requestAnimationFrame)
+      widths.push(tag.getBoundingClientRect().width)
+    }
+    return widths
+  })
   await expect(first).toHaveAttribute('data-tag-state', 'full')
+  expect(Math.min(...expansionWidths)).toBeGreaterThanOrEqual(smallTagWidth - 1)
   await expect(firstTag).toHaveCSS('font-size', '12px')
   await expect(secondTag).toHaveCSS('font-size', '0px')
   await expect

@@ -56,13 +56,28 @@
 
   .track-item--selected .track-tags .tag {
     width: auto !important;
+    min-width: 1rem;
     height: auto !important;
     padding: 0.25rem 0.625rem !important;
     font-size: 0.75rem !important;
   }
 
-  .track-item--preview .track-tags .tag {
+  .track-item--active .track-tags .tag {
     transform: skewX(var(--tag-skew-angle)) scaleX(1);
+  }
+
+  .track-item--active:not(.track-item--selected) .track-tags .tag {
+    animation: mobile-track-tag-preview-in 200ms ease both;
+  }
+}
+
+@keyframes mobile-track-tag-preview-in {
+  from {
+    transform: scaleX(0) skewX(var(--tag-skew-angle));
+  }
+
+  to {
+    transform: scaleX(1) skewX(var(--tag-skew-angle));
   }
 }
 
