@@ -785,7 +785,7 @@ test.describe('desktop gallery interaction matrix', () => {
     await expect(cursorText).toHaveText(nextText!)
   })
 
-  test('track contribution tags expand as one stable hover group', async ({ page }) => {
+  test('track hover shows small contribution tags without text', async ({ page }) => {
     await openCollection(page, '/')
     await buildTrail(page, 5)
     await openSlideshow(page)
@@ -815,34 +815,125 @@ test.describe('desktop gallery interaction matrix', () => {
       .toBeGreaterThan(5)
     await expect(tags.first()).toHaveCSS('color', 'rgba(0, 0, 0, 0)')
 
-    const tagGroup = track.locator('.track-tags')
-    await tagGroup.hover()
-    await expect(tags.first()).toHaveCSS('color', 'rgb(255, 255, 255)')
-    await expect(labels.first()).toHaveCSS('overflow', 'visible')
-    expect(
-      await labels.evaluateAll((elements) =>
-        elements.every((label) => label.getBoundingClientRect().width > 0)
-      )
-    ).toBe(true)
-
-    const tagBoxes = await tags.evaluateAll((elements) =>
-      elements.map((tag) => {
-        const box = tag.getBoundingClientRect()
-        return { left: box.left, right: box.right, y: box.top + box.height / 2 }
-      })
-    )
-    await page.mouse.move((tagBoxes[0].right + tagBoxes[1].left) / 2, tagBoxes[0].y)
-    await expect(tags.first()).toHaveCSS('color', 'rgb(255, 255, 255)')
-
-    const groupBox = await tagGroup.boundingBox()
-    expect(groupBox).not.toBeNull()
-    await page.mouse.move(groupBox!.x - 2, groupBox!.y + groupBox!.height / 2)
-    await expect(tags.first()).toHaveCSS('color', 'rgb(255, 255, 255)')
+    await expect(tags.first()).toHaveCSS('color', 'rgba(0, 0, 0, 0)')
+    await expect(labels.first()).toHaveCSS('max-width', '0px')
+    await expect(labels.first()).toHaveCSS('opacity', '0')
 
     await page.locator('.project-name').hover()
     await expect(tags.first()).toHaveCSS('color', 'rgba(0, 0, 0, 0)')
-    await tagGroup.hover()
-    await expect(tags.first()).toHaveCSS('color', 'rgb(255, 255, 255)')
+  })
+
+  test('clicking anywhere in a row toggles one full track without hover hiding text', async ({
+    page
+  }) => {
+    await openCollection(page, '/')
+    await buildTrail(page, 5)
+    await openSlideshow(page)
+
+    for (
+      let attempt = 0;
+      attempt < 14 && (await page.locator('.track-item').count()) < 2;
+      attempt += 1
+    )
+      await navigate(page, 'next')
+
+    const tracks = page.locator('.track-item')
+    const first = tracks.nth(0)
+    const second = tracks.nth(1)
+    const firstTag = first.locator('.track-tags .tag').first()
+    const secondTag = second.locator('.track-tags .tag').first()
+
+    const firstBox = await first.boundingBox()
+    expect(firstBox).not.toBeNull()
+    await page.mouse.move(
+      firstBox!.x + firstBox!.width - 4,
+      firstBox!.y + firstBox!.height / 2
+    )
+    await expect
+      .poll(async () => firstTag.evaluate((tag) => tag.getBoundingClientRect().width))
+      .toBeGreaterThan(5)
+    const hoverTagHeight = await firstTag.evaluate(
+      (tag) => tag.getBoundingClientRect().height
+    )
+    await page.mouse.click(
+      firstBox!.x + firstBox!.width - 4,
+      firstBox!.y + firstBox!.height / 2
+    )
+    await expect(first).toHaveAttribute('aria-pressed', 'true')
+    await expect(first.locator('.tag-label').first()).toHaveCSS('opacity', '0')
+    await page.waitForTimeout(120)
+    expect(
+      await first
+        .locator('.tag-label')
+        .first()
+        .evaluate((label) => label.getBoundingClientRect().width)
+    ).toBeGreaterThan(0)
+    await expect(first.locator('.tag-label').first()).toHaveCSS('opacity', '0')
+    await expect(firstTag).toHaveCSS('color', 'rgb(255, 255, 255)')
+    await expect(first.locator('.tag-label').first()).toHaveCSS(
+      'color',
+      'rgb(255, 255, 255)'
+    )
+    await expect(first.locator('.tag-label').first()).toHaveCSS('display', 'block')
+    await expect(first.locator('.tag-label').first()).toHaveCSS('opacity', '1')
+    expect(
+      await first
+        .locator('.tag-label')
+        .first()
+        .evaluate((label) => new DOMMatrixReadOnly(getComputedStyle(label).transform).c)
+    ).toBeCloseTo(Math.tan((5 * Math.PI) / 180), 5)
+    expect(
+      await page
+        .locator('.contribution-tags .tag-label')
+        .first()
+        .evaluate((label) => new DOMMatrixReadOnly(getComputedStyle(label).transform).c)
+    ).toBeCloseTo(Math.tan((15 * Math.PI) / 180), 5)
+    expect(
+      await firstTag.evaluate((tag) => tag.getBoundingClientRect().height)
+    ).toBeCloseTo(hoverTagHeight, 1)
+    await expect
+      .poll(async () =>
+        first
+          .locator('.tag-label')
+          .first()
+          .evaluate((label) => label.getBoundingClientRect().width)
+      )
+      .toBeGreaterThan(0)
+    await expect(secondTag).toHaveCSS('color', 'rgba(0, 0, 0, 0)')
+
+    await first.locator('.track-name').click()
+    await expect(first).toHaveAttribute('aria-pressed', 'false')
+    await first.locator('.track-name').click()
+    await expect(first).toHaveAttribute('aria-pressed', 'true')
+    await expect(first.locator('.tag-label').first()).toHaveCSS('display', 'block')
+    await expect
+      .poll(async () =>
+        first
+          .locator('.tag-label')
+          .first()
+          .evaluate((label) => label.getBoundingClientRect().width)
+      )
+      .toBeGreaterThan(0)
+
+    await second.locator('.track-name').hover()
+    await expect(firstTag).toHaveCSS('color', 'rgb(255, 255, 255)')
+    await expect(secondTag).toHaveCSS('color', 'rgba(0, 0, 0, 0)')
+
+    const secondBox = await second.boundingBox()
+    expect(secondBox).not.toBeNull()
+    await page.mouse.click(
+      secondBox!.x + secondBox!.width - 4,
+      secondBox!.y + secondBox!.height / 2
+    )
+    await expect(first).toHaveAttribute('aria-pressed', 'false')
+    await expect(second).toHaveAttribute('aria-pressed', 'true')
+    await expect(firstTag).toHaveCSS('color', 'rgba(0, 0, 0, 0)')
+    await expect(secondTag).toHaveCSS('color', 'rgb(255, 255, 255)')
+
+    await second.locator('.track-name').click()
+    await page.locator('.project-name').hover()
+    await expect(second).toHaveAttribute('aria-pressed', 'false')
+    await expect(secondTag).toHaveCSS('color', 'rgba(0, 0, 0, 0)')
   })
 
   test('closing shrinks before returning one image to the stage', async ({ page }) => {

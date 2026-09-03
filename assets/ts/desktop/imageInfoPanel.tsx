@@ -9,7 +9,7 @@ import {
   type JSX
 } from 'solid-js'
 
-import type { ImageInfo } from '../resources'
+import type { ImageInfo, TrackInfo } from '../resources'
 import { toArray } from '../resources'
 
 interface HitAreaSegment {
@@ -32,6 +32,17 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
   let resizeObserver: ResizeObserver | undefined
   let updateFrame: number | undefined
   const [hitAreaSegments, setHitAreaSegments] = createSignal<HitAreaSegment[]>([])
+  const [selectedTrack, setSelectedTrack] = createSignal<TrackInfo>()
+
+  const toggleTrack = (track: TrackInfo): void => {
+    setSelectedTrack((selected) => (selected === track ? undefined : track))
+  }
+
+  const handleTrackKeyDown = (event: KeyboardEvent, track: TrackInfo): void => {
+    if (event.key !== 'Enter' && event.key !== ' ') return
+    event.preventDefault()
+    toggleTrack(track)
+  }
 
   const updateHitAreaSegments = (): void => {
     updateFrame = undefined
@@ -164,7 +175,7 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
                     <For each={info().projectContributionTags}>
                       {(tag) => (
                         <span class="tag" data-tag={tag}>
-                          {tag}
+                          <span class="tag-label">{tag}</span>
                         </span>
                       )}
                     </For>
@@ -237,7 +248,17 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
                       <For each={info().trackList}>
                         {(track) => (
                           <>
-                            <div class="track-item">
+                            <div
+                              class="track-item"
+                              classList={{
+                                'track-item--selected': selectedTrack() === track
+                              }}
+                              role="button"
+                              tabIndex={0}
+                              aria-pressed={selectedTrack() === track}
+                              onClick={() => toggleTrack(track)}
+                              onKeyDown={(event) => handleTrackKeyDown(event, track)}
+                            >
                               <span class="track-name">{track.name}</span>
                               <Show when={track.contributionTags?.length}>
                                 <div class="track-tags">

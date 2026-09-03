@@ -63,12 +63,13 @@
   --tag-expanded-width: 8rem; /* fixed expanded width (consistent layout) */
   --tag-expanded-padding-l: var(--sm);
   --tag-expanded-padding-r: var(--md);
-  ---tag-expanded-padding-vertical: var(--sm);
+  --tag-expanded-padding-vertical: 0;
   --tag-text-hidden: transparent;
   --tag-text-visible: #ffffff;
 
   --tag-skew-angle: -19deg;
-  --tag-skew-counter: 19deg;
+  --project-tag-text-counter-skew: 15deg;
+  --track-tag-text-counter-skew: 5deg;
 
   // Breakpoints (for reference in media queries)
   --breakpoint-mobile: 600px;

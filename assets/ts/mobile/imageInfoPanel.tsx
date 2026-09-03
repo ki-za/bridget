@@ -1,10 +1,21 @@
 import { createMemo, createSignal, For, Show, type JSX } from 'solid-js'
 
-import type { ImageInfo } from '../resources'
+import type { ImageInfo, TrackInfo } from '../resources'
 import { toArray } from '../resources'
 
 export default function MobileImageInfoPanel(props: { info?: ImageInfo }): JSX.Element {
   const [showTrackModal, setShowTrackModal] = createSignal(false)
+  const [selectedTrack, setSelectedTrack] = createSignal<TrackInfo>()
+
+  const toggleTrack = (track: TrackInfo): void => {
+    setSelectedTrack((selected) => (selected === track ? undefined : track))
+  }
+
+  const handleTrackKeyDown = (event: KeyboardEvent, track: TrackInfo): void => {
+    if (event.key !== 'Enter' && event.key !== ' ') return
+    event.preventDefault()
+    toggleTrack(track)
+  }
 
   const closeTrackModal = () => {
     setShowTrackModal(false)
@@ -29,7 +40,7 @@ export default function MobileImageInfoPanel(props: { info?: ImageInfo }): JSX.E
                     <For each={info().projectContributionTags}>
                       {(tag) => (
                         <span class="tag" data-tag={tag}>
-                          {tag}
+                          <span class="tag-label">{tag}</span>
                         </span>
                       )}
                     </For>
@@ -107,14 +118,24 @@ export default function MobileImageInfoPanel(props: { info?: ImageInfo }): JSX.E
                   <div class="track-items">
                     <For each={info().trackList}>
                       {(track) => (
-                        <div class="track-item">
+                        <div
+                          class="track-item"
+                          classList={{
+                            'track-item--selected': selectedTrack() === track
+                          }}
+                          role="button"
+                          tabIndex={0}
+                          aria-pressed={selectedTrack() === track}
+                          onClick={() => toggleTrack(track)}
+                          onKeyDown={(event) => handleTrackKeyDown(event, track)}
+                        >
                           <span class="track-name">{track.name}</span>
                           <Show when={track.contributionTags?.length}>
                             <div class="track-tags">
                               <For each={track.contributionTags}>
                                 {(tag) => (
                                   <span class="tag" data-tag={tag}>
-                                    {tag}
+                                    <span class="tag-label">{tag}</span>
                                   </span>
                                 )}
                               </For>
