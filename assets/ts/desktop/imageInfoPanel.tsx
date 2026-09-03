@@ -11,6 +11,7 @@ import {
 
 import type { ImageInfo, TrackInfo } from '../resources'
 import { toArray } from '../resources'
+import TrackScrollbar from '../trackScrollbar'
 
 interface HitAreaSegment {
   height: number
@@ -245,6 +246,7 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
                   <section class="track-list">
                     <h4 class="track-section-label">Tracks</h4>
                     <div class="track-items">
+                      <TrackScrollbar tracks={info().trackList} />
                       <For each={info().trackList}>
                         {(track) => (
                           <>

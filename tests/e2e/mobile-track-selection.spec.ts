@@ -21,6 +21,9 @@ test('taps cycle one track through small tags, full labels, and hidden', async (
   await expect(panel.locator('.project-name')).toHaveText('Live Wire')
   const tracks = panel.locator('.track-item')
   await expect(tracks).toHaveCount(2)
+  await expect(panel.locator('.track-scrollbar')).not.toHaveClass(
+    /track-scrollbar--visible/
+  )
 
   const first = tracks.nth(0)
   const second = tracks.nth(1)
@@ -100,6 +103,31 @@ test('taps cycle one track through small tags, full labels, and hidden', async (
   await expect
     .poll(async () => secondTag.evaluate((tag) => tag.getBoundingClientRect().width))
     .toBe(0)
+})
+
+test('overflowing track list keeps a visible scroll indicator', async ({ page }) => {
+  await page.goto('/')
+  await page.locator('.collection img').nth(2).tap()
+
+  const panel = page.locator('.swiper-slide-active .mobile-image-info')
+  await expect(panel.locator('.project-name')).toHaveText('Electric Drive')
+  const tracks = panel.locator('.track-items')
+  const scrollbar = tracks.locator('.track-scrollbar')
+
+  expect(
+    await tracks.evaluate((element) => element.scrollHeight > element.clientHeight)
+  ).toBe(true)
+  await expect(scrollbar).toHaveClass(/track-scrollbar--visible/)
+  await expect(scrollbar).toHaveCSS('width', '4px')
+  const initialBox = await scrollbar.boundingBox()
+  expect(initialBox).not.toBeNull()
+
+  await tracks.evaluate((element) => {
+    element.scrollTop = 100
+  })
+  await expect
+    .poll(async () => (await scrollbar.boundingBox())?.y)
+    .toBeGreaterThan(initialBox!.y)
 })
 
 test('hover-capable mobile layout keeps selected tag text visible', async ({

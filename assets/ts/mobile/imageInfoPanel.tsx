@@ -2,6 +2,7 @@ import { createMemo, createSignal, For, Show, type JSX } from 'solid-js'
 
 import type { ImageInfo, TrackInfo } from '../resources'
 import { toArray } from '../resources'
+import TrackScrollbar from '../trackScrollbar'
 
 type TrackTagDisplay = 'hidden' | 'small' | 'full'
 
@@ -130,6 +131,7 @@ export default function MobileImageInfoPanel(props: { info?: ImageInfo }): JSX.E
                 <section class="track-list">
                   <h4 class="section-label">Tracks</h4>
                   <div class="track-items">
+                    <TrackScrollbar tracks={info().trackList} />
                     <For each={info().trackList}>
                       {(track) => (
                         <div

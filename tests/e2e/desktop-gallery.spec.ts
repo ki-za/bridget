@@ -691,6 +691,11 @@ test.describe('desktop gallery interaction matrix', () => {
     expect(
       await tracks.evaluate((element) => element.scrollHeight > element.clientHeight)
     ).toBe(true)
+    const trackScrollbar = tracks.locator('.track-scrollbar')
+    await expect(trackScrollbar).toHaveClass(/track-scrollbar--visible/)
+    await expect(trackScrollbar).toHaveCSS('width', '4px')
+    const initialScrollbarBox = await trackScrollbar.boundingBox()
+    expect(initialScrollbarBox).not.toBeNull()
     const tracksBox = await tracks.boundingBox()
     expect(tracksBox).not.toBeNull()
     await page.mouse.move(
@@ -701,6 +706,9 @@ test.describe('desktop gallery interaction matrix', () => {
     await expect
       .poll(async () => tracks.evaluate((element) => element.scrollTop))
       .toBeGreaterThan(0)
+    await expect
+      .poll(async () => (await trackScrollbar.boundingBox())?.y)
+      .toBeGreaterThan(initialScrollbarBox!.y)
     expect(visible(await imageStates(page), 0.95)[0].index).toBe(initialIndex)
 
     await page.mouse.click(2, viewport.height / 2)
@@ -715,6 +723,27 @@ test.describe('desktop gallery interaction matrix', () => {
     await page.mouse.click(viewport.width / 2, Math.min(80, viewport.height / 4))
     await expect(page.locator(stage)).toHaveClass(/closing/)
     await expect(page.locator(stage)).toHaveClass(/trail/)
+  })
+
+  test('track scroll indicator follows overflow across projects', async ({ page }) => {
+    await openCollection(page, '/')
+    await buildTrail(page, 5)
+    await openSlideshow(page)
+
+    const title = page.locator('.project-name')
+    const tracks = page.locator('.track-items')
+    const scrollbar = tracks.locator('.track-scrollbar')
+
+    await expect(title).toHaveText('Live Wire')
+    await expect(scrollbar).not.toHaveClass(/track-scrollbar--visible/)
+
+    await navigate(page, 'next')
+    await expect(title).toHaveText('HARANBANJO')
+    await expect(scrollbar).toHaveClass(/track-scrollbar--visible/)
+
+    await navigate(page, 'next')
+    await expect(title).toHaveText('Tychonaut')
+    await expect(scrollbar).not.toHaveClass(/track-scrollbar--visible/)
   })
 
   test('navigation keeps its cursor label unless the image is loading', async ({
@@ -785,7 +814,9 @@ test.describe('desktop gallery interaction matrix', () => {
     await expect(cursorText).toHaveText(nextText!)
   })
 
-  test('track hover shows small contribution tags without text', async ({ page }) => {
+  test('track hover previews contribution tags and tag hover reveals labels', async ({
+    page
+  }) => {
     await openCollection(page, '/')
     await buildTrail(page, 5)
     await openSlideshow(page)
@@ -819,8 +850,21 @@ test.describe('desktop gallery interaction matrix', () => {
     await expect(labels.first()).toHaveCSS('max-width', '0px')
     await expect(labels.first()).toHaveCSS('opacity', '0')
 
+    await track.locator('.track-tags').hover()
+    await expect(tags.first()).toHaveCSS('color', 'rgb(255, 255, 255)')
+    await expect(labels.first()).toHaveCSS('color', 'rgb(255, 255, 255)')
+    await expect(labels.first()).toHaveCSS('opacity', '1')
+    await expect
+      .poll(async () =>
+        labels.evaluateAll((elements) =>
+          elements.every((label) => label.getBoundingClientRect().width > 0)
+        )
+      )
+      .toBe(true)
+
     await page.locator('.project-name').hover()
     await expect(tags.first()).toHaveCSS('color', 'rgba(0, 0, 0, 0)')
+    await expect(labels.first()).toHaveCSS('opacity', '0')
   })
 
   test('clicking anywhere in a row toggles one full track without hover hiding text', async ({
@@ -860,15 +904,6 @@ test.describe('desktop gallery interaction matrix', () => {
       firstBox!.y + firstBox!.height / 2
     )
     await expect(first).toHaveAttribute('aria-pressed', 'true')
-    await expect(first.locator('.tag-label').first()).toHaveCSS('opacity', '0')
-    await page.waitForTimeout(120)
-    expect(
-      await first
-        .locator('.tag-label')
-        .first()
-        .evaluate((label) => label.getBoundingClientRect().width)
-    ).toBeGreaterThan(0)
-    await expect(first.locator('.tag-label').first()).toHaveCSS('opacity', '0')
     await expect(firstTag).toHaveCSS('color', 'rgb(255, 255, 255)')
     await expect(first.locator('.tag-label').first()).toHaveCSS(
       'color',
@@ -918,6 +953,11 @@ test.describe('desktop gallery interaction matrix', () => {
     await second.locator('.track-name').hover()
     await expect(firstTag).toHaveCSS('color', 'rgb(255, 255, 255)')
     await expect(secondTag).toHaveCSS('color', 'rgba(0, 0, 0, 0)')
+
+    await second.locator('.track-tags').hover()
+    await expect(firstTag).toHaveCSS('color', 'rgb(255, 255, 255)')
+    await expect(secondTag).toHaveCSS('color', 'rgb(255, 255, 255)')
+    await expect(second.locator('.tag-label').first()).toHaveCSS('opacity', '1')
 
     const secondBox = await second.boundingBox()
     expect(secondBox).not.toBeNull()

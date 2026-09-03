@@ -332,6 +332,7 @@
 .track-items {
   display: flex;
   flex-direction: column;
+  position: relative;
   margin-bottom: var(--md);
   margin-top: var(--xs);
   max-height: 20.3vh;
@@ -358,6 +359,29 @@
   /* Firefox */
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
+}
+
+.track-scrollbar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  width: 4px;
+  opacity: 0;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 3px;
+  transition:
+    opacity var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.track-scrollbar--visible {
+  opacity: 1;
+}
+
+.track-items:hover > .track-scrollbar--visible {
+  background: rgba(0, 0, 0, 0.22);
 }
 
 .track-item {
@@ -443,7 +467,7 @@
     color 0ms linear 80ms;
 }
 
-/* TRACK HOVER: show uniform slivers (text still hidden) */
+/* TRACK HOVER: preview slivers, then reveal full labels over the tag group. */
 @media (hover: hover) {
   .image-info-panel .track-item:not(.track-item--selected):hover .track-tags .tag {
     padding-right: calc(var(--tag-sliver-width) / 2);
@@ -454,6 +478,28 @@
     transform: skewX(var(--tag-skew-angle)) scaleX(1);
     color: var(--tag-text-hidden);
     opacity: 1;
+  }
+
+  .image-info-panel
+    .track-item:not(.track-item--selected):hover
+    .track-tags:hover
+    .tag {
+    padding-right: var(--tag-expanded-padding-l);
+    padding-left: var(--tag-expanded-padding-l);
+    color: var(--tag-text-visible);
+  }
+
+  .image-info-panel
+    .track-item:not(.track-item--selected):hover
+    .track-tags:hover
+    .tag-label {
+    max-width: var(--tag-expanded-width);
+    color: var(--tag-text-visible);
+    opacity: 1;
+    transition:
+      max-width 180ms ease 70ms,
+      opacity 100ms ease 180ms,
+      color 0ms linear 180ms;
   }
 }
 
