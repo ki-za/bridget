@@ -17,13 +17,20 @@ export interface TrackInfo {
   contributionTags?: string[] // Artist's role: ["photographed", "composed"]
 }
 
+export interface ProjectLink {
+  label: string // Button text: "Bandcamp"
+  url: string // "https://artist.bandcamp.com/..."
+}
+
 // data structure for project/album/series metadata
 export interface ImageInfo {
   artistName: string | string[] // "Alex Webb" or ["Artist A", "Artist B"]
   artistLink?: string | string[] // "https://..." or ["https://a.com", "https://b.com"]
   projectName: string // "Istanbul: City of a Hundred Names"
   spotifyLink?: string // "https://open.spotify.com/..."
-  appleMusicLink?: string // "https://podcasts.apple.com/..."
+  appleMusicLink?: string // "https://music.apple.com/..."
+  youtubeMusicLink?: string // "https://music.youtube.com/..."
+  customLinks?: ProjectLink[] // [{ label: "Bandcamp", url: "https://..." }]
   releaseYear: number // 2007
   projectContributionTags?: string[] // ["photographer", "author"]
   releasedBy?: string[] // ["Aperture Foundation", "Label B"]
@@ -37,6 +44,18 @@ export interface ImageInfo {
 export function toArray(value: string | string[] | undefined): string[] {
   if (value === undefined) return []
   return Array.isArray(value) ? value : [value]
+}
+
+export function getProjectLinks(info: ImageInfo): ProjectLink[] {
+  const links: ProjectLink[] = []
+
+  if (info.spotifyLink) links.push({ label: 'Spotify', url: info.spotifyLink })
+  if (info.appleMusicLink)
+    links.push({ label: 'Apple Music', url: info.appleMusicLink })
+  if (info.youtubeMusicLink)
+    links.push({ label: 'YouTube Music', url: info.youtubeMusicLink })
+
+  return links.concat(info.customLinks ?? [])
 }
 
 export async function getImageJSON(): Promise<ImageJSON[]> {

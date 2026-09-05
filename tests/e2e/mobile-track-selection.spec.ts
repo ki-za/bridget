@@ -10,6 +10,59 @@ test.use({
   viewport: { width: 390, height: 844 }
 })
 
+test('renders legacy, YouTube Music, and custom project links in order', async ({
+  page
+}) => {
+  await page.route('**/index.json', async (route) => {
+    const response = await route.fetch()
+    const imageData = (await response.json()) as Array<{
+      imageInfo?: Record<string, unknown>
+    }>
+
+    for (const image of imageData) {
+      if (image.imageInfo === undefined) continue
+      Object.assign(image.imageInfo, {
+        spotifyLink: 'https://open.spotify.com/album/example',
+        appleMusicLink: 'https://music.apple.com/album/example',
+        youtubeMusicLink: 'https://music.youtube.com/playlist?list=example',
+        customLinks: [
+          { label: 'Bandcamp', url: 'https://example.bandcamp.com/release' },
+          { label: 'Credits', url: 'https://example.com/credits' }
+        ]
+      })
+    }
+
+    await route.fulfill({ response, json: imageData })
+  })
+
+  await page.goto('/')
+  await page.locator('.collection img').first().tap()
+
+  const links = page.locator('.swiper-slide-active .external-links a')
+  await expect(links).toHaveText([
+    'Spotify',
+    'Apple Music',
+    'YouTube Music',
+    'Bandcamp',
+    'Credits'
+  ])
+  await expect(links.nth(2)).toHaveAttribute(
+    'href',
+    'https://music.youtube.com/playlist?list=example'
+  )
+  await expect(links.nth(3)).toHaveAttribute(
+    'href',
+    'https://example.bandcamp.com/release'
+  )
+  await expect(links.first()).toHaveAttribute('target', '_blank')
+  await expect(links.first()).toHaveAttribute('rel', 'noopener noreferrer')
+  expect(
+    await page
+      .locator('.swiper-slide-active .mobile-image-info')
+      .evaluate((panel) => panel.scrollWidth <= panel.clientWidth)
+  ).toBe(true)
+})
+
 test('taps cycle one track through small tags, full labels, and hidden', async ({
   page
 }) => {

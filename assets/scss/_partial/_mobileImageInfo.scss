@@ -33,6 +33,7 @@
   .external-links {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     gap: 0.5rem;
     align-self: flex-start;
     margin-top: 0.75rem;

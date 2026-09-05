@@ -10,7 +10,7 @@ import {
 } from 'solid-js'
 
 import type { ImageInfo, TrackInfo } from '../resources'
-import { toArray } from '../resources'
+import { getProjectLinks, toArray } from '../resources'
 import TrackScrollbar from '../trackScrollbar'
 
 interface HitAreaSegment {
@@ -150,6 +150,7 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
         const artistLinks = createMemo(() => toArray(info().artistLink))
         const releasedByLinks = createMemo(() => toArray(info().releasedByLink))
         const collaboratorLinks = createMemo(() => toArray(info().collaboratorLinks))
+        const projectLinks = createMemo(() => getProjectLinks(info()))
 
         return (
           <div class="panel-container">
@@ -214,28 +215,20 @@ export default function ImageInfoPanel(props: { info?: ImageInfo }): JSX.Element
                 </h2>
               </div>
 
-              <Show when={info().spotifyLink || info().appleMusicLink}>
+              <Show when={projectLinks().length}>
                 <div class="project-links">
-                  <Show when={info().spotifyLink}>
-                    <a
-                      href={info().spotifyLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="link-button link-icon"
-                    >
-                      Spotify
-                    </a>
-                  </Show>
-                  <Show when={info().appleMusicLink}>
-                    <a
-                      href={info().appleMusicLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="link-button link-icon"
-                    >
-                      Apple Music
-                    </a>
-                  </Show>
+                  <For each={projectLinks()}>
+                    {(link) => (
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="link-button link-icon"
+                      >
+                        {link.label}
+                      </a>
+                    )}
+                  </For>
                 </div>
               </Show>
 

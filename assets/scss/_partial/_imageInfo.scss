@@ -231,6 +231,7 @@
 .project-links {
   display: inline-flex;
   flex-direction: row;
+  flex-wrap: wrap;
   width: fit-content;
   max-width: 100%;
   gap: calc(var(--xs) * 0.5);

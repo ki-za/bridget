@@ -514,6 +514,60 @@ test.describe('desktop gallery interaction matrix', () => {
     expect(frames.at(-1)!.panelOpacity).toBeGreaterThan(0.99)
   })
 
+  test('renders legacy, YouTube Music, and custom project links in order', async ({
+    page
+  }) => {
+    await page.route('**/index.json', async (route) => {
+      const response = await route.fetch()
+      const imageData = (await response.json()) as Array<{
+        imageInfo?: Record<string, unknown>
+      }>
+
+      for (const image of imageData) {
+        if (image.imageInfo === undefined) continue
+        Object.assign(image.imageInfo, {
+          spotifyLink: 'https://open.spotify.com/album/example',
+          appleMusicLink: 'https://music.apple.com/album/example',
+          youtubeMusicLink: 'https://music.youtube.com/playlist?list=example',
+          customLinks: [
+            { label: 'Bandcamp', url: 'https://example.bandcamp.com/release' },
+            { label: 'Credits', url: 'https://example.com/credits' }
+          ]
+        })
+      }
+
+      await route.fulfill({ response, json: imageData })
+    })
+
+    await openCollection(page, '/')
+    await buildTrail(page, 5)
+    await openSlideshow(page)
+
+    const links = page.locator('.project-links a')
+    await expect(links).toHaveText([
+      'Spotify',
+      'Apple Music',
+      'YouTube Music',
+      'Bandcamp',
+      'Credits'
+    ])
+    await expect(links.nth(2)).toHaveAttribute(
+      'href',
+      'https://music.youtube.com/playlist?list=example'
+    )
+    await expect(links.nth(3)).toHaveAttribute(
+      'href',
+      'https://example.bandcamp.com/release'
+    )
+    await expect(links.first()).toHaveAttribute('target', '_blank')
+    await expect(links.first()).toHaveAttribute('rel', 'noopener noreferrer')
+    expect(
+      await page
+        .locator('.image-info-panel')
+        .evaluate((panel) => panel.scrollWidth <= panel.clientWidth)
+    ).toBe(true)
+  })
+
   test('viewport navigation surrounds interactive, selectable info blocks', async ({
     page
   }) => {

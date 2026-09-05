@@ -1,7 +1,7 @@
 import { createMemo, createSignal, For, Show, type JSX } from 'solid-js'
 
 import type { ImageInfo, TrackInfo } from '../resources'
-import { toArray } from '../resources'
+import { getProjectLinks, toArray } from '../resources'
 import TrackScrollbar from '../trackScrollbar'
 
 type TrackTagDisplay = 'hidden' | 'small' | 'full'
@@ -44,6 +44,7 @@ export default function MobileImageInfoPanel(props: { info?: ImageInfo }): JSX.E
         const artistLinks = createMemo(() => toArray(info().artistLink))
         const releasedByLinks = createMemo(() => toArray(info().releasedByLink))
         const collaboratorLinks = createMemo(() => toArray(info().collaboratorLinks))
+        const projectLinks = createMemo(() => getProjectLinks(info()))
 
         return (
           <>
@@ -100,28 +101,20 @@ export default function MobileImageInfoPanel(props: { info?: ImageInfo }): JSX.E
                 </div>
 
                 {/* Links on Right Side */}
-                <Show when={info().spotifyLink || info().appleMusicLink}>
+                <Show when={projectLinks().length}>
                   <div class="external-links">
-                    <Show when={info().spotifyLink}>
-                      <a
-                        href={info().spotifyLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="link-button"
-                      >
-                        Spotify
-                      </a>
-                    </Show>
-                    <Show when={info().appleMusicLink}>
-                      <a
-                        href={info().appleMusicLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="link-button"
-                      >
-                        Apple Music
-                      </a>
-                    </Show>
+                    <For each={projectLinks()}>
+                      {(link) => (
+                        <a
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="link-button"
+                        >
+                          {link.label}
+                        </a>
+                      )}
+                    </For>
                   </div>
                 </Show>
               </div>
